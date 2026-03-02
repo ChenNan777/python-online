@@ -78,13 +78,11 @@ const MapPanel: React.FC<MapPanelProps> = ({ roadNetwork }) => {
       >
         <TileLayer
           attribution='&copy; <a href="http://www.tianditu.gov.cn">天地图</a>'
-          url={`http://t{s}.tianditu.gov.cn/DataServer?T=vec_w&x={x}&y={y}&l={z}&tk=${tiandituKey}`}
-          subdomains={['0', '1', '2', '3', '4', '5', '6', '7']}
+          url={`/tianditu/DataServer?T=vec_w&x={x}&y={y}&l={z}&tk=${tiandituKey}`}
         />
         <TileLayer
           attribution='&copy; <a href="http://www.tianditu.gov.cn">天地图</a>'
-          url={`http://t{s}.tianditu.gov.cn/DataServer?T=cva_w&x={x}&y={y}&l={z}&tk=${tiandituKey}`}
-          subdomains={['0', '1', '2', '3', '4', '5', '6', '7']}
+          url={`/tianditu/DataServer?T=cva_w&x={x}&y={y}&l={z}&tk=${tiandituKey}`}
         />
 
         {/* Road network */}
