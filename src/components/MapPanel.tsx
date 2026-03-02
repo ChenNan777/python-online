@@ -133,15 +133,15 @@ const MapPanel: React.FC<MapPanelProps> = ({ roadNetwork }) => {
       </MapContainer>
 
       {/* Info bar */}
-      {(optimalWeight !== null || userWeight !== null) && (
+      {(optimalWeight != null || userWeight != null) && (
         <div className="path-info">
-          {optimalWeight !== null && (
+          {optimalWeight != null && (
             <div className="info-item">
               <span className="label">最优路径权重:</span>
               <span className="value optimal">{optimalWeight.toFixed(2)}</span>
             </div>
           )}
-          {userWeight !== null && (
+          {userWeight != null && (
             <div className="info-item">
               <span className="label">用户路径权重:</span>
               <span className="value user">{userWeight.toFixed(2)}</span>
