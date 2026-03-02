@@ -1,6 +1,7 @@
 import { createWithEqualityFn } from "zustand/traditional";
 import { shallow } from "zustand/shallow";
 import type { Breakpoint, GraphData, PositioningData, PositioningResult, RunStatus, ShortestPathResult, VariableScope } from "../types";
+import type { RoadNetwork } from "../utils/parseRoadNetwork";
 
 export interface PythonState {
   // Editor State
@@ -24,6 +25,7 @@ export interface PythonState {
   outputDurationMs: number | null;
   graphData: GraphData | null;
   graphResult: ShortestPathResult | null;
+  roadNetwork: RoadNetwork | null;
 
   // Actions
   setCode: (code: string) => void;
@@ -49,6 +51,7 @@ export interface PythonState {
   setOutputDurationMs: (ms: number | null) => void;
   setGraphData: (data: GraphData | null) => void;
   setGraphResult: (result: ShortestPathResult | null) => void;
+  setRoadNetwork: (data: RoadNetwork | null) => void;
 
   positioningData: PositioningData | null;
   positioningResult: PositioningResult | null;
@@ -79,6 +82,7 @@ export const usePythonStore = createWithEqualityFn<PythonState>()(
     outputDurationMs: null,
     graphData: null,
     graphResult: null,
+    roadNetwork: null,
     positioningData: null,
     positioningResult: null,
 
@@ -129,6 +133,7 @@ export const usePythonStore = createWithEqualityFn<PythonState>()(
     setOutputDurationMs: (outputDurationMs) => set({ outputDurationMs }),
     setGraphData: (graphData) => set({ graphData }),
     setGraphResult: (graphResult) => set({ graphResult }),
+    setRoadNetwork: (roadNetwork) => set({ roadNetwork }),
     setPositioningData: (positioningData) => set({ positioningData }),
     setPositioningResult: (positioningResult) => set({ positioningResult }),
 
