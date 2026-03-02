@@ -260,19 +260,25 @@ export const CHALLENGES: Challenge[] = [
   },
   {
     id: "shortest-path",
-    title: "最短路径",
+    title: "真实路网最短路径",
     difficulty: "困难",
-    description: `实现函数 solve(graph, start, end)，求从 start 到 end 的最短路径，返回经过的节点列表。
+    description: `实现函数 solve(graph, start, end)，在真实路网中找到从起点到终点的最短路径。
 
-graph 格式：邻接字典，graph[u][v] = 权重
+参数：
+  graph: 路网邻接表，graph[u][v] = 距离（米）
+  start: 起点节点 ID（字符串）
+  end: 终点节点 ID（字符串）
+
+全局变量：
+  positions: 节点坐标字典 {nodeId: [lng, lat]}（可选，用于 A* 启发式）
+
+返回值：
+  经过的节点 ID 列表，如 ["node_0", "node_5", "node_12", ...]
 
 示例：
-  graph = {"A":{"B":4,"C":2},"B":{"D":3},"C":{"B":1,"D":5},"D":{}}
-  solve(graph, "A", "D") → ["A", "C", "B", "D"]   # 总权重 2+1+3=6
+  solve(graph, "node_0", "node_50") → ["node_0", "node_5", ..., "node_50"]
 
-若不可达，返回空列表 []。
-
-提示：右侧图面板会用一张路网图（节点 0~499，25×20 网格）可视化你的算法结果，测试用例使用独立的小图验证正确性。`,
+提示：右侧地图会显示长沙真实路网，你的路径和最优路径将在地图上对比显示。`,
     starterCode: `def solve(graph, start, end):
     pass
 `,
