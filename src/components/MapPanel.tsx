@@ -2,6 +2,8 @@ import React, { useMemo } from 'react';
 import { MapContainer, TileLayer, GeoJSON, Polyline, Marker } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import { usePythonStore } from '../store/usePythonStore';
+import type { RoadNetwork } from '../utils/parseRoadNetwork';
 
 // Fix Leaflet default icon issue with Vite
 import icon from 'leaflet/dist/images/marker-icon.png';
@@ -17,25 +19,17 @@ let DefaultIcon = L.icon({
 L.Marker.prototype.options.icon = DefaultIcon;
 
 interface MapPanelProps {
-  roadNetwork: any;
-  optimalPath: number[] | null;
-  userPath: number[] | null;
-  optimalWeight: number | null;
-  userWeight: number | null;
+  roadNetwork: RoadNetwork | null;
 }
 
-export const MapPanel: React.FC<MapPanelProps> = ({
-  roadNetwork,
-  optimalPath,
-  userPath,
-  optimalWeight,
-  userWeight,
-}) => {
+export const MapPanel: React.FC<MapPanelProps> = ({ roadNetwork }) => {
+  // Get path data from store
+  const graphResult = usePythonStore((s) => s.graphResult);
   // Compute center coordinates from road network
   const center = useMemo(() => {
-    if (!roadNetwork?.features?.length) return [39.9042, 116.4074]; // Beijing default
+    if (!roadNetwork?.geojson?.features?.length) return [39.9042, 116.4074]; // Beijing default
 
-    const coords = roadNetwork.features
+    const coords = roadNetwork.geojson.features
       .flatMap((f: any) => f.geometry.coordinates)
       .flat();
 
@@ -49,19 +43,18 @@ export const MapPanel: React.FC<MapPanelProps> = ({
   }, [roadNetwork]);
 
   // Convert node IDs to coordinates
-  const getPathCoordinates = (path: number[] | null) => {
-    if (!path || !roadNetwork?.features) return [];
-
-    const nodeMap = new Map();
-    roadNetwork.features.forEach((feature: any) => {
-      const [lng, lat] = feature.geometry.coordinates[0];
-      nodeMap.set(feature.properties.source, [lat, lng]);
-      const [lng2, lat2] = feature.geometry.coordinates[1];
-      nodeMap.set(feature.properties.target, [lat2, lng2]);
-    });
-
-    return path.map(nodeId => nodeMap.get(nodeId)).filter(Boolean);
+  const getPathCoordinates = (path: string[] | null | undefined) => {
+    if (!path || !roadNetwork?.positions) return [];
+    return path.map(nodeId => {
+      const pos = roadNetwork.positions[nodeId];
+      return pos ? [pos[1], pos[0]] : null; // [lat, lng] for Leaflet
+    }).filter(Boolean) as [number, number][];
   };
+
+  const optimalPath = graphResult?.path;
+  const userPath = graphResult?.userPath;
+  const optimalWeight = graphResult?.optimalWeight;
+  const userWeight = graphResult?.totalWeight;
 
   const optimalCoords = useMemo(() => getPathCoordinates(optimalPath), [optimalPath, roadNetwork]);
   const userCoords = useMemo(() => getPathCoordinates(userPath), [userPath, roadNetwork]);
@@ -84,15 +77,15 @@ export const MapPanel: React.FC<MapPanelProps> = ({
 
         {/* Road network */}
         <GeoJSON
-          data={roadNetwork}
-          style={{ color: '#888', weight: 2, opacity: 0.6 }}
+          data={roadNetwork.geojson}
+          style={{ color: '#e2e8f0', weight: 1, opacity: 0.7 }}
         />
 
         {/* Optimal path */}
         {optimalCoords.length > 0 && (
           <Polyline
             positions={optimalCoords}
-            color="blue"
+            color="#3b82f6"
             weight={4}
             opacity={0.8}
           />
@@ -102,10 +95,10 @@ export const MapPanel: React.FC<MapPanelProps> = ({
         {userCoords.length > 0 && (
           <Polyline
             positions={userCoords}
-            color="orange"
+            color="#f59e0b"
             weight={4}
             opacity={0.8}
-            dashArray="10, 10"
+            dashArray="6 3"
           />
         )}
 
