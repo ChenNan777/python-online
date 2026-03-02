@@ -6,8 +6,10 @@ import OutputPanel from "./OutputPanel";
 import VariablePanel from "./VariablePanel";
 import GraphPanel from "../../components/GraphPanel";
 import PositioningPanel from "../../components/PositioningPanel";
+import MapPanel from "../../components/MapPanel";
 import type { RunStatus } from "../../types";
 import { usePythonStore } from "../../store/usePythonStore";
+import type { RoadNetwork } from "../../utils/parseRoadNetwork";
 
 function formatDurationMs(ms: number): string {
   if (!Number.isFinite(ms) || ms < 0) return "";
@@ -32,11 +34,12 @@ function OutputPanelTitle({ status, durationMs }: { status: RunStatus; durationM
 }
 
 type Props = {
-  activeTab: "debugger" | "graph" | "graph-debug" | "positioning-debug";
+  activeTab: "debugger" | "graph" | "graph-debug" | "positioning-debug" | "map-debug";
   extraPanels?: DebugPanel[];
+  roadNetwork?: RoadNetwork | null;
 };
 
-export default function RightPanelStack({ activeTab, extraPanels }: Props) {
+export default function RightPanelStack({ activeTab, extraPanels, roadNetwork }: Props) {
   const {
     code, breakpoints, setBreakpointEnabled, removeBreakpoint,
     output, runStatus, outputDurationMs, variableScopes,
@@ -103,6 +106,17 @@ export default function RightPanelStack({ activeTab, extraPanels }: Props) {
       <div className="h-full flex flex-col">
         <div className="shrink-0 border-b border-black/8" style={{ height: "50%" }}>
           <PositioningPanel />
+        </div>
+        <div className="flex-1 min-h-0">{debugStack}</div>
+      </div>
+    );
+  }
+
+  if (activeTab === "map-debug") {
+    return (
+      <div className="h-full flex flex-col">
+        <div className="shrink-0 border-b border-black/8" style={{ height: "50%" }}>
+          <MapPanel roadNetwork={roadNetwork || null} />
         </div>
         <div className="flex-1 min-h-0">{debugStack}</div>
       </div>
