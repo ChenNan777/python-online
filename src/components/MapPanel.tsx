@@ -25,7 +25,7 @@ interface MapPanelProps {
  * 地图面板组件，用于显示路网和路径规划结果
  * @param roadNetwork - 路网数据，包含节点、边和起终点信息
  */
-export const MapPanel: React.FC<MapPanelProps> = ({ roadNetwork }) => {
+const MapPanel: React.FC<MapPanelProps> = ({ roadNetwork }) => {
   // Get path data from store
   const graphResult = usePythonStore((s) => s.graphResult);
   // Compute center coordinates from road network
@@ -152,3 +152,5 @@ export const MapPanel: React.FC<MapPanelProps> = ({ roadNetwork }) => {
     </div>
   );
 };
+
+export default MapPanel;
