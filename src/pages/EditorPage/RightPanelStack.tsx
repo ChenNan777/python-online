@@ -75,13 +75,20 @@ export default function RightPanelStack({ activeTab, extraPanels, roadNetwork }:
         ),
       });
     }
+    if (activeTab === "map-debug") {
+      panels.push({
+        key: "map-debug",
+        title: "地图",
+        content: <MapPanel roadNetwork={roadNetwork || null} />,
+      });
+    }
     panels.push({
       key: "output",
       title: <OutputPanelTitle status={runStatus} durationMs={outputDurationMs} />,
       content: <OutputPanel output={output} />,
     });
     return panels;
-  }, [activeTab, variableScopes, breakpoints, code, setBreakpointEnabled, removeBreakpoint, runStatus, outputDurationMs, output]);
+  }, [activeTab, variableScopes, breakpoints, code, setBreakpointEnabled, removeBreakpoint, runStatus, outputDurationMs, output, roadNetwork]);
 
   const allPanels = useMemo(
     () => [...basePanels, ...(extraPanels ?? [])],
@@ -106,17 +113,6 @@ export default function RightPanelStack({ activeTab, extraPanels, roadNetwork }:
       <div className="h-full flex flex-col">
         <div className="shrink-0 border-b border-black/8" style={{ height: "50%" }}>
           <PositioningPanel />
-        </div>
-        <div className="flex-1 min-h-0">{debugStack}</div>
-      </div>
-    );
-  }
-
-  if (activeTab === "map-debug") {
-    return (
-      <div className="h-full flex flex-col">
-        <div className="shrink-0 border-b border-black/8" style={{ height: "50%" }}>
-          <MapPanel roadNetwork={roadNetwork || null} />
         </div>
         <div className="flex-1 min-h-0">{debugStack}</div>
       </div>
