@@ -30,19 +30,25 @@ const MapPanel: React.FC<MapPanelProps> = ({ roadNetwork }) => {
   const graphResult = usePythonStore((s) => s.graphResult);
   // Compute center coordinates from road network
   const center = useMemo(() => {
-    if (!roadNetwork?.geojson?.features?.length) return [39.9042, 116.4074]; // Beijing default
+    if (!roadNetwork?.geojson?.features?.length) return [28.2282, 112.9388]; // Changsha default
 
-    const coords = roadNetwork.geojson.features
-      .flatMap((f: any) => f.geometry.coordinates)
-      .flat();
+    // GeoJSON coordinates are [lng, lat]
+    const allCoords: number[][] = [];
+    roadNetwork.geojson.features.forEach((f: any) => {
+      if (f.geometry.type === 'LineString') {
+        allCoords.push(...f.geometry.coordinates);
+      }
+    });
 
-    const lats = coords.filter((_: any, i: number) => i % 2 === 1);
-    const lngs = coords.filter((_: any, i: number) => i % 2 === 0);
+    if (allCoords.length === 0) return [28.2282, 112.9388];
 
-    return [
-      (Math.min(...lats) + Math.max(...lats)) / 2,
-      (Math.min(...lngs) + Math.max(...lngs)) / 2,
-    ];
+    const lngs = allCoords.map(c => c[0]);
+    const lats = allCoords.map(c => c[1]);
+
+    const centerLat = (Math.min(...lats) + Math.max(...lats)) / 2;
+    const centerLng = (Math.min(...lngs) + Math.max(...lngs)) / 2;
+
+    return [centerLat, centerLng]; // Leaflet expects [lat, lng]
   }, [roadNetwork]);
 
   // Convert node IDs to coordinates
