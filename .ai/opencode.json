@@ -1,0 +1,36 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "permission": {
+    // ==================== 项目特定：样式文件权限 ====================
+    "edit": {
+      // 允许：样式文件（影响较小，可自动修改）
+      "*.css": "allow",
+      "*.scss": "allow",
+      "src/styles/**": "allow",
+      "src/**/*.css": "allow",
+      "src/**/*.scss": "allow",
+      
+      // 询问：核心源代码文件（需要审查）
+      "src/**/*.ts": "ask",
+      "src/**/*.tsx": "ask",
+      "src/**/*.js": "ask",
+      "src/**/*.jsx": "ask",
+      
+      // 询问：项目配置文件（非常重要）
+      "package.json": "ask",
+      "package-lock.json": "ask",
+      "tsconfig*.json": "ask",
+      "vite.config.ts": "ask",
+      "eslint.config.js": "ask",
+      "tailwind.config.js": "ask",
+      "postcss.config.js": "ask",
+      ".gitignore": "ask",
+      
+      // 询问：HTML 入口文件
+      "index.html": "ask",
+      
+      // 允许：AI 配置文件夹内的文件
+      ".ai/**": "allow"
+    }
+  }
+}

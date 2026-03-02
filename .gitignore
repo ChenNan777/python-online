@@ -25,3 +25,9 @@ dist-ssr
 package-lock.json
 .claude/
 docs/
+
+# AI configuration (keep AGENTS.md and opencode.json, ignore others)
+.ai/*
+!.ai/AGENTS.md
+!.ai/opencode.json
+!.ai/README.md
