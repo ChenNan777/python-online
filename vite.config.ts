@@ -14,13 +14,6 @@ export default defineConfig({
       "Cross-Origin-Opener-Policy": "same-origin",
       "Cross-Origin-Embedder-Policy": "require-corp",
     },
-    proxy: {
-      '/osm-tiles': {
-        target: 'https://tile.openstreetmap.org',
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/osm-tiles/, ''),
-      },
-    },
   },
   worker: {
     format: "es",

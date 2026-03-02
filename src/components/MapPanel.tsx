@@ -62,6 +62,9 @@ const MapPanel: React.FC<MapPanelProps> = ({ roadNetwork }) => {
   const optimalCoords = useMemo(() => getPathCoordinates(optimalPath), [optimalPath, roadNetwork]);
   const userCoords = useMemo(() => getPathCoordinates(userPath), [userPath, roadNetwork]);
 
+  // 天地图 API Key
+  const tiandituKey = import.meta.env.VITE_TIANDITU_KEY || 'YOUR_TIANDITU_KEY';
+
   if (!roadNetwork) {
     return <div className="map-panel">加载地图数据中...</div>;
   }
@@ -74,8 +77,14 @@ const MapPanel: React.FC<MapPanelProps> = ({ roadNetwork }) => {
         style={{ height: '100%', width: '100%' }}
       >
         <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-          url="/osm-tiles/{z}/{x}/{y}.png"
+          attribution='&copy; <a href="http://www.tianditu.gov.cn">天地图</a>'
+          url={`http://t{s}.tianditu.gov.cn/DataServer?T=vec_w&x={x}&y={y}&l={z}&tk=${tiandituKey}`}
+          subdomains={['0', '1', '2', '3', '4', '5', '6', '7']}
+        />
+        <TileLayer
+          attribution='&copy; <a href="http://www.tianditu.gov.cn">天地图</a>'
+          url={`http://t{s}.tianditu.gov.cn/DataServer?T=cva_w&x={x}&y={y}&l={z}&tk=${tiandituKey}`}
+          subdomains={['0', '1', '2', '3', '4', '5', '6', '7']}
         />
 
         {/* Road network */}
