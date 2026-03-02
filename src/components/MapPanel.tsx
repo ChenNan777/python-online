@@ -1,7 +1,6 @@
 import React, { useMemo } from 'react';
 import { MapContainer, TileLayer, GeoJSON, Polyline, Marker } from 'react-leaflet';
 import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
 import { usePythonStore } from '../store/usePythonStore';
 import type { RoadNetwork } from '../utils/parseRoadNetwork';
 
