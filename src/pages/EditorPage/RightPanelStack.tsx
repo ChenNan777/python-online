@@ -4,7 +4,6 @@ import DebugPanelStack, { type DebugPanel } from "../../components/DebugPanelSta
 import BreakpointPanel from "./BreakpointPanel";
 import OutputPanel from "./OutputPanel";
 import VariablePanel from "./VariablePanel";
-import GraphPanel from "../../components/GraphPanel";
 import PositioningPanel from "../../components/PositioningPanel";
 import MapPanel from "../../components/MapPanel";
 import type { RunStatus } from "../../types";
@@ -81,7 +80,7 @@ export default function RightPanelStack({ activeTab, extraPanels, roadNetwork }:
       content: <OutputPanel output={output} />,
     });
     return panels;
-  }, [activeTab, variableScopes, breakpoints, code, setBreakpointEnabled, removeBreakpoint, runStatus, outputDurationMs, output, roadNetwork]);
+  }, [activeTab, variableScopes, breakpoints, code, setBreakpointEnabled, removeBreakpoint, runStatus, outputDurationMs, output]);
 
   const allPanels = useMemo(
     () => [...basePanels, ...(extraPanels ?? [])],
@@ -90,7 +89,7 @@ export default function RightPanelStack({ activeTab, extraPanels, roadNetwork }:
 
   const debugStack = <DebugPanelStack key={activeTab} panels={allPanels} />;
 
-  if (activeTab === "graph" || activeTab === "graph-debug") {
+  if (activeTab === "graph-debug") {
     return (
       <div className="h-full flex flex-col">
         <div className="shrink-0 border-b border-black/8" style={{ height: "50%" }}>

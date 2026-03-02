@@ -30,7 +30,6 @@ import ExtraDepsModal from "../../components/ExtraDepsModal";
 import ContextCodeModal from "../../components/ContextCodeModal";
 import RightPanelStack from "../EditorPage/RightPanelStack";
 import TestCasesPanel from "../../components/TestCasesPanel";
-import { generateGraph } from "../../utils/generateGraph";
 import { generatePositioningData } from "../../utils/generatePositioning";
 import { parseRoadNetwork } from '../../utils/parseRoadNetwork';
 import type { RoadNetwork } from '../../utils/parseRoadNetwork';

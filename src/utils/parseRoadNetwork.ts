@@ -12,6 +12,11 @@ export type RoadNetwork = {
 
 /**
  * 计算两个经纬度坐标之间的 Haversine 距离（单位：米）
+ * @param lng1 - 第一个点的经度
+ * @param lat1 - 第一个点的纬度
+ * @param lng2 - 第二个点的经度
+ * @param lat2 - 第二个点的纬度
+ * @returns 两点之间的距离（米）
  */
 function haversineDistance(
   lng1: number,
@@ -35,6 +40,8 @@ function haversineDistance(
 
 /**
  * 解析 GeoJSON 路网数据，构建图结构
+ * @param geojson - GeoJSON 格式的路网数据
+ * @returns 包含图结构、节点位置、边信息和起终点的路网对象
  */
 export function parseRoadNetwork(geojson: FeatureCollection): RoadNetwork {
   const graph: Record<string, Record<string, number>> = {};
