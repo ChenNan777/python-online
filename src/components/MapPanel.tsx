@@ -453,6 +453,46 @@ const MapPanel: React.FC<MapPanelProps> = ({ roadNetwork }) => {
           );
         })}
 
+        {/* True target marker */}
+        {positioningData?.trueTarget && (
+          <Marker
+            position={[positioningData.trueTarget.lat, positioningData.trueTarget.lng]}
+            icon={L.icon({
+              iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
+              shadowUrl: iconShadow,
+              iconSize: [25, 41],
+              iconAnchor: [12, 41],
+            })}
+          />
+        )}
+
+        {/* User solution marker */}
+        {positioningResult && (
+          <Marker
+            position={[positioningResult.userLat, positioningResult.userLng]}
+            icon={L.icon({
+              iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-orange.png',
+              shadowUrl: iconShadow,
+              iconSize: [25, 41],
+              iconAnchor: [12, 41],
+            })}
+          />
+        )}
+
+        {/* Error line between true and user solution */}
+        {positioningResult && positioningData?.trueTarget && (
+          <Polyline
+            positions={[
+              [positioningData.trueTarget.lat, positioningData.trueTarget.lng],
+              [positioningResult.userLat, positioningResult.userLng]
+            ]}
+            color="#ef4444"
+            weight={2}
+            opacity={0.7}
+            dashArray="4 4"
+          />
+        )}
+
         {/* Optimal path */}
         {optimalCoords.length > 0 && (
           <Polyline
