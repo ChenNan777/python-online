@@ -1,7 +1,8 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { MapContainer, TileLayer, GeoJSON, Polyline, Marker } from 'react-leaflet';
 import L from 'leaflet';
-import { message } from 'antd';
+import { message, Dropdown } from 'antd';
+import type { MenuProps } from 'antd';
 import { usePythonStore } from '../store/usePythonStore';
 import type { RoadNetwork } from '../utils/parseRoadNetwork';
 
@@ -29,6 +30,12 @@ interface MapPanelProps {
 const MapPanel: React.FC<MapPanelProps> = ({ roadNetwork }) => {
   // Get path data from store
   const graphResult = usePythonStore((s) => s.graphResult);
+
+  // State for context menu
+  const [contextMenuVisible, setContextMenuVisible] = useState(false);
+  const [contextMenuPosition, setContextMenuPosition] = useState({ x: 0, y: 0 });
+  const [clickedCoords, setClickedCoords] = useState<{ lat: number; lng: number } | null>(null);
+
   // Compute center coordinates from road network
   const center = useMemo(() => {
     if (!roadNetwork?.geojson?.features?.length) return [28.2282, 112.9388]; // Changsha default
@@ -85,12 +92,24 @@ const MapPanel: React.FC<MapPanelProps> = ({ roadNetwork }) => {
   // 天地图 API Key
   const tiandituKey = import.meta.env.VITE_TIANDITU_KEY || 'YOUR_TIANDITU_KEY';
 
-  // Handle right-click to copy coordinates
-  const handleContextMenu = async (e: L.LeafletMouseEvent) => {
+  // Handle right-click to show context menu
+  const handleContextMenu = (e: L.LeafletMouseEvent) => {
     e.originalEvent.preventDefault(); // Prevent default context menu
 
     const { lat, lng } = e.latlng;
-    const coordText = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+    setClickedCoords({ lat, lng });
+    setContextMenuPosition({
+      x: e.originalEvent.clientX,
+      y: e.originalEvent.clientY,
+    });
+    setContextMenuVisible(true);
+  };
+
+  // Handle copy coordinates
+  const handleCopyCoordinates = async () => {
+    if (!clickedCoords) return;
+
+    const coordText = `${clickedCoords.lat.toFixed(6)}, ${clickedCoords.lng.toFixed(6)}`;
 
     try {
       if (navigator.clipboard && navigator.clipboard.writeText) {
@@ -103,14 +122,41 @@ const MapPanel: React.FC<MapPanelProps> = ({ roadNetwork }) => {
       console.error('Failed to copy coordinates:', error);
       message.error('复制坐标失败');
     }
+
+    setContextMenuVisible(false);
   };
+
+  // Context menu items
+  const menuItems: MenuProps['items'] = [
+    {
+      key: 'copy-coords',
+      label: '复制坐标',
+      onClick: handleCopyCoordinates,
+    },
+  ];
 
   if (!roadNetwork) {
     return <div className="map-panel">加载地图数据中...</div>;
   }
 
   return (
-    <div className="map-panel">
+    <div className="map-panel" onClick={() => setContextMenuVisible(false)}>
+      <Dropdown
+        menu={{ items: menuItems }}
+        open={contextMenuVisible}
+        onOpenChange={setContextMenuVisible}
+        trigger={[]}
+      >
+        <div
+          style={{
+            position: 'fixed',
+            left: contextMenuPosition.x,
+            top: contextMenuPosition.y,
+            width: 0,
+            height: 0,
+          }}
+        />
+      </Dropdown>
       <MapContainer
         center={center as [number, number]}
         zoom={13}
