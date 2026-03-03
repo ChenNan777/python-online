@@ -69,6 +69,19 @@ const MapPanel: React.FC<MapPanelProps> = ({ roadNetwork }) => {
   const optimalCoords = useMemo(() => getPathCoordinates(optimalPath), [optimalPath, roadNetwork]);
   const userCoords = useMemo(() => getPathCoordinates(userPath), [userPath, roadNetwork]);
 
+  // Get start and end positions from roadNetwork
+  const startPosition = useMemo(() => {
+    if (!roadNetwork?.start || !roadNetwork?.positions) return null;
+    const pos = roadNetwork.positions[roadNetwork.start];
+    return pos ? [pos[1], pos[0]] as [number, number] : null; // [lat, lng]
+  }, [roadNetwork]);
+
+  const endPosition = useMemo(() => {
+    if (!roadNetwork?.end || !roadNetwork?.positions) return null;
+    const pos = roadNetwork.positions[roadNetwork.end];
+    return pos ? [pos[1], pos[0]] as [number, number] : null; // [lat, lng]
+  }, [roadNetwork]);
+
   // 天地图 API Key
   const tiandituKey = import.meta.env.VITE_TIANDITU_KEY || 'YOUR_TIANDITU_KEY';
 
@@ -142,7 +155,33 @@ const MapPanel: React.FC<MapPanelProps> = ({ roadNetwork }) => {
           />
         )}
 
-        {/* Start marker */}
+        {/* Start marker - always show if position exists */}
+        {startPosition && (
+          <Marker
+            position={startPosition}
+            icon={L.icon({
+              iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
+              shadowUrl: iconShadow,
+              iconSize: [25, 41],
+              iconAnchor: [12, 41],
+            })}
+          />
+        )}
+
+        {/* End marker - always show if position exists */}
+        {endPosition && (
+          <Marker
+            position={endPosition}
+            icon={L.icon({
+              iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
+              shadowUrl: iconShadow,
+              iconSize: [25, 41],
+              iconAnchor: [12, 41],
+            })}
+          />
+        )}
+
+        {/* Path start marker - only show when path exists */}
         {optimalCoords.length > 0 && (
           <Marker
             position={optimalCoords[0]}
@@ -155,7 +194,7 @@ const MapPanel: React.FC<MapPanelProps> = ({ roadNetwork }) => {
           />
         )}
 
-        {/* End marker */}
+        {/* Path end marker - only show when path exists */}
         {optimalCoords.length > 0 && (
           <Marker
             position={optimalCoords[optimalCoords.length - 1]}
