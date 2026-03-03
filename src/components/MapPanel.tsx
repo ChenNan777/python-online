@@ -342,6 +342,33 @@ const MapPanel: React.FC<MapPanelProps> = ({ roadNetwork }) => {
           }}
         />
 
+        {/* Positioning stations */}
+        {positioningData?.stations?.map((station) => (
+          <Marker
+            key={station.id}
+            position={[station.lat, station.lng]}
+            icon={L.divIcon({
+              className: 'custom-station-marker',
+              html: `<div style="
+                background: #3b82f6;
+                color: white;
+                width: 32px;
+                height: 32px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-weight: bold;
+                font-size: 14px;
+                border: 2px solid white;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+              ">${station.id}</div>`,
+              iconSize: [32, 32],
+              iconAnchor: [16, 16],
+            })}
+          />
+        ))}
+
         {/* Optimal path */}
         {optimalCoords.length > 0 && (
           <Polyline
