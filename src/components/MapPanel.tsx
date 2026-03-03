@@ -72,6 +72,26 @@ const MapPanel: React.FC<MapPanelProps> = ({ roadNetwork }) => {
   // 天地图 API Key
   const tiandituKey = import.meta.env.VITE_TIANDITU_KEY || 'YOUR_TIANDITU_KEY';
 
+  // Handle right-click to copy coordinates
+  const handleContextMenu = async (e: L.LeafletMouseEvent) => {
+    e.originalEvent.preventDefault(); // Prevent default context menu
+
+    const { lat, lng } = e.latlng;
+    const coordText = `${lat.toFixed(6)}, ${lng.toFixed(6)}`;
+
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(coordText);
+        message.success(`坐标已复制: ${coordText}`);
+      } else {
+        message.error('浏览器不支持复制功能');
+      }
+    } catch (error) {
+      console.error('Failed to copy coordinates:', error);
+      message.error('复制坐标失败');
+    }
+  };
+
   if (!roadNetwork) {
     return <div className="map-panel">加载地图数据中...</div>;
   }
@@ -82,6 +102,9 @@ const MapPanel: React.FC<MapPanelProps> = ({ roadNetwork }) => {
         center={center as [number, number]}
         zoom={13}
         style={{ height: '100%', width: '100%' }}
+        eventHandlers={{
+          contextmenu: handleContextMenu,
+        }}
       >
         <TileLayer
           attribution='&copy; <a href="http://www.tianditu.gov.cn">天地图</a>'
