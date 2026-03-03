@@ -76,6 +76,36 @@ const MapPanel: React.FC<MapPanelProps> = ({ roadNetwork }) => {
     return [centerLat, centerLng]; // Leaflet expects [lat, lng]
   }, [roadNetwork, positioningData]);
 
+  // Calculate bearing line endpoint
+  const calculateBearingLineEnd = (
+    stationLng: number,
+    stationLat: number,
+    bearingDeg: number,
+    lengthKm: number
+  ): [number, number] => {
+    const R = 6371; // Earth radius in km
+    const d = lengthKm / R;
+    const brng = (bearingDeg * Math.PI) / 180;
+
+    const lat1 = (stationLat * Math.PI) / 180;
+    const lng1 = (stationLng * Math.PI) / 180;
+
+    const lat2 = Math.asin(
+      Math.sin(lat1) * Math.cos(d) +
+      Math.cos(lat1) * Math.sin(d) * Math.cos(brng)
+    );
+
+    const lng2 = lng1 + Math.atan2(
+      Math.sin(brng) * Math.sin(d) * Math.cos(lat1),
+      Math.cos(d) - Math.sin(lat1) * Math.sin(lat2)
+    );
+
+    return [
+      (lat2 * 180) / Math.PI,
+      (lng2 * 180) / Math.PI
+    ];
+  };
+
   // Convert node IDs to coordinates
   const getPathCoordinates = (path: string[] | null | undefined) => {
     if (!path || !roadNetwork?.positions) return [];
@@ -92,6 +122,31 @@ const MapPanel: React.FC<MapPanelProps> = ({ roadNetwork }) => {
 
   const optimalCoords = useMemo(() => getPathCoordinates(optimalPath), [optimalPath, roadNetwork]);
   const userCoords = useMemo(() => getPathCoordinates(userPath), [userPath, roadNetwork]);
+
+  const bearingLineLength = useMemo(() => {
+    if (!positioningData) return 10; // default 10km
+
+    // Calculate max distance from stations to targets
+    let maxDist = 5; // minimum 5km
+
+    const targets = [
+      positioningData.trueTarget,
+      positioningResult ? { lng: positioningResult.userLng, lat: positioningResult.userLat } : null,
+    ].filter(Boolean);
+
+    positioningData.stations.forEach(station => {
+      targets.forEach(target => {
+        if (!target) return;
+        const dist = Math.sqrt(
+          Math.pow((target.lng - station.lng) * 111, 2) +
+          Math.pow((target.lat - station.lat) * 111, 2)
+        );
+        maxDist = Math.max(maxDist, dist);
+      });
+    });
+
+    return maxDist * 1.5; // 1.5x buffer
+  }, [positioningData, positioningResult]);
 
   // Get start and end positions from roadNetwork
   const startPosition = useMemo(() => {
@@ -368,6 +423,35 @@ const MapPanel: React.FC<MapPanelProps> = ({ roadNetwork }) => {
             })}
           />
         ))}
+
+        {/* Bearing lines */}
+        {positioningData?.measurements?.map((measurement, idx) => {
+          const station = positioningData.stations.find(s => s.id === measurement.stationId);
+          if (!station) return null;
+
+          const endPoint = calculateBearingLineEnd(
+            station.lng,
+            station.lat,
+            measurement.bearingDeg,
+            bearingLineLength
+          );
+
+          const colors = ['#3b82f6', '#10b981', '#f59e0b'];
+
+          return (
+            <Polyline
+              key={`bearing-${measurement.stationId}`}
+              positions={[
+                [station.lat, station.lng],
+                endPoint
+              ]}
+              color={colors[idx % colors.length]}
+              weight={2}
+              opacity={0.6}
+              dashArray="6 3"
+            />
+          );
+        })}
 
         {/* Optimal path */}
         {optimalCoords.length > 0 && (
