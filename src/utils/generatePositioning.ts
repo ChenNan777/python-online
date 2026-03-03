@@ -1,12 +1,12 @@
 import type { PositioningData } from "../types";
 
-// Fixed scenario: 3 stations, lng/lat coordinate space (Beijing area)
-const TRUE_TARGET = { lng: 116.400, lat: 39.900 };
+// Fixed scenario: 3 stations, lng/lat coordinate space (Changsha area)
+const TRUE_TARGET = { lng: 112.938, lat: 28.228 };
 
 const STATION_DEFS = [
-  { id: "A", lng: 116.350, lat: 39.860 },
-  { id: "B", lng: 116.450, lat: 39.860 },
-  { id: "C", lng: 116.420, lat: 39.860 },
+  { id: "A", lng: 112.900, lat: 28.200 },
+  { id: "B", lng: 112.976, lat: 28.200 },
+  { id: "C", lng: 112.938, lat: 28.256 },
 ];
 
 // Small fixed noise offsets per station (degrees)
