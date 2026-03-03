@@ -148,6 +148,23 @@ const MapPanel: React.FC<MapPanelProps> = ({ roadNetwork }) => {
     return maxDist * 1.5; // 1.5x buffer
   }, [positioningData, positioningResult]);
 
+  const positioningError = useMemo(() => {
+    if (!positioningResult || !positioningData?.trueTarget) return null;
+
+    const R = 6371e3; // Earth radius in meters
+    const lat1 = (positioningData.trueTarget.lat * Math.PI) / 180;
+    const lat2 = (positioningResult.userLat * Math.PI) / 180;
+    const Δlat = ((positioningResult.userLat - positioningData.trueTarget.lat) * Math.PI) / 180;
+    const Δlng = ((positioningResult.userLng - positioningData.trueTarget.lng) * Math.PI) / 180;
+
+    const a = Math.sin(Δlat / 2) * Math.sin(Δlat / 2) +
+              Math.cos(lat1) * Math.cos(lat2) *
+              Math.sin(Δlng / 2) * Math.sin(Δlng / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+    return R * c; // distance in meters
+  }, [positioningResult, positioningData]);
+
   // Get start and end positions from roadNetwork
   const startPosition = useMemo(() => {
     if (!roadNetwork?.positions) return null;
@@ -615,7 +632,7 @@ const MapPanel: React.FC<MapPanelProps> = ({ roadNetwork }) => {
       </MapContainer>
 
       {/* Info bar */}
-      {(optimalWeight != null || userWeight != null) && (
+      {((optimalWeight != null || userWeight != null) || positioningError != null) && (
         <div className="path-info">
           {optimalWeight != null && (
             <div className="info-item">
@@ -636,6 +653,20 @@ const MapPanel: React.FC<MapPanelProps> = ({ roadNetwork }) => {
                     {' '}({userWeight - optimalWeight >= 0 ? '+' : ''}{(userWeight - optimalWeight).toFixed(2)})
                   </span>
                 )}
+              </span>
+            </div>
+          )}
+          {positioningError != null && (
+            <div className="info-item">
+              <span className="label">定位误差:</span>
+              <span className="value user">
+                {positioningError.toFixed(2)} 米
+                <span
+                  className="offset"
+                  style={{ color: positioningError < 100 ? '#22c55e' : positioningError < 500 ? '#f59e0b' : '#ef4444' }}
+                >
+                  {' '}({positioningError < 100 ? '优秀' : positioningError < 500 ? '良好' : '需改进'})
+                </span>
               </span>
             </div>
           )}
