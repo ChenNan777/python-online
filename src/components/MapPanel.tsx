@@ -1,8 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { MapContainer, TileLayer, GeoJSON, Polyline, Marker } from 'react-leaflet';
 import L from 'leaflet';
-import { message, Dropdown } from 'antd';
-import type { MenuProps } from 'antd';
+import { message } from 'antd';
 import { usePythonStore } from '../store/usePythonStore';
 import type { RoadNetwork } from '../utils/parseRoadNetwork';
 
@@ -127,15 +126,6 @@ const MapPanel: React.FC<MapPanelProps> = ({ roadNetwork }) => {
     setContextMenuVisible(false);
   };
 
-  // Context menu items
-  const menuItems: MenuProps['items'] = [
-    {
-      key: 'copy-coords',
-      label: '复制坐标',
-      onClick: handleCopyCoordinates,
-    },
-  ];
-
   if (!roadNetwork) {
     return <div className="map-panel">加载地图数据中...</div>;
   }
@@ -144,29 +134,41 @@ const MapPanel: React.FC<MapPanelProps> = ({ roadNetwork }) => {
     <div
       className="map-panel"
       onClick={() => setContextMenuVisible(false)}
-      onContextMenu={(e) => {
-        if (contextMenuVisible) {
-          e.preventDefault();
-        }
-      }}
     >
-      <Dropdown
-        menu={{ items: menuItems }}
-        open={contextMenuVisible}
-        onOpenChange={setContextMenuVisible}
-        trigger={[]}
-      >
+      {/* Custom context menu */}
+      {contextMenuVisible && (
         <div
           style={{
             position: 'fixed',
             left: contextMenuPosition.x,
             top: contextMenuPosition.y,
-            width: 0,
-            height: 0,
-            pointerEvents: 'none',
+            background: 'white',
+            border: '1px solid #d9d9d9',
+            borderRadius: '4px',
+            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
+            zIndex: 9999,
+            minWidth: '120px',
           }}
-        />
-      </Dropdown>
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div
+            style={{
+              padding: '8px 12px',
+              cursor: 'pointer',
+              fontSize: '14px',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = '#f5f5f5';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = 'white';
+            }}
+            onClick={handleCopyCoordinates}
+          >
+            复制坐标
+          </div>
+        </div>
+      )}
       <MapContainer
         center={center as [number, number]}
         zoom={13}
