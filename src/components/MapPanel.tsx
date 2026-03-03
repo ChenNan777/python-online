@@ -118,7 +118,7 @@ const MapPanel: React.FC<MapPanelProps> = ({ roadNetwork }) => {
         {/* Road network */}
         <GeoJSON
           data={roadNetwork.geojson}
-          style={{ color: '#e2e8f0', weight: 1, opacity: 0.7 }}
+          style={{ color: '#10b981', weight: 3, opacity: 0.8 }}
         />
 
         {/* Optimal path */}
