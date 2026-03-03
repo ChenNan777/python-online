@@ -95,6 +95,7 @@ const MapPanel: React.FC<MapPanelProps> = ({ roadNetwork }) => {
   // Handle right-click to show context menu
   const handleContextMenu = (e: L.LeafletMouseEvent) => {
     e.originalEvent.preventDefault(); // Prevent default context menu
+    e.originalEvent.stopPropagation(); // Stop event propagation
 
     const { lat, lng } = e.latlng;
     setClickedCoords({ lat, lng });
@@ -140,7 +141,15 @@ const MapPanel: React.FC<MapPanelProps> = ({ roadNetwork }) => {
   }
 
   return (
-    <div className="map-panel" onClick={() => setContextMenuVisible(false)}>
+    <div
+      className="map-panel"
+      onClick={() => setContextMenuVisible(false)}
+      onContextMenu={(e) => {
+        if (contextMenuVisible) {
+          e.preventDefault();
+        }
+      }}
+    >
       <Dropdown
         menu={{ items: menuItems }}
         open={contextMenuVisible}
@@ -154,6 +163,7 @@ const MapPanel: React.FC<MapPanelProps> = ({ roadNetwork }) => {
             top: contextMenuPosition.y,
             width: 0,
             height: 0,
+            pointerEvents: 'none',
           }}
         />
       </Dropdown>
@@ -163,6 +173,14 @@ const MapPanel: React.FC<MapPanelProps> = ({ roadNetwork }) => {
         style={{ height: '100%', width: '100%' }}
         eventHandlers={{
           contextmenu: handleContextMenu,
+        }}
+        whenReady={(map) => {
+          // Ensure context menu is prevented on the map container
+          const container = map.target.getContainer();
+          container.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+          });
         }}
       >
         <TileLayer
