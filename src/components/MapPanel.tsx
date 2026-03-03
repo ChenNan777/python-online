@@ -4,7 +4,6 @@ import L from 'leaflet';
 import { message } from 'antd';
 import { usePythonStore } from '../store/usePythonStore';
 import type { RoadNetwork } from '../utils/parseRoadNetwork';
-import type { PositioningData, PositioningResult } from '../types';
 
 // Fix Leaflet default icon issue with Vite
 import icon from 'leaflet/dist/images/marker-icon.png';
@@ -21,8 +20,6 @@ L.Marker.prototype.options.icon = DefaultIcon;
 
 interface MapPanelProps {
   roadNetwork: RoadNetwork | null;
-  positioningData?: PositioningData | null;
-  positioningResult?: PositioningResult | null;
 }
 
 /**
