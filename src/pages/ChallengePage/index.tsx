@@ -150,8 +150,7 @@ export default function ChallengePage() {
     return null;
   }
 
-  const [selectedId, setSelectedId] = useState(challengeId);
-  const challenge = CHALLENGES.find((c) => c.id === selectedId)!;
+  const challenge = CHALLENGES.find((c) => c.id === challengeId)!;
   const testCasesRef = useRef(challenge.testCases);
 
   const {
