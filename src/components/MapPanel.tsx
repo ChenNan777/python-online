@@ -306,6 +306,9 @@ const MapPanel: React.FC<MapPanelProps> = ({ roadNetwork }) => {
 
   // 天地图 API Key
   const tiandituKey = import.meta.env.VITE_TIANDITU_KEY || '5bb740ffd3a80fb3963e022454eca6e2';
+  const tiandituBaseUrl = import.meta.env.DEV
+    ? '/tianditu/DataServer'
+    : 'https://t0.tianditu.gov.cn/DataServer';
 
   // Handle copy coordinates
   const handleCopyCoordinates = async () => {
@@ -399,11 +402,11 @@ const MapPanel: React.FC<MapPanelProps> = ({ roadNetwork }) => {
         <MapEventHandler />
         <TileLayer
           attribution='&copy; <a href="http://www.tianditu.gov.cn">天地图</a>'
-          url={`/tianditu/DataServer?T=img_w&x={x}&y={y}&l={z}&tk=${tiandituKey}`}
+          url={`${tiandituBaseUrl}?T=img_w&x={x}&y={y}&l={z}&tk=${tiandituKey}`}
         />
         <TileLayer
           attribution='&copy; <a href="http://www.tianditu.gov.cn">天地图</a>'
-          url={`/tianditu/DataServer?T=cia_w&x={x}&y={y}&l={z}&tk=${tiandituKey}`}
+          url={`${tiandituBaseUrl}?T=cia_w&x={x}&y={y}&l={z}&tk=${tiandituKey}`}
         />
 
         {/* Road network */}
