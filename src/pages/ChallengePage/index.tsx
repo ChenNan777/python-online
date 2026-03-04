@@ -20,7 +20,7 @@ import {
   SquareStop,
   StepForward,
 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import type { editor as MonacoEditor } from "monaco-editor";
 import { Pane, SplitPane } from "react-split-pane";
 import { CHALLENGES } from "./challenges";
@@ -128,7 +128,29 @@ function RunControls(props: {
 
 export default function ChallengePage() {
   const navigate = useNavigate();
-  const [selectedId, setSelectedId] = useState(CHALLENGES[0].id);
+  const { type } = useParams<{ type: string }>();
+
+  // 根据路由参数确定挑战ID
+  const challengeId = type === 'positioning'
+    ? 'bearing-positioning'
+    : type === 'pathfinding'
+    ? 'shortest-path'
+    : null;
+
+  // 如果挑战ID无效，重定向到 dashboard
+  if (!challengeId) {
+    navigate('/dashboard', { replace: true });
+    return null;
+  }
+
+  // 查找对应的挑战
+  const initialChallenge = CHALLENGES.find((c) => c.id === challengeId);
+  if (!initialChallenge) {
+    navigate('/dashboard', { replace: true });
+    return null;
+  }
+
+  const [selectedId, setSelectedId] = useState(challengeId);
   const challenge = CHALLENGES.find((c) => c.id === selectedId)!;
   const testCasesRef = useRef(challenge.testCases);
 
@@ -473,12 +495,6 @@ measurements = __pjson__.loads('${measurementsJson}')`;
   const handleStepInto = useCallback(() => stepInto(baseDepth), [baseDepth, stepInto]);
   const handleStepOut = useCallback(() => stepOut(baseDepth), [baseDepth, stepOut]);
 
-  const handleChallengeChange = useCallback((id: string) => {
-    setSelectedId(id);
-    setResults(null);
-    clearEditorRunError();
-  }, [clearEditorRunError]);
-
   const handleDebugModeChange = useCallback((enabled: boolean) => {
     setDebugMode(enabled);
     // Clear graph result when toggling debug mode
@@ -528,22 +544,13 @@ const extraPanels = useMemo(() => [{
             ]}
             onChange={(v) => { if (v === "debugger") navigate("/"); }}
           />
-          <Select
-            value={selectedId}
+          <Button
             size="small"
-            popupMatchSelectWidth={false}
+            onClick={() => navigate('/dashboard')}
             disabled={isRunning}
-            options={CHALLENGES.map((c) => ({ value: c.id, label: c.title, difficulty: c.difficulty }))}
-            optionRender={(opt) => (
-              <div className="flex items-center gap-2">
-                <span>{opt.data.label}</span>
-                <Tag color={DIFFICULTY_COLOR[opt.data.difficulty as keyof typeof DIFFICULTY_COLOR]} className="text-[11px]">
-                  {opt.data.difficulty}
-                </Tag>
-              </div>
-            )}
-            onChange={handleChallengeChange}
-          />
+          >
+            返回任务
+          </Button>
           <Tag color={DIFFICULTY_COLOR[challenge.difficulty]}>{challenge.difficulty}</Tag>
           {hasContext && <Tag color="blue" className="text-xs">上下文</Tag>}
           <Tooltip title="加载额外依赖" placement="bottom">
