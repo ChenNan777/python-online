@@ -20,7 +20,7 @@ import {
   SquareStop,
   StepForward,
 } from "lucide-react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import type { editor as MonacoEditor } from "monaco-editor";
 import { Pane, SplitPane } from "react-split-pane";
 import { CHALLENGES } from "./challenges";
@@ -129,6 +129,10 @@ function RunControls(props: {
 export default function ChallengePage() {
   const navigate = useNavigate();
   const { type } = useParams<{ type: string }>();
+  const location = useLocation();
+
+  // 检测当前是练习模式还是考试模式
+  const isPracticeRoute = location.pathname.startsWith('/practice/');
 
   // 根据路由参数确定挑战ID
   const challengeId = type === 'positioning'
@@ -167,8 +171,11 @@ export default function ChallengePage() {
     debugMode, setDebugMode,
     debugStartCoord, setDebugStartCoord,
     debugEndCoord, setDebugEndCoord,
-    isPracticeMode, setChallengeMode,
+    isPracticeMode: storePracticeMode, setChallengeMode,
   } = usePythonStore();
+
+  // 在考试模式下强制关闭练习模式
+  const isPracticeMode = isPracticeRoute ? storePracticeMode : false;
 
   const editorRef = useRef<MonacoEditor.IStandaloneCodeEditor | null>(null);
   const monacoRef = useRef<Parameters<OnMount>[1] | null>(null);
@@ -534,23 +541,6 @@ const extraPanels = useMemo(() => [{
       {messageContextHolder}
       <Layout.Header className="flex items-center px-3 h-12! bg-white! border-b border-black/8 shrink-0">
         <Space size={8} align="center" className="min-w-0">
-          <Segmented
-            size="small"
-            value="challenge"
-            options={[
-              { label: "调试器", value: "debugger" },
-              { label: "编程挑战", value: "challenge" },
-            ]}
-            onChange={(v) => { if (v === "debugger") navigate("/"); }}
-          />
-          <Button
-            size="small"
-            onClick={() => navigate('/dashboard')}
-            disabled={isRunning}
-          >
-            返回任务
-          </Button>
-          <Tag color={DIFFICULTY_COLOR[challenge.difficulty]}>{challenge.difficulty}</Tag>
           {hasContext && <Tag color="blue" className="text-xs">上下文</Tag>}
           <Tooltip title="加载额外依赖" placement="bottom">
             <span>
