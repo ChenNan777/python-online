@@ -4,10 +4,12 @@ import DebugPanelStack, { type DebugPanel } from "../../components/DebugPanelSta
 import BreakpointPanel from "./BreakpointPanel";
 import OutputPanel from "./OutputPanel";
 import VariablePanel from "./VariablePanel";
-import GraphPanel from "../../components/GraphPanel";
 import PositioningPanel from "../../components/PositioningPanel";
+import MapPanel from "../../components/MapPanel";
+import GraphPanel from "../../components/GraphPanel";
 import type { RunStatus } from "../../types";
 import { usePythonStore } from "../../store/usePythonStore";
+import type { RoadNetwork } from "../../utils/parseRoadNetwork";
 
 function formatDurationMs(ms: number): string {
   if (!Number.isFinite(ms) || ms < 0) return "";
@@ -31,74 +33,13 @@ function OutputPanelTitle({ status, durationMs }: { status: RunStatus; durationM
   );
 }
 
-function canResizeDivider(
-  panelDefs: PanelDef[],
-  openByKey: Record<PanelKey, boolean>,
-  dividerIndex: number,
-): boolean {
-  const left = panelDefs[dividerIndex]?.key;
-  const right = panelDefs[dividerIndex + 1]?.key;
-  if (!left || !right) return false;
-  return openByKey[left] || openByKey[right];
-}
+type Props = {
+  activeTab: "debugger" | "graph" | "graph-debug" | "positioning-debug" | "map-debug";
+  extraPanels?: DebugPanel[];
+  roadNetwork?: RoadNetwork | null;
+};
 
-function PanelDivider(props: DividerProps & { isEnabled: boolean }) {
-  const isEnabled = props.isEnabled && !props.disabled;
-  const ariaOrientation =
-    props.direction === "horizontal" ? "vertical" : "horizontal";
-  const cursor =
-    props.direction === "horizontal"
-      ? isEnabled
-        ? "col-resize"
-        : "default"
-      : isEnabled
-        ? "row-resize"
-        : "default";
-  const baseStyle: CSSProperties = {
-    flex: "none",
-    position: "relative",
-    userSelect: "none",
-    touchAction: "none",
-    ...(props.direction === "horizontal"
-      ? { width: "1px" }
-      : { height: "1px" }),
-    cursor: props.isDragging
-      ? props.direction === "horizontal"
-        ? "col-resize"
-        : "row-resize"
-      : cursor,
-    ...(props.style ?? {}),
-  };
-
-  return (
-    <div
-      className={clsx(
-        "split-pane-divider",
-        props.direction,
-        props.isDragging && "dragging",
-        props.className,
-        isEnabled ? "" : "opacity-40",
-      )}
-      style={baseStyle}
-      role="separator"
-      aria-orientation={ariaOrientation}
-      aria-disabled={!isEnabled}
-      aria-valuenow={props.currentSize}
-      aria-valuemin={props.minSize}
-      aria-valuemax={props.maxSize}
-      tabIndex={isEnabled ? 0 : -1}
-      onPointerDown={isEnabled ? props.onPointerDown : undefined}
-      onMouseDown={isEnabled ? props.onMouseDown : undefined}
-      onTouchStart={isEnabled ? props.onTouchStart : undefined}
-      onTouchEnd={isEnabled ? props.onTouchEnd : undefined}
-      onKeyDown={isEnabled ? props.onKeyDown : undefined}
-    >
-      {props.children}
-    </div>
-  );
-}
-
-export default function RightPanelStack({ activeTab, extraPanels }: Props) {
+export default function RightPanelStack({ activeTab, extraPanels, roadNetwork }: Props) {
   const {
     code, breakpoints, setBreakpointEnabled, removeBreakpoint,
     output, runStatus, outputDurationMs, variableScopes,
@@ -149,7 +90,7 @@ export default function RightPanelStack({ activeTab, extraPanels }: Props) {
 
   const debugStack = <DebugPanelStack key={activeTab} panels={allPanels} />;
 
-  if (activeTab === "graph" || activeTab === "graph-debug") {
+  if (activeTab === "graph-debug") {
     return (
       <div className="h-full flex flex-col">
         <div className="shrink-0 border-b border-black/8" style={{ height: "50%" }}>
@@ -165,6 +106,17 @@ export default function RightPanelStack({ activeTab, extraPanels }: Props) {
       <div className="h-full flex flex-col">
         <div className="shrink-0 border-b border-black/8" style={{ height: "50%" }}>
           <PositioningPanel />
+        </div>
+        <div className="flex-1 min-h-0">{debugStack}</div>
+      </div>
+    );
+  }
+
+  if (activeTab === "map-debug") {
+    return (
+      <div className="h-full flex flex-col">
+        <div className="shrink-0 border-b border-black/8" style={{ height: "50%" }}>
+          <MapPanel roadNetwork={roadNetwork || null} />
         </div>
         <div className="flex-1 min-h-0">{debugStack}</div>
       </div>

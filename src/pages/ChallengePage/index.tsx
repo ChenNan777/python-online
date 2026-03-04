@@ -6,6 +6,7 @@ import {
   Segmented,
   Select,
   Space,
+  Switch,
   Tag,
   Tooltip,
   message,
@@ -30,8 +31,9 @@ import ExtraDepsModal from "../../components/ExtraDepsModal";
 import ContextCodeModal from "../../components/ContextCodeModal";
 import RightPanelStack from "../EditorPage/RightPanelStack";
 import TestCasesPanel from "../../components/TestCasesPanel";
-import { generateGraph } from "../../utils/generateGraph";
 import { generatePositioningData } from "../../utils/generatePositioning";
+import { parseRoadNetwork } from '../../utils/parseRoadNetwork';
+import type { RoadNetwork } from '../../utils/parseRoadNetwork';
 
 const DIFFICULTY_COLOR = { 简单: "success", 中等: "warning", 困难: "error" } as const;
 
@@ -141,6 +143,10 @@ export default function ChallengePage() {
     graphData, setGraphData, setGraphResult,
     setVariableScopes, setCurrentLine, setIsPaused,
     setPositioningData, setPositioningResult,
+    debugMode, setDebugMode,
+    debugStartCoord, setDebugStartCoord,
+    debugEndCoord, setDebugEndCoord,
+    isPracticeMode, setChallengeMode,
   } = usePythonStore();
 
   const editorRef = useRef<MonacoEditor.IStandaloneCodeEditor | null>(null);
@@ -153,6 +159,7 @@ export default function ChallengePage() {
   const [contextDraft, setContextDraft] = useState("");
   const [results, setResults] = useState<TestResult[] | null>(null);
   const [messageApi, messageContextHolder] = message.useMessage();
+  const [roadNetwork, setRoadNetworkLocal] = useState<RoadNetwork | null>(null);
 
   // On mount: load first challenge code into store
   useEffect(() => {
@@ -169,6 +176,22 @@ export default function ChallengePage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Load road network when shortest-path challenge is selected
+  useEffect(() => {
+    if (challenge.id === 'shortest-path') {
+      fetch('/road.geojson')
+        .then(res => res.json())
+        .then(geojson => {
+          const network = parseRoadNetwork(geojson);
+          setRoadNetworkLocal(network);
+          setGraphData(null);
+        })
+        .catch(err => console.error('加载路网失败:', err));
+    } else {
+      setRoadNetworkLocal(null);
+    }
+  }, [challenge.id, setGraphData]);
+
   // Reset when challenge changes
   useEffect(() => {
     setCode(challenge.starterCode);
@@ -180,7 +203,6 @@ export default function ChallengePage() {
     testCasesRef.current = challenge.testCases;
     if (editorRef.current) editorRef.current.setValue(challenge.starterCode);
     if (challenge.id === "shortest-path") {
-      setGraphData(generateGraph());
       setGraphResult(null);
       setPositioningData(null);
       setPositioningResult(null);
@@ -205,60 +227,75 @@ export default function ChallengePage() {
     const testSetup = `import json as __json__\n__TEST_CASES__ = __json__.loads('${tcJson}')`;
 
     let graphSetup = "";
-    if (challenge.id === "shortest-path") {
-      // Build graph in Python using same LCG algorithm — avoids serializing nodes as JSON
-      graphSetup = `
-# --- Road network (25x20 grid, seeded LCG, deterministic) ---
-def __build_graph__():
-    COLS, ROWS = 25, 20
-    s = 0xdeadbeef
-    def rng():
-        nonlocal s
-        s = (1664525 * s + 1013904223) & 0xFFFFFFFF
-        return s / 0x100000000
-    def is_outer(r, c): return r==0 or r==ROWS-1 or c==0 or c==COLS-1
-    def is_cong(r, c): return 7<=r<=13 and 7<=c<=17 and not (r==10 or c==10 or c==14)
-    def is_exp(r, c): return r in (4,10,16) or c in (5,12,20)
-    def is_cross(r, c): return r in (7,13) or c in (8,17)
-    def weight(r1,c1,r2,c2):
-        if is_cong(r1,c1) or is_cong(r2,c2): return int(rng()*9)+10
-        if is_outer(r1,c1) and is_outer(r2,c2): return int(rng()*2)+1
-        if (is_exp(r1,c1) and is_exp(r2,c2)) or (is_cross(r1,c1) and is_cross(r2,c2)): return int(rng()*3)+2
-        return int(rng()*5)+5
-    def prob(r1,c1,r2,c2):
-        if is_outer(r1,c1) and is_outer(r2,c2): return 1.0
-        if is_cong(r1,c1) or is_cong(r2,c2): return 0.55
-        if is_exp(r1,c1) or is_exp(r2,c2): return 0.92
-        if is_cross(r1,c1) or is_cross(r2,c2): return 0.88
-        return 0.55
-    g = {str(i): {} for i in range(ROWS*COLS)}
-    def add(a, b, w=None):
-        ra,ca = divmod(int(a),COLS); rb,cb = divmod(int(b),COLS)
-        ww = w if w is not None else weight(ra,ca,rb,cb)
-        g[a][b] = ww; g[b][a] = ww
-    idx = lambda r,c: str(r*COLS+c)
-    for r in range(ROWS):
-        for c in range(COLS-1):
-            if rng()<prob(r,c,r,c+1): add(idx(r,c),idx(r,c+1))
-    for r in range(ROWS-1):
-        for c in range(COLS):
-            if rng()<prob(r,c,r+1,c): add(idx(r,c),idx(r+1,c))
-    for c in range(COLS-2):
-        add(idx(0,c),idx(0,c+2),int(rng()*2)+2)
-        add(idx(ROWS-1,c),idx(ROWS-1,c+2),int(rng()*2)+2)
-    for r in range(ROWS-2):
-        add(idx(r,0),idx(r+2,0),int(rng()*2)+2)
-        add(idx(r,COLS-1),idx(r+2,COLS-1),int(rng()*2)+2)
-    for er in (4,10,16):
-        for c in range(COLS-2): add(idx(er,c),idx(er,c+2),int(rng()*2)+1)
-    for ec in (5,12,20):
-        for r in range(ROWS-2): add(idx(r,ec),idx(r+2,ec),int(rng()*2)+1)
-    return g
-graph = __build_graph__()
-start = "0"
-end   = str(25*20-1)
+    if (challenge.id === "shortest-path" && roadNetwork) {
+      const graphJson = JSON.stringify(roadNetwork.graph).replace(/\\/g, "\\\\").replace(/'/g, "\\'");
+      const positionsJson = JSON.stringify(roadNetwork.positions).replace(/\\/g, "\\\\").replace(/'/g, "\\'");
+
+      // In debug mode, use debug coordinates to find nearest nodes
+      let startNode = roadNetwork.start;
+      let endNode = roadNetwork.end;
+
+      if (debugMode && (debugStartCoord || debugEndCoord)) {
+        const haversineDistance = (lng1: number, lat1: number, lng2: number, lat2: number) => {
+          const R = 6371e3;
+          const φ1 = (lat1 * Math.PI) / 180;
+          const φ2 = (lat2 * Math.PI) / 180;
+          const Δφ = ((lat2 - lat1) * Math.PI) / 180;
+          const Δλ = ((lng2 - lng1) * Math.PI) / 180;
+          const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) + Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+          const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+          return R * c;
+        };
+
+        if (debugStartCoord) {
+          let minDist = Infinity;
+          for (const nodeId in roadNetwork.positions) {
+            const [lng, lat] = roadNetwork.positions[nodeId];
+            const dist = haversineDistance(lng, lat, debugStartCoord.lng, debugStartCoord.lat);
+            if (dist < minDist) {
+              minDist = dist;
+              startNode = nodeId;
+            }
+          }
+        }
+
+        if (debugEndCoord) {
+          // Find all nodes reachable from start using BFS
+          const reachableFromStart = new Set<string>();
+          const queue: string[] = [startNode];
+          reachableFromStart.add(startNode);
+
+          while (queue.length > 0) {
+            const current = queue.shift()!;
+            for (const neighbor in roadNetwork.graph[current]) {
+              if (!reachableFromStart.has(neighbor)) {
+                reachableFromStart.add(neighbor);
+                queue.push(neighbor);
+              }
+            }
+          }
+
+          // Find nearest reachable node to debug end coordinates
+          let minDist = Infinity;
+          for (const nodeId of reachableFromStart) {
+            const [lng, lat] = roadNetwork.positions[nodeId];
+            const dist = haversineDistance(lng, lat, debugEndCoord.lng, debugEndCoord.lat);
+            if (dist < minDist) {
+              minDist = dist;
+              endNode = nodeId;
+            }
+          }
+        }
+      }
+
+      graphSetup = `import json as __gjson__
+graph = __gjson__.loads('${graphJson}')
+positions = __gjson__.loads('${positionsJson}')
+start = "${startNode}"
+end = "${endNode}"
+
 import heapq as __hq__
-def __path_solve__(g, s, e):
+def __optimal_path__(g, s, e):
     dist = {n: float('inf') for n in g}
     dist[s] = 0
     prev = {}
@@ -293,7 +330,7 @@ measurements = __pjson__.loads('${measurementsJson}')`;
 
     const parts = [testSetup, graphSetup, positioningSetup, contextCode].filter(Boolean);
     return parts.join("\n");
-  }, [challenge.id, challenge.testCases, contextCode]);
+  }, [challenge.id, challenge.testCases, contextCode, roadNetwork, debugMode, debugStartCoord, debugEndCoord]);
 
   const enabledBreakpointLines = useMemo(
     () => breakpoints.filter((b) => b.enabled).map((b) => b.line),
@@ -442,6 +479,17 @@ measurements = __pjson__.loads('${measurementsJson}')`;
     clearEditorRunError();
   }, [clearEditorRunError]);
 
+  const handleDebugModeChange = useCallback((enabled: boolean) => {
+    setDebugMode(enabled);
+    // Clear graph result when toggling debug mode
+    setGraphResult(null);
+    // Clear debug coordinates when turning off debug mode
+    if (!enabled) {
+      setDebugStartCoord(null);
+      setDebugEndCoord(null);
+    }
+  }, [setDebugMode, setGraphResult, setDebugStartCoord, setDebugEndCoord]);
+
   const consoleOutput = useMemo(
     () => output.filter((l) => !l.startsWith("__RESULTS__:")),
     [output],
@@ -510,6 +558,32 @@ const extraPanels = useMemo(() => [{
                 disabled={isRunning}>上下文</Button>
             </span>
           </Tooltip>
+          {challenge.id === "shortest-path" && (
+            <Tooltip title="开启后可拖动起终点验证算法" placement="bottom">
+              <Space size={4} align="center">
+                <span className="text-xs text-black/65">自定义起终点</span>
+                <Switch
+                  size="small"
+                  checked={debugMode}
+                  onChange={handleDebugModeChange}
+                  disabled={isRunning}
+                />
+              </Space>
+            </Tooltip>
+          )}
+          {(challenge.id === "shortest-path" || challenge.id === "bearing-positioning") && (
+            <Tooltip title="练习模式显示最优解和真实目标，考试模式只显示你的解" placement="bottom">
+              <Space size={4} align="center">
+                <span className="text-xs text-black/65">练习模式</span>
+                <Switch
+                  size="small"
+                  checked={isPracticeMode}
+                  onChange={setChallengeMode}
+                  disabled={isRunning}
+                />
+              </Space>
+            </Tooltip>
+          )}
         </Space>
         <div className="flex-1" />
         <Space size={8} align="center">
@@ -549,31 +623,37 @@ const extraPanels = useMemo(() => [{
         <SplitPane direction="horizontal" dividerClassName="thick" className="h-full">
           {/* Left: description + editor */}
           <Pane minSize={400} defaultSize="58%" className="min-h-0">
-            <div className="h-full flex flex-col">
-              <div className="px-4 py-3 border-b border-black/8 bg-[#fafafa] overflow-y-auto shrink-0" style={{ maxHeight: 180 }}>
-                <div className="text-[13px] font-semibold mb-1">{challenge.title}</div>
-                <pre className="text-xs text-black/70 whitespace-pre-wrap font-sans leading-5 m-0">
-                  {challenge.description}
-                </pre>
-              </div>
-              <div className="px-3 py-1.5 border-b border-black/8 bg-white shrink-0 flex items-center gap-2">
-                <span className="text-xs text-black/45">查看解法：</span>
-                <Select
-                  size="small"
-                  placeholder="选择解法"
-                  popupMatchSelectWidth={false}
-                  style={{ minWidth: 120 }}
-                  options={challenge.solutions.map((s, i) => ({ value: i, label: s.label }))}
-                  onChange={(idx: number) => {
-                    const sol = challenge.solutions[idx];
-                    if (!sol) return;
-                    setCode(sol.code);
-                    if (editorRef.current) editorRef.current.setValue(sol.code);
-                  }}
-                  value={null}
-                />
-              </div>
-              <div className="flex-1 min-h-0">
+            <SplitPane direction="vertical" dividerClassName="thick" className="h-full">
+              {/* Description */}
+              <Pane minSize={150} defaultSize="35%" className="min-h-0">
+                <div className="h-full flex flex-col">
+                  <div className="px-4 py-3 border-b border-black/8 bg-[#fafafa] overflow-y-auto flex-1">
+                    <div className="text-[13px] font-semibold mb-1">{challenge.title}</div>
+                    <pre className="text-xs text-black/70 whitespace-pre-wrap font-sans leading-5 m-0">
+                      {challenge.description}
+                    </pre>
+                  </div>
+                  <div className="px-3 py-1.5 border-b border-black/8 bg-white shrink-0 flex items-center gap-2">
+                    <span className="text-xs text-black/45">查看解法：</span>
+                    <Select
+                      size="small"
+                      placeholder="选择解法"
+                      popupMatchSelectWidth={false}
+                      style={{ minWidth: 120 }}
+                      options={challenge.solutions.map((s, i) => ({ value: i, label: s.label }))}
+                      onChange={(idx: number) => {
+                        const sol = challenge.solutions[idx];
+                        if (!sol) return;
+                        setCode(sol.code);
+                        if (editorRef.current) editorRef.current.setValue(sol.code);
+                      }}
+                      value={null}
+                    />
+                  </div>
+                </div>
+              </Pane>
+              {/* Editor */}
+              <Pane minSize={200} className="min-h-0">
                 <Editor
                   height="100%"
                   defaultLanguage="python"
@@ -590,18 +670,19 @@ const extraPanels = useMemo(() => [{
                     renderLineHighlight: "line",
                   }}
                 />
-              </div>
-            </div>
+              </Pane>
+            </SplitPane>
           </Pane>
           {/* Right: debug panels (graph on top) + test results */}
           <Pane minSize={280} className="min-h-0">
             <div className="h-full">
               <RightPanelStack
                 activeTab={
-                  challenge.id === "shortest-path" ? "graph-debug"
-                  : challenge.id === "bearing-positioning" ? "positioning-debug"
+                  challenge.id === "shortest-path" ? "map-debug"
+                  : challenge.id === "bearing-positioning" ? "map-debug"
                   : "debugger"
                 }
+                roadNetwork={roadNetwork}
                 extraPanels={extraPanels}
               />
             </div>

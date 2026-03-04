@@ -41,7 +41,7 @@ export type ShortestPathResult = {
   userPath?: string[];   // user's algorithm path (if returned as dict)
 };
 
-export type ObserverStation = { id: string; lng: number; lat: number };
+export type ObserverStation = { id: string; lng: number; lat: number; frequency?: string };
 export type PositioningData = {
   stations: ObserverStation[];
   measurements: { stationId: string; bearingDeg: number }[];

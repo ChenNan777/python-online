@@ -15,6 +15,13 @@ export default defineConfig({
       "Cross-Origin-Opener-Policy": "same-origin",
       "Cross-Origin-Embedder-Policy": "require-corp",
     },
+    proxy: {
+      '/tianditu': {
+        target: 'http://t0.tianditu.gov.cn',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/tianditu/, ''),
+      },
+    },
   },
   worker: {
     format: "es",
