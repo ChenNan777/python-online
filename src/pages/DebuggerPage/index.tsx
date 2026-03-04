@@ -221,7 +221,7 @@ const CODE_TEMPLATES: CodeTemplate[] = [
   },
 ];
 
-function App() {
+function DebuggerPage() {
   const navigate = useNavigate();
   const {
     code,
@@ -681,4 +681,4 @@ function App() {
   );
 }
 
-export default App;
+export default DebuggerPage;
