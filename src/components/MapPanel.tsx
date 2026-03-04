@@ -305,7 +305,7 @@ const MapPanel: React.FC<MapPanelProps> = ({ roadNetwork }) => {
   }, [endPosition, endTargetPosition]);
 
   // 天地图 API Key
-  const tiandituKey = import.meta.env.VITE_TIANDITU_KEY || 'YOUR_TIANDITU_KEY';
+  const tiandituKey = import.meta.env.VITE_TIANDITU_KEY || '5bb740ffd3a80fb3963e022454eca6e2';
 
   // Handle copy coordinates
   const handleCopyCoordinates = async () => {
