@@ -1,3 +1,5 @@
+import type { TaskInfo } from './task';
+
 export interface User {
   id: string;
   username: string;
@@ -11,11 +13,8 @@ export interface Team {
   name: string;
 }
 
-export interface TaskInfo {
-  id: string;
-  name: string;
-  description: string;
-}
+// 重新导出 TaskInfo 以保持向后兼容
+export type { TaskInfo };
 
 export interface LoginRequest {
   username: string;
