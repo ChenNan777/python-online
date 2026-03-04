@@ -685,7 +685,7 @@ const extraPanels = useMemo(() => [{
               <RightPanelStack
                 activeTab={
                   challenge.id === "shortest-path" ? "map-debug"
-                  : challenge.id === "bearing-positioning" ? "map-debug"
+                  : challenge.id === "bearing-positioning" ? "positioning-debug"
                   : "debugger"
                 }
                 roadNetwork={roadNetwork}
