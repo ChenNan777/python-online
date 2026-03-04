@@ -36,7 +36,7 @@ export default function LoginPage() {
 
   return (
     <div className="login-page">
-      <Card className="login-card" title="Python 在线编辑器">
+      <Card className="login-card" title="在线作业平台">
         <Form
           name="login"
           onFinish={onFinish}
@@ -71,6 +71,33 @@ export default function LoginPage() {
               block
             >
               登录
+            </Button>
+          </Form.Item>
+
+          <Form.Item>
+            <Button
+              block
+              onClick={() => navigate('/debugger')}
+            >
+              进入调试器（无需登录）
+            </Button>
+          </Form.Item>
+
+          <Form.Item>
+            <Button
+              block
+              onClick={() => navigate('/practice/positioning')}
+            >
+              定位分析练习（无需登录）
+            </Button>
+          </Form.Item>
+
+          <Form.Item>
+            <Button
+              block
+              onClick={() => navigate('/practice/pathfinding')}
+            >
+              路径规划练习（无需登录）
             </Button>
           </Form.Item>
         </Form>
