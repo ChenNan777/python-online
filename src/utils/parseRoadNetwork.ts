@@ -8,6 +8,8 @@ export type RoadNetwork = {
   start: string;
   end: string;
   geojson: FeatureCollection;
+  startCoord: { lng: number; lat: number };
+  endCoord: { lng: number; lat: number };
 };
 
 /**
@@ -86,24 +88,62 @@ export function parseRoadNetwork(geojson: FeatureCollection): RoadNetwork {
     }
   }
 
-  // 选择起点和终点（从前 50 个节点中选择距离最远的两个）
-  let maxDistance = 0;
+  // 指定起点和终点坐标
+  const startCoord = { lng: 113.043225, lat: 28.254607 };
+  const endCoord = { lng: 113.039751, lat: 28.266712 };
+
+  // 找到最接近指定坐标的节点
   let start = nodes[0].id;
   let end = nodes[nodes.length - 1].id;
+  let minStartDist = Infinity;
+  let minEndDist = Infinity;
 
-  const sampleSize = Math.min(50, nodes.length);
-  for (let i = 0; i < sampleSize; i++) {
-    for (let j = i + 1; j < sampleSize; j++) {
-      const [lng1, lat1] = positions[nodes[i].id];
-      const [lng2, lat2] = positions[nodes[j].id];
-      const distance = haversineDistance(lng1, lat1, lng2, lat2);
+  for (const node of nodes) {
+    const [lng, lat] = positions[node.id];
 
-      if (distance > maxDistance) {
-        maxDistance = distance;
-        start = nodes[i].id;
-        end = nodes[j].id;
+    // 找最接近起点的节点
+    const distToStart = haversineDistance(lng, lat, startCoord.lng, startCoord.lat);
+    if (distToStart < minStartDist) {
+      minStartDist = distToStart;
+      start = node.id;
+    }
+
+    // 找最接近终点的节点
+    const distToEnd = haversineDistance(lng, lat, endCoord.lng, endCoord.lat);
+    if (distToEnd < minEndDist) {
+      minEndDist = distToEnd;
+      end = node.id;
+    }
+  }
+
+  // 验证start和end是否连通，如果不连通则在start的连通分量中找最远的节点作为end
+  const reachableFromStart = new Set<string>();
+  const queue: string[] = [start];
+  reachableFromStart.add(start);
+
+  while (queue.length > 0) {
+    const current = queue.shift()!;
+    for (const neighbor in graph[current]) {
+      if (!reachableFromStart.has(neighbor)) {
+        reachableFromStart.add(neighbor);
+        queue.push(neighbor);
       }
     }
+  }
+
+  // 如果end不可达，在可达节点中找距离end目标坐标最近的节点
+  if (!reachableFromStart.has(end)) {
+    let newEnd = start;
+    let minDist = Infinity;
+    for (const nodeId of reachableFromStart) {
+      const [lng, lat] = positions[nodeId];
+      const dist = haversineDistance(lng, lat, endCoord.lng, endCoord.lat);
+      if (dist < minDist) {
+        minDist = dist;
+        newEnd = nodeId;
+      }
+    }
+    end = newEnd;
   }
 
   return {
@@ -114,5 +154,7 @@ export function parseRoadNetwork(geojson: FeatureCollection): RoadNetwork {
     start,
     end,
     geojson,
+    startCoord,
+    endCoord,
   };
 }

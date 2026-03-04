@@ -32,6 +32,9 @@ export const CHALLENGES: Challenge[] = [
   solve([3, 1, 2])        → [1, 2, 3]
   solve([5, 4, 3, 2, 1])  → [1, 2, 3, 4, 5]
 
+本次输入：
+  arr = [3, 1, 2]
+
 提示：可以使用冒泡排序、选择排序或任意排序算法。`,
     starterCode: `def solve(arr):
     pass
@@ -106,6 +109,10 @@ export const CHALLENGES: Challenge[] = [
   solve([1, 3, 5, 7, 9], 5) → 2
   solve([1, 3, 5, 7, 9], 6) → -1
 
+本次输入：
+  arr = [1, 3, 5, 7, 9]
+  target = 5
+
 要求：时间复杂度 O(log n)。`,
     starterCode: `def solve(arr, target):
     pass
@@ -163,7 +170,10 @@ export const CHALLENGES: Challenge[] = [
 示例：
   solve(0) → 0
   solve(6) → 8
-  solve(10) → 55`,
+  solve(10) → 55
+
+本次输入：
+  n = 0`,
     starterCode: `def solve(n):
     pass
 `,
@@ -228,7 +238,10 @@ export const CHALLENGES: Challenge[] = [
 示例：
   solve("()[]{}") → True
   solve("([)]")   → False
-  solve("{[]}")   → True`,
+  solve("{[]}")   → True
+
+本次输入：
+  s = "()"`,
     starterCode: `def solve(s):
     pass
 `,
@@ -260,7 +273,7 @@ export const CHALLENGES: Challenge[] = [
   },
   {
     id: "shortest-path",
-    title: "真实路网最短路径",
+    title: "路径规划",
     difficulty: "困难",
     description: `实现函数 solve(graph, start, end)，在真实路网中找到从起点到终点的最短路径。
 
@@ -278,7 +291,12 @@ export const CHALLENGES: Challenge[] = [
 示例：
   solve(graph, "node_0", "node_50") → ["node_0", "node_5", ..., "node_50"]
 
-提示：右侧地图会显示长沙真实路网，你的路径和最优路径将在地图上对比显示。`,
+本次输入：
+  graph = {A: {B: 1}, B: {}, C: {D: 1}, D: {}}
+  start = "A"
+  end = "D"
+
+提示：右侧地图会显示真实路网，你的路径将显示在地图上。`,
     starterCode: `def solve(graph, start, end):
     pass
 `,
@@ -301,29 +319,6 @@ def solve(graph, start, end):
                 dist[v] = dist[u] + w
                 prev[v] = u
                 heapq.heappush(pq, (dist[v], v))
-    if dist[end] == float('inf'):
-        return []
-    path, node = [], end
-    while node in prev:
-        path.append(node)
-        node = prev[node]
-    path.append(start)
-    path.reverse()
-    return path
-`,
-      },
-      {
-        label: "Bellman-Ford",
-        code: `def solve(graph, start, end):
-    dist = {n: float('inf') for n in graph}
-    dist[start] = 0
-    prev = {}
-    edges = [(u, v, w) for u in graph for v, w in graph[u].items()]
-    for _ in range(len(graph) - 1):
-        for u, v, w in edges:
-            if dist[u] + w < dist[v]:
-                dist[v] = dist[u] + w
-                prev[v] = u
     if dist[end] == float('inf'):
         return []
     path, node = [], end
@@ -469,57 +464,6 @@ def solve(graph, start, end):
     return path
 `,
       },
-      {
-        label: "双向Dijkstra",
-        code: `import heapq
-
-def solve(graph, start, end):
-    rev = {u: {} for u in graph}
-    for u in graph:
-        for v, w in graph[u].items():
-            rev[v][u] = w
-    dist_f = {n: float('inf') for n in graph}
-    dist_b = {n: float('inf') for n in graph}
-    dist_f[start] = 0; dist_b[end] = 0
-    prev_f, prev_b = {}, {}
-    settled_f, settled_b = set(), set()
-    pq_f = [(0, start)]; pq_b = [(0, end)]
-    best = float('inf'); meeting = None
-    while pq_f or pq_b:
-        if pq_f:
-            d, u = heapq.heappop(pq_f)
-            if d <= dist_f[u]:
-                settled_f.add(u)
-                if u in settled_b and dist_f[u] + dist_b[u] < best:
-                    best = dist_f[u] + dist_b[u]; meeting = u
-                for v, w in graph[u].items():
-                    if dist_f[u] + w < dist_f[v]:
-                        dist_f[v] = dist_f[u] + w; prev_f[v] = u
-                        heapq.heappush(pq_f, (dist_f[v], v))
-        if pq_b:
-            d, u = heapq.heappop(pq_b)
-            if d <= dist_b[u]:
-                settled_b.add(u)
-                if u in settled_f and dist_f[u] + dist_b[u] < best:
-                    best = dist_f[u] + dist_b[u]; meeting = u
-                for v, w in rev[u].items():
-                    if dist_b[u] + w < dist_b[v]:
-                        dist_b[v] = dist_b[u] + w; prev_b[v] = u
-                        heapq.heappush(pq_b, (dist_b[v], v))
-        if pq_f and pq_b and pq_f[0][0] + pq_b[0][0] >= best:
-            break
-    if meeting is None:
-        return []
-    path_f, node = [], meeting
-    while node in prev_f:
-        path_f.append(node); node = prev_f[node]
-    path_f.append(start); path_f.reverse()
-    path_b, node = [], meeting
-    while node in prev_b:
-        node = prev_b[node]; path_b.append(node)
-    return path_f + path_b
-`,
-      },
     ],
     testCases: [
       {
@@ -553,6 +497,18 @@ measurements: 测量列表，每项为 {"stationId": str, "bearingDeg": float}
 
 坐标系：lng 向东为正，lat 向北为正。
 方位角公式：bearing = atan2(dlng, dlat)，其中 dlng=目标lng-站lng，dlat=目标lat-站lat
+
+本次输入：
+  stations = [
+    {"id": "A", "lng": 116.350, "lat": 39.860},
+    {"id": "B", "lng": 116.450, "lat": 39.860},
+    {"id": "C", "lng": 116.420, "lat": 39.860}
+  ]
+  measurements = [
+    {"stationId": "A", "bearingDeg": 51.34},
+    {"stationId": "B", "bearingDeg": 308.66},
+    {"stationId": "C", "bearingDeg": 333.43}
+  ]
 
 提示：可用最小二乘法联立多条方位线方程求解。
 右侧面板会可视化观测站、方位线和你的解。`,
@@ -659,12 +615,12 @@ def solve(stations, measurements):
     # 初始点：所有站的重心
     lng = sum(s["lng"] for s in stations) / len(stations)
     lat = sum(s["lat"] for s in stations) / len(stations)
-    lr = 1.0
+    lr = 0.0001
     for _ in range(2000):
         _, glng, glat = loss_grad(lng, lat)
         lng -= lr * glng
         lat -= lr * glat
-        lr *= 0.999
+        lr *= 0.9995
     return (lng, lat)
 `,
       },
@@ -727,7 +683,11 @@ def solve(stations, measurements):
 
 示例：
   solve([2, 7, 11, 15], 9) → [0, 1]
-  solve([3, 2, 4], 6)      → [1, 2]`,
+  solve([3, 2, 4], 6)      → [1, 2]
+
+本次输入：
+  nums = [2, 7, 11, 15]
+  target = 9`,
     starterCode: `def solve(nums, target):
     pass
 `,

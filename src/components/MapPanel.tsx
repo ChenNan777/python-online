@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { MapContainer, TileLayer, GeoJSON, Polyline, Marker, useMapEvents } from 'react-leaflet';
+import { MapContainer, TileLayer, GeoJSON, Polyline, Marker, Tooltip, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import { message } from 'antd';
 import { usePythonStore } from '../store/usePythonStore';
@@ -28,7 +28,7 @@ interface MapPanelProps {
  */
 const MapPanel: React.FC<MapPanelProps> = ({ roadNetwork }) => {
   // Get path data and debug mode from store
-  const { graphResult, debugMode, debugStartCoord, debugEndCoord, setDebugStartCoord, setDebugEndCoord, positioningData, positioningResult } = usePythonStore((s) => ({
+  const { graphResult, debugMode, debugStartCoord, debugEndCoord, setDebugStartCoord, setDebugEndCoord, positioningData, positioningResult, isPracticeMode } = usePythonStore((s) => ({
     graphResult: s.graphResult,
     debugMode: s.debugMode,
     debugStartCoord: s.debugStartCoord,
@@ -37,6 +37,7 @@ const MapPanel: React.FC<MapPanelProps> = ({ roadNetwork }) => {
     setDebugEndCoord: s.setDebugEndCoord,
     positioningData: s.positioningData,
     positioningResult: s.positioningResult,
+    isPracticeMode: s.isPracticeMode,
   }));
 
   // State for context menu
@@ -124,10 +125,10 @@ const MapPanel: React.FC<MapPanelProps> = ({ roadNetwork }) => {
   const userCoords = useMemo(() => getPathCoordinates(userPath), [userPath, roadNetwork]);
 
   const bearingLineLength = useMemo(() => {
-    if (!positioningData) return 10; // default 10km
+    if (!positioningData) return 2; // default 2km
 
-    // Calculate max distance from stations to targets
-    let maxDist = 5; // minimum 5km
+    // Calculate distance from each station to target, use the max + small buffer
+    let maxDist = 1; // minimum 1km
 
     const targets = [
       positioningData.trueTarget,
@@ -145,7 +146,7 @@ const MapPanel: React.FC<MapPanelProps> = ({ roadNetwork }) => {
       });
     });
 
-    return maxDist * 1.5; // 1.5x buffer
+    return maxDist + 0.5; // Just extend 0.5km beyond the target
   }, [positioningData, positioningResult]);
 
   const positioningError = useMemo(() => {
@@ -346,7 +347,8 @@ const MapPanel: React.FC<MapPanelProps> = ({ roadNetwork }) => {
     return null;
   };
 
-  if (!roadNetwork) {
+  // Allow rendering when either roadNetwork or positioningData exists
+  if (!roadNetwork && !positioningData) {
     return <div className="map-panel">加载地图数据中...</div>;
   }
 
@@ -405,41 +407,93 @@ const MapPanel: React.FC<MapPanelProps> = ({ roadNetwork }) => {
         />
 
         {/* Road network */}
-        <GeoJSON
-          data={roadNetwork.geojson}
-          style={{ color: '#10b981', weight: 3, opacity: 0.8 }}
-          filter={(feature) => {
-            // Only show LineString features, filter out Point features
-            return feature.geometry.type === 'LineString';
-          }}
-        />
+        {roadNetwork && (
+          <GeoJSON
+            data={roadNetwork.geojson}
+            style={{ color: '#10b981', weight: 3, opacity: 0.8 }}
+            filter={(feature) => {
+              // Only show LineString features, filter out Point features
+              return feature.geometry.type === 'LineString';
+            }}
+          />
+        )}
 
         {/* Positioning stations */}
-        {positioningData?.stations?.map((station) => (
-          <Marker
-            key={station.id}
-            position={[station.lat, station.lng]}
-            icon={L.divIcon({
-              className: 'custom-station-marker',
-              html: `<div style="
-                background: #3b82f6;
-                color: white;
-                width: 32px;
-                height: 32px;
-                border-radius: 50%;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-weight: bold;
-                font-size: 14px;
-                border: 2px solid white;
-                box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-              ">${station.id}</div>`,
-              iconSize: [32, 32],
-              iconAnchor: [16, 16],
-            })}
-          />
-        ))}
+        {positioningData?.stations?.map((station) => {
+          const measurement = positioningData.measurements.find(m => m.stationId === station.id);
+          const bearingDeg = measurement?.bearingDeg ?? 0;
+
+          return (
+            <Marker
+              key={station.id}
+              position={[station.lat, station.lng]}
+              icon={L.divIcon({
+                className: 'custom-station-marker',
+                html: `<div style="
+                  position: relative;
+                  width: 40px;
+                  height: 40px;
+                  display: flex;
+                  align-items: center;
+                  justify-content: center;
+                ">
+                  <div style="
+                    position: absolute;
+                    width: 40px;
+                    height: 40px;
+                    border-radius: 50%;
+                    background: rgba(59, 130, 246, 0.15);
+                    animation: radar-pulse 2s ease-out infinite;
+                  "></div>
+                  <div style="
+                    position: absolute;
+                    width: 28px;
+                    height: 28px;
+                    border-radius: 50%;
+                    background: rgba(59, 130, 246, 0.25);
+                  "></div>
+                  <div style="
+                    position: relative;
+                    width: 18px;
+                    height: 18px;
+                    border-radius: 50%;
+                    background: #3b82f6;
+                    border: 2px solid white;
+                    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 10px;
+                    font-weight: bold;
+                    color: white;
+                  ">${station.id}</div>
+                </div>
+                <style>
+                  @keyframes radar-pulse {
+                    0% { transform: scale(0.8); opacity: 1; }
+                    100% { transform: scale(1.3); opacity: 0; }
+                  }
+                </style>`,
+                iconSize: [40, 40],
+                iconAnchor: [20, 20],
+              })}
+            >
+              <Tooltip direction="top" offset={[0, -20]} opacity={0.95} permanent={false}>
+                <div style={{ fontSize: '12px', lineHeight: '1.6' }}>
+                  <div style={{ fontWeight: 'bold', marginBottom: '4px', color: '#1e40af' }}>
+                    观测站 {station.id}
+                  </div>
+                  <div><strong>经度:</strong> {station.lng.toFixed(6)}°</div>
+                  <div><strong>纬度:</strong> {station.lat.toFixed(6)}°</div>
+                  <div><strong>方位角:</strong> {bearingDeg.toFixed(2)}°</div>
+                  {station.frequency && (
+                    <div><strong>频率:</strong> {station.frequency}</div>
+                  )}
+                </div>
+              </Tooltip>
+            </Marker>
+          );
+        })}
 
         {/* Bearing lines */}
         {positioningData?.measurements?.map((measurement, idx) => {
@@ -453,7 +507,7 @@ const MapPanel: React.FC<MapPanelProps> = ({ roadNetwork }) => {
             bearingLineLength
           );
 
-          const colors = ['#3b82f6', '#10b981', '#f59e0b'];
+          const colors = ['#2563eb', '#059669', '#ea580c'];
 
           return (
             <Polyline
@@ -463,15 +517,15 @@ const MapPanel: React.FC<MapPanelProps> = ({ roadNetwork }) => {
                 endPoint
               ]}
               color={colors[idx % colors.length]}
-              weight={2}
-              opacity={0.6}
-              dashArray="6 3"
+              weight={2.5}
+              opacity={0.9}
+              dashArray="10 5"
             />
           );
         })}
 
-        {/* True target marker */}
-        {positioningData?.trueTarget && (
+        {/* True target marker - only show in practice mode */}
+        {isPracticeMode && positioningData?.trueTarget && (
           <Marker
             position={[positioningData.trueTarget.lat, positioningData.trueTarget.lng]}
             icon={L.icon({
@@ -480,7 +534,14 @@ const MapPanel: React.FC<MapPanelProps> = ({ roadNetwork }) => {
               iconSize: [25, 41],
               iconAnchor: [12, 41],
             })}
-          />
+          >
+            <Tooltip direction="top" offset={[0, -40]} opacity={0.95}>
+              <div style={{ fontSize: '12px', lineHeight: '1.6' }}>
+                <div><strong>经度:</strong> {positioningData.trueTarget.lng.toFixed(6)}°</div>
+                <div><strong>纬度:</strong> {positioningData.trueTarget.lat.toFixed(6)}°</div>
+              </div>
+            </Tooltip>
+          </Marker>
         )}
 
         {/* User solution marker */}
@@ -493,11 +554,18 @@ const MapPanel: React.FC<MapPanelProps> = ({ roadNetwork }) => {
               iconSize: [25, 41],
               iconAnchor: [12, 41],
             })}
-          />
+          >
+            <Tooltip direction="top" offset={[0, -40]} opacity={0.95}>
+              <div style={{ fontSize: '12px', lineHeight: '1.6' }}>
+                <div><strong>经度:</strong> {positioningResult.userLng.toFixed(6)}°</div>
+                <div><strong>纬度:</strong> {positioningResult.userLat.toFixed(6)}°</div>
+              </div>
+            </Tooltip>
+          </Marker>
         )}
 
-        {/* Error line between true and user solution */}
-        {positioningResult && positioningData?.trueTarget && (
+        {/* Error line between true and user solution - only show in practice mode */}
+        {isPracticeMode && positioningResult && positioningData?.trueTarget && (
           <Polyline
             positions={[
               [positioningData.trueTarget.lat, positioningData.trueTarget.lng],
@@ -510,13 +578,14 @@ const MapPanel: React.FC<MapPanelProps> = ({ roadNetwork }) => {
           />
         )}
 
-        {/* Optimal path */}
-        {optimalCoords.length > 0 && (
+        {/* Optimal path - only show in practice mode */}
+        {isPracticeMode && optimalCoords.length > 0 && (
           <Polyline
             positions={optimalCoords}
             color="#3b82f6"
             weight={4}
             opacity={0.8}
+            className="path-flow-optimal"
           />
         )}
 
@@ -527,7 +596,7 @@ const MapPanel: React.FC<MapPanelProps> = ({ roadNetwork }) => {
             color="#f59e0b"
             weight={4}
             opacity={0.8}
-            dashArray="6 3"
+            className="path-flow-user"
           />
         )}
 
@@ -574,7 +643,14 @@ const MapPanel: React.FC<MapPanelProps> = ({ roadNetwork }) => {
               iconSize: [25, 41],
               iconAnchor: [12, 41],
             })}
-          />
+          >
+            <Tooltip direction="top" offset={[0, -40]} opacity={0.95}>
+              <div style={{ fontSize: '12px', lineHeight: '1.6' }}>
+                <div><strong>经度:</strong> {startTargetPosition[1].toFixed(6)}°</div>
+                <div><strong>纬度:</strong> {startTargetPosition[0].toFixed(6)}°</div>
+              </div>
+            </Tooltip>
+          </Marker>
         )}
 
         {/* End marker - always show in debug mode or when needs connection */}
@@ -597,7 +673,14 @@ const MapPanel: React.FC<MapPanelProps> = ({ roadNetwork }) => {
               iconSize: [25, 41],
               iconAnchor: [12, 41],
             })}
-          />
+          >
+            <Tooltip direction="top" offset={[0, -40]} opacity={0.95}>
+              <div style={{ fontSize: '12px', lineHeight: '1.6' }}>
+                <div><strong>经度:</strong> {endTargetPosition[1].toFixed(6)}°</div>
+                <div><strong>纬度:</strong> {endTargetPosition[0].toFixed(6)}°</div>
+              </div>
+            </Tooltip>
+          </Marker>
         )}
 
         {/* Start marker - show grey if in debug mode or needs connection, otherwise green */}
@@ -612,7 +695,16 @@ const MapPanel: React.FC<MapPanelProps> = ({ roadNetwork }) => {
               iconSize: (debugMode || startNeedsConnection) ? [20, 33] : [25, 41],
               iconAnchor: (debugMode || startNeedsConnection) ? [10, 33] : [12, 41],
             })}
-          />
+          >
+            {!(debugMode || startNeedsConnection) && (
+              <Tooltip direction="top" offset={[0, -40]} opacity={0.95}>
+                <div style={{ fontSize: '12px', lineHeight: '1.6' }}>
+                  <div><strong>经度:</strong> {startPosition[1].toFixed(6)}°</div>
+                  <div><strong>纬度:</strong> {startPosition[0].toFixed(6)}°</div>
+                </div>
+              </Tooltip>
+            )}
+          </Marker>
         )}
 
         {/* End marker - show grey if in debug mode or needs connection, otherwise red */}
@@ -627,14 +719,23 @@ const MapPanel: React.FC<MapPanelProps> = ({ roadNetwork }) => {
               iconSize: (debugMode || endNeedsConnection) ? [20, 33] : [25, 41],
               iconAnchor: (debugMode || endNeedsConnection) ? [10, 33] : [12, 41],
             })}
-          />
+          >
+            {!(debugMode || endNeedsConnection) && (
+              <Tooltip direction="top" offset={[0, -40]} opacity={0.95}>
+                <div style={{ fontSize: '12px', lineHeight: '1.6' }}>
+                  <div><strong>经度:</strong> {endPosition[1].toFixed(6)}°</div>
+                  <div><strong>纬度:</strong> {endPosition[0].toFixed(6)}°</div>
+                </div>
+              </Tooltip>
+            )}
+          </Marker>
         )}
       </MapContainer>
 
       {/* Info bar */}
       {((optimalWeight != null || userWeight != null) || positioningError != null) && (
         <div className="path-info">
-          {optimalWeight != null && (
+          {isPracticeMode && optimalWeight != null && (
             <div className="info-item">
               <span className="label">最优解:</span>
               <span className="value optimal">{optimalWeight.toFixed(2)}</span>
@@ -645,7 +746,7 @@ const MapPanel: React.FC<MapPanelProps> = ({ roadNetwork }) => {
               <span className="label">求解结果:</span>
               <span className="value user">
                 {userWeight.toFixed(2)}
-                {optimalWeight != null && optimalWeight > 0 && (
+                {isPracticeMode && optimalWeight != null && optimalWeight > 0 && (
                   <span
                     className="offset"
                     style={{ color: Math.abs(userWeight - optimalWeight) < 0.01 ? '#22c55e' : '#ef4444' }}
@@ -656,17 +757,11 @@ const MapPanel: React.FC<MapPanelProps> = ({ roadNetwork }) => {
               </span>
             </div>
           )}
-          {positioningError != null && (
+          {isPracticeMode && positioningError != null && (
             <div className="info-item">
               <span className="label">定位误差:</span>
               <span className="value user">
                 {positioningError.toFixed(2)} 米
-                <span
-                  className="offset"
-                  style={{ color: positioningError < 100 ? '#22c55e' : positioningError < 500 ? '#f59e0b' : '#ef4444' }}
-                >
-                  {' '}({positioningError < 100 ? '优秀' : positioningError < 500 ? '良好' : '需改进'})
-                </span>
               </span>
             </div>
           )}

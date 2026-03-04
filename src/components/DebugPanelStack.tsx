@@ -73,14 +73,15 @@ export default function DebugPanelStack({ panels }: { panels: DebugPanel[] }) {
 
   return (
     <div ref={containerRef} className="h-full flex flex-col overflow-hidden">
-      {panels.map((panel) => {
+      {panels.map((panel, index) => {
         const isOpen = openKeys.has(panel.key);
         const contentHeight = heights[panel.key] ?? 120;
+        const isLastPanel = index === panels.length - 1;
         return (
           <div
             key={panel.key}
-            className="flex flex-col border-b border-black/8 shrink-0"
-            style={isOpen ? { height: contentHeight + HEADER_HEIGHT } : undefined}
+            className={`flex flex-col border-b border-black/8 ${isLastPanel && isOpen ? 'flex-1 min-h-0' : 'shrink-0'}`}
+            style={isOpen && !isLastPanel ? { height: contentHeight + HEADER_HEIGHT } : undefined}
           >
             <button
               type="button"
@@ -93,14 +94,16 @@ export default function DebugPanelStack({ panels }: { panels: DebugPanel[] }) {
             </button>
             {isOpen && (
               <>
-                <div className="overflow-auto" style={{ height: contentHeight }}>
+                <div className={`overflow-auto ${isLastPanel ? 'flex-1 min-h-0' : ''}`} style={!isLastPanel ? { height: contentHeight } : undefined}>
                   {panel.content}
                 </div>
-                <div
-                  onMouseDown={(e) => onMouseDown(e, panel.key)}
-                  className="shrink-0 h-1 cursor-row-resize bg-transparent hover:bg-blue-400/40 active:bg-blue-400/60 transition-colors"
-                  style={{ marginTop: -4 }}
-                />
+                {!isLastPanel && (
+                  <div
+                    onMouseDown={(e) => onMouseDown(e, panel.key)}
+                    className="shrink-0 h-1 cursor-row-resize bg-transparent hover:bg-blue-400/40 active:bg-blue-400/60 transition-colors"
+                    style={{ marginTop: -4 }}
+                  />
+                )}
               </>
             )}
           </div>

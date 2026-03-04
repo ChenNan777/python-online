@@ -19,6 +19,15 @@ export interface PythonState {
   hoverLine: number | null;
   pausedDepth: number;
 
+  // Debug Mode
+  debugMode: boolean;
+  debugStartCoord: { lng: number; lat: number } | null;
+  debugEndCoord: { lng: number; lat: number } | null;
+
+  // Challenge Mode
+  isPracticeMode: boolean;
+  setChallengeMode: (isPractice: boolean) => void;
+
   // Output Data
   output: string[];
   variableScopes: VariableScope[];
@@ -45,6 +54,10 @@ export interface PythonState {
   setCurrentLine: (line: number | null) => void;
   setHoverLine: (line: number | null) => void;
   setPausedDepth: (depth: number) => void;
+
+  setDebugMode: (enabled: boolean) => void;
+  setDebugStartCoord: (coord: { lng: number; lat: number } | null) => void;
+  setDebugEndCoord: (coord: { lng: number; lat: number } | null) => void;
 
   setOutput: (output: string[] | ((prev: string[]) => string[])) => void;
   setVariableScopes: (scopes: VariableScope[]) => void;
@@ -76,6 +89,12 @@ export const usePythonStore = createWithEqualityFn<PythonState>()(
     currentLine: null,
     hoverLine: null,
     pausedDepth: 1,
+
+    debugMode: false,
+    debugStartCoord: null,
+    debugEndCoord: null,
+
+    isPracticeMode: import.meta.env.VITE_CHALLENGE_MODE !== 'exam',
 
     output: [],
     variableScopes: [],
@@ -124,6 +143,12 @@ export const usePythonStore = createWithEqualityFn<PythonState>()(
     setCurrentLine: (currentLine) => set({ currentLine }),
     setHoverLine: (hoverLine) => set({ hoverLine }),
     setPausedDepth: (pausedDepth) => set({ pausedDepth }),
+
+    setDebugMode: (debugMode) => set({ debugMode }),
+    setDebugStartCoord: (debugStartCoord) => set({ debugStartCoord }),
+    setDebugEndCoord: (debugEndCoord) => set({ debugEndCoord }),
+
+    setChallengeMode: (isPractice) => set({ isPracticeMode: isPractice }),
 
     setOutput: (output) =>
       set((state) => ({
