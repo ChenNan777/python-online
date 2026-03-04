@@ -23,6 +23,8 @@ createRoot(document.getElementById("root")!).render(
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/debugger" element={<DebuggerPage />} />
+        {/* 练习模式路由 - 无需登录 */}
+        <Route path="/practice/:type" element={<ChallengePage />} />
         <Route element={<ProtectedRoute />}>
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/challenge/:type" element={<ChallengePage />} />
