@@ -6,6 +6,7 @@ import OutputPanel from "./OutputPanel";
 import VariablePanel from "./VariablePanel";
 import PositioningPanel from "../../components/PositioningPanel";
 import MapPanel from "../../components/MapPanel";
+import GraphPanel from "../../components/GraphPanel";
 import type { RunStatus } from "../../types";
 import { usePythonStore } from "../../store/usePythonStore";
 import type { RoadNetwork } from "../../utils/parseRoadNetwork";
