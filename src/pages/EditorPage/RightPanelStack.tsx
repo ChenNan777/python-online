@@ -9,17 +9,6 @@ import PositioningPanel from "../../components/PositioningPanel";
 import type { RunStatus } from "../../types";
 import { usePythonStore } from "../../store/usePythonStore";
 
-export type RightPanelTab =
-  | "debugger"
-  | "graph"
-  | "graph-debug"
-  | "positioning-debug";
-
-type Props = {
-  activeTab: RightPanelTab;
-  extraPanels?: DebugPanel[];
-};
-
 function formatDurationMs(ms: number): string {
   if (!Number.isFinite(ms) || ms < 0) return "";
   if (ms < 1000) return `${Math.round(ms)}ms`;
@@ -39,6 +28,73 @@ function OutputPanelTitle({ status, durationMs }: { status: RunStatus; durationM
       {statusNode}
       {durationText && <span className="text-[11px] text-black/45 whitespace-nowrap">{durationText}</span>}
     </>
+  );
+}
+
+function canResizeDivider(
+  panelDefs: PanelDef[],
+  openByKey: Record<PanelKey, boolean>,
+  dividerIndex: number,
+): boolean {
+  const left = panelDefs[dividerIndex]?.key;
+  const right = panelDefs[dividerIndex + 1]?.key;
+  if (!left || !right) return false;
+  return openByKey[left] || openByKey[right];
+}
+
+function PanelDivider(props: DividerProps & { isEnabled: boolean }) {
+  const isEnabled = props.isEnabled && !props.disabled;
+  const ariaOrientation =
+    props.direction === "horizontal" ? "vertical" : "horizontal";
+  const cursor =
+    props.direction === "horizontal"
+      ? isEnabled
+        ? "col-resize"
+        : "default"
+      : isEnabled
+        ? "row-resize"
+        : "default";
+  const baseStyle: CSSProperties = {
+    flex: "none",
+    position: "relative",
+    userSelect: "none",
+    touchAction: "none",
+    ...(props.direction === "horizontal"
+      ? { width: "1px" }
+      : { height: "1px" }),
+    cursor: props.isDragging
+      ? props.direction === "horizontal"
+        ? "col-resize"
+        : "row-resize"
+      : cursor,
+    ...(props.style ?? {}),
+  };
+
+  return (
+    <div
+      className={clsx(
+        "split-pane-divider",
+        props.direction,
+        props.isDragging && "dragging",
+        props.className,
+        isEnabled ? "" : "opacity-40",
+      )}
+      style={baseStyle}
+      role="separator"
+      aria-orientation={ariaOrientation}
+      aria-disabled={!isEnabled}
+      aria-valuenow={props.currentSize}
+      aria-valuemin={props.minSize}
+      aria-valuemax={props.maxSize}
+      tabIndex={isEnabled ? 0 : -1}
+      onPointerDown={isEnabled ? props.onPointerDown : undefined}
+      onMouseDown={isEnabled ? props.onMouseDown : undefined}
+      onTouchStart={isEnabled ? props.onTouchStart : undefined}
+      onTouchEnd={isEnabled ? props.onTouchEnd : undefined}
+      onKeyDown={isEnabled ? props.onKeyDown : undefined}
+    >
+      {props.children}
+    </div>
   );
 }
 

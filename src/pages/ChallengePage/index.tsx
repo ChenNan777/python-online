@@ -138,7 +138,7 @@ export default function ChallengePage() {
     currentLine, hoverLine, setHoverLine,
     pausedDepth,
     output,
-    setGraphData, setGraphResult,
+    graphData, setGraphData, setGraphResult,
     setVariableScopes, setCurrentLine, setIsPaused,
     setPositioningData, setPositioningResult,
   } = usePythonStore();
