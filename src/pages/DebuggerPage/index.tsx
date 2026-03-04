@@ -23,13 +23,13 @@ import {
 } from "lucide-react";
 import type { editor as MonacoEditor } from "monaco-editor";
 import { Pane, SplitPane } from "react-split-pane";
-import RightPanelStack from "./pages/EditorPage/RightPanelStack";
-import ContextCodeModal from "./components/ContextCodeModal";
-import ExtraDepsModal from "./components/ExtraDepsModal";
-import type { CodeTemplate } from "./types";
-import { usePythonStore } from "./store/usePythonStore";
-import { usePyodideWorkerRuntime } from "./features/pythonRunner";
-import "./App.css";
+import RightPanelStack from "../EditorPage/RightPanelStack";
+import ContextCodeModal from "../../components/ContextCodeModal";
+import ExtraDepsModal from "../../components/ExtraDepsModal";
+import type { CodeTemplate } from "../../types";
+import { usePythonStore } from "../../store/usePythonStore";
+import { usePyodideWorkerRuntime } from "../../features/pythonRunner";
+import "../../App.css";
 
 function RunControls(props: {
   onRun: () => void;
