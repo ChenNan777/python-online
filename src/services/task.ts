@@ -51,7 +51,7 @@ function adaptTaskInfoToUser(apiData: TaskInfoApiResponse, username: string, use
  * 获取任务信息
  */
 export async function getTaskInfo(username: string, userId: string): Promise<User> {
-  const response = await httpClient.get<ApiResponse<TaskInfoApiResponse>>('/workPlatform/list');
+  const response = await httpClient.get<ApiResponse<TaskInfoApiResponse>>('/workPlatform/task');
 
   if (response.data.code !== 200) {
     throw new Error(response.data.message || '获取任务信息失败');
