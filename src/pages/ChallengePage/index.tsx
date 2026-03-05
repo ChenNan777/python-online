@@ -554,7 +554,7 @@ const extraPanels = useMemo(() => [{
                 disabled={isRunning}>上下文</Button>
             </span>
           </Tooltip>
-          {challenge.id === "shortest-path" && (
+          {challenge.id === "shortest-path" && isPracticeRoute && (
             <Tooltip title="开启后可拖动起终点验证算法" placement="bottom">
               <Space size={4} align="center">
                 <span className="text-xs text-black/65">自定义起终点</span>
