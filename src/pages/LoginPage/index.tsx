@@ -73,17 +73,17 @@ export default function LoginPage() {
               登录
             </Button>
           </Form.Item>
-
-          <Form.Item style={{ marginBottom: 0, textAlign: 'center' }}>
-            <Button
-              type="link"
-              onClick={() => navigate('/practice')}
-              style={{ textDecoration: 'underline' }}
-            >
-              练习
-            </Button>
-          </Form.Item>
         </Form>
+
+        <div className="login-footer">
+          <Button
+            type="link"
+            onClick={() => navigate('/practice')}
+            className="practice-link"
+          >
+            进入练习模式
+          </Button>
+        </div>
 
         <div className="login-hint">
           <p>测试账号：</p>

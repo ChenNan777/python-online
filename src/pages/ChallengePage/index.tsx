@@ -541,6 +541,15 @@ const extraPanels = useMemo(() => [{
       {messageContextHolder}
       <Layout.Header className="flex items-center px-3 h-12! bg-white! border-b border-black/8 shrink-0">
         <Space size={8} align="center" className="min-w-0">
+          {isPracticeRoute && (
+            <Button
+              size="small"
+              onClick={() => navigate('/practice')}
+              disabled={isRunning}
+            >
+              返回
+            </Button>
+          )}
           {hasContext && <Tag color="blue" className="text-xs">上下文</Tag>}
           <Tooltip title="加载额外依赖" placement="bottom">
             <span>
