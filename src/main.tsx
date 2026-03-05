@@ -1,15 +1,39 @@
 import React from "react";
-import ReactDOM from "react-dom";
+import { createRoot } from "react-dom/client";
+import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
+import "leaflet/dist/leaflet.css";
 import "./index.css";
 import "./styles/index.scss";
-import App from "./App";
+import DebuggerPage from "./pages/DebuggerPage";
+import ChallengePage from "./pages/ChallengePage";
+import LoginPage from "./pages/LoginPage";
+import DashboardPage from "./pages/DashboardPage";
+import PracticePage from "./pages/PracticePage";
+import ProtectedRoute from "./components/ProtectedRoute";
+import { useAuthStore } from "./store/useAuthStore";
 import { setupMonaco } from "./monaco/setupMonaco";
 
 setupMonaco();
 
-ReactDOM.render(
+// 恢复登录状态
+useAuthStore.getState().loadFromStorage();
+
+createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <App />
+    <BrowserRouter>
+      <Routes>
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/practice" element={<PracticePage />} />
+        <Route path="/debugger" element={<DebuggerPage />} />
+        {/* 练习模式路由 - 无需登录 */}
+        <Route path="/practice/:type" element={<ChallengePage />} />
+        <Route element={<ProtectedRoute />}>
+          <Route path="/dashboard" element={<DashboardPage />} />
+          <Route path="/challenge/:type" element={<ChallengePage />} />
+        </Route>
+        <Route path="/" element={<Navigate to="/dashboard" replace />} />
+        <Route path="*" element={<Navigate to="/dashboard" replace />} />
+      </Routes>
+    </BrowserRouter>
   </React.StrictMode>,
-  document.getElementById("root"),
 );

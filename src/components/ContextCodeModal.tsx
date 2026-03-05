@@ -21,7 +21,7 @@ export default function ContextCodeModal(props: {
       onOk={handleSave}
       okText="保存"
       cancelText="取消"
-      destroyOnClose={false}
+      destroyOnHidden={false}
     >
       <div className="flex flex-col gap-2">
         <Typography.Text type="secondary" className="text-xs">

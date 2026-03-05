@@ -91,7 +91,7 @@ export default function ExtraDepsModal(props: {
       open={props.open}
       onCancel={handleClose}
       footer={null}
-      destroyOnClose={false}
+      destroyOnHidden={false}
       maskClosable={!props.loading}
     >
       <div className="flex flex-col gap-3">
