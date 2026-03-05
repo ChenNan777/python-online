@@ -545,7 +545,7 @@ function DebuggerPage() {
         <Space size={6} align="center" className="min-w-0">
           <Button
             size="small"
-            onClick={() => navigate('/login')}
+            onClick={() => navigate('/practice')}
             disabled={isRunning}
           >
             返回
