@@ -19,8 +19,8 @@ export default function DashboardPage() {
     navigate(`/challenge/${challengeType}`);
   };
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
     navigate('/login');
   };
 
