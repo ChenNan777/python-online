@@ -567,19 +567,6 @@ const extraPanels = useMemo(() => [{
               </Space>
             </Tooltip>
           )}
-          {(challenge.id === "shortest-path" || challenge.id === "bearing-positioning") && isPracticeRoute && (
-            <Tooltip title="练习模式显示最优解和真实目标，考试模式只显示你的解" placement="bottom">
-              <Space size={4} align="center">
-                <span className="text-xs text-black/65">练习模式</span>
-                <Switch
-                  size="small"
-                  checked={isPracticeMode}
-                  onChange={setChallengeMode}
-                  disabled={isRunning}
-                />
-              </Space>
-            </Tooltip>
-          )}
         </Space>
         <div className="flex-1" />
         <Space size={8} align="center">
