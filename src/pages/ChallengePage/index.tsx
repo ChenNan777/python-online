@@ -204,6 +204,13 @@ export default function ChallengePage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // 在练习路由下自动启用练习模式
+  useEffect(() => {
+    if (isPracticeRoute) {
+      setChallengeMode(true);
+    }
+  }, [isPracticeRoute, setChallengeMode]);
+
   // Load road network when shortest-path challenge is selected
   useEffect(() => {
     if (challenge.id === 'shortest-path') {
