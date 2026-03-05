@@ -37,9 +37,10 @@ type Props = {
   activeTab: "debugger" | "graph" | "graph-debug" | "positioning-debug" | "map-debug";
   extraPanels?: DebugPanel[];
   roadNetwork?: RoadNetwork | null;
+  isPracticeMode?: boolean;
 };
 
-export default function RightPanelStack({ activeTab, extraPanels, roadNetwork }: Props) {
+export default function RightPanelStack({ activeTab, extraPanels, roadNetwork, isPracticeMode }: Props) {
   const {
     code, breakpoints, setBreakpointEnabled, removeBreakpoint,
     output, runStatus, outputDurationMs, variableScopes,
@@ -105,7 +106,7 @@ export default function RightPanelStack({ activeTab, extraPanels, roadNetwork }:
     return (
       <div className="h-full flex flex-col">
         <div className="shrink-0 border-b border-black/8" style={{ height: "50%" }}>
-          <MapPanel roadNetwork={null} />
+          <MapPanel roadNetwork={null} isPracticeMode={isPracticeMode} />
         </div>
         <div className="flex-1 min-h-0">{debugStack}</div>
       </div>
@@ -116,7 +117,7 @@ export default function RightPanelStack({ activeTab, extraPanels, roadNetwork }:
     return (
       <div className="h-full flex flex-col">
         <div className="shrink-0 border-b border-black/8" style={{ height: "50%" }}>
-          <MapPanel roadNetwork={roadNetwork || null} />
+          <MapPanel roadNetwork={roadNetwork || null} isPracticeMode={isPracticeMode} />
         </div>
         <div className="flex-1 min-h-0">{debugStack}</div>
       </div>

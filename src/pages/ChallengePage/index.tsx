@@ -34,6 +34,7 @@ import TestCasesPanel from "../../components/TestCasesPanel";
 import { generatePositioningData } from "../../utils/generatePositioning";
 import { parseRoadNetwork } from '../../utils/parseRoadNetwork';
 import type { RoadNetwork } from '../../utils/parseRoadNetwork';
+import { useAuthStore } from '../../store/useAuthStore';
 
 const DIFFICULTY_COLOR = { 简单: "success", 中等: "warning", 困难: "error" } as const;
 
@@ -130,6 +131,7 @@ export default function ChallengePage() {
   const navigate = useNavigate();
   const { type } = useParams<{ type: string }>();
   const location = useLocation();
+  const { user } = useAuthStore();
 
   // 检测当前是练习模式还是考试模式
   const isPracticeRoute = location.pathname.startsWith('/practice/');
@@ -548,6 +550,11 @@ const extraPanels = useMemo(() => [{
       {messageContextHolder}
       <Layout.Header className="flex items-center px-3 h-12! bg-white! border-b border-black/8 shrink-0">
         <Space size={8} align="center" className="min-w-0">
+          {user?.task.memberName && user?.team.name && (
+            <span className="text-sm font-medium text-black/85">
+              {user.team.name} / {user.task.memberName}
+            </span>
+          )}
           {isPracticeRoute && (
             <Button
               size="small"
@@ -682,6 +689,7 @@ const extraPanels = useMemo(() => [{
                   : "debugger"
                 }
                 roadNetwork={roadNetwork}
+                isPracticeMode={isPracticeMode}
                 extraPanels={extraPanels}
               />
             </div>

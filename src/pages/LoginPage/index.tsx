@@ -84,12 +84,6 @@ export default function LoginPage() {
             进入练习模式
           </Button>
         </div>
-
-        <div className="login-hint">
-          <p>测试账号：</p>
-          <p>定位分析: user1 / 123456</p>
-          <p>路径规划: user2 / 123456</p>
-        </div>
       </Card>
     </div>
   );

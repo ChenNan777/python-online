@@ -20,25 +20,31 @@ L.Marker.prototype.options.icon = DefaultIcon;
 
 interface MapPanelProps {
   roadNetwork: RoadNetwork | null;
+  isPracticeMode?: boolean;
 }
 
 /**
  * 地图面板组件，用于显示路网和路径规划结果
  * @param roadNetwork - 路网数据，包含节点、边和起终点信息
+ * @param isPracticeMode - 是否为练习模式（可选，如果未提供则从 store 读取）
  */
-const MapPanel: React.FC<MapPanelProps> = ({ roadNetwork }) => {
+const MapPanel: React.FC<MapPanelProps> = ({ roadNetwork, isPracticeMode: isPracticeModeProp }) => {
   // Get path data and debug mode from store
-  const { graphResult, debugMode, debugStartCoord, debugEndCoord, setDebugStartCoord, setDebugEndCoord, positioningData, positioningResult, isPracticeMode } = usePythonStore((s) => ({
+  const { graphResult, debugMode, debugStartCoord, debugEndCoord, setDebugStartCoord, setDebugEndCoord, setGraphResult, positioningData, positioningResult, isPracticeMode: isPracticeModeStore } = usePythonStore((s) => ({
     graphResult: s.graphResult,
     debugMode: s.debugMode,
     debugStartCoord: s.debugStartCoord,
     debugEndCoord: s.debugEndCoord,
     setDebugStartCoord: s.setDebugStartCoord,
     setDebugEndCoord: s.setDebugEndCoord,
+    setGraphResult: s.setGraphResult,
     positioningData: s.positioningData,
     positioningResult: s.positioningResult,
     isPracticeMode: s.isPracticeMode,
   }));
+
+  // Use prop if provided, otherwise fall back to store value
+  const isPracticeMode = isPracticeModeProp !== undefined ? isPracticeModeProp : isPracticeModeStore;
 
   // State for context menu
   const [contextMenuVisible, setContextMenuVisible] = useState(false);
@@ -651,6 +657,7 @@ const MapPanel: React.FC<MapPanelProps> = ({ roadNetwork }) => {
                   const marker = e.target;
                   const position = marker.getLatLng();
                   setDebugStartCoord({ lng: position.lng, lat: position.lat });
+                  setGraphResult(null);
                 }
               },
             }}
@@ -681,6 +688,7 @@ const MapPanel: React.FC<MapPanelProps> = ({ roadNetwork }) => {
                   const marker = e.target;
                   const position = marker.getLatLng();
                   setDebugEndCoord({ lng: position.lng, lat: position.lat });
+                  setGraphResult(null);
                 }
               },
             }}
