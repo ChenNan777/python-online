@@ -1,12 +1,13 @@
 import { create } from 'zustand';
 import type { User } from '../types/auth';
+import { authApi } from '../services/auth';
 
 interface AuthStore {
   user: User | null;
   token: string | null;
   isAuthenticated: boolean;
   setAuth: (token: string, user: User) => void;
-  logout: () => void;
+  logout: () => Promise<void>;
   loadFromStorage: () => void;
 }
 
@@ -21,7 +22,11 @@ export const useAuthStore = create<AuthStore>((set) => ({
     set({ token, user, isAuthenticated: true });
   },
 
-  logout: () => {
+  logout: async () => {
+    // 调用登出 API
+    await authApi.logout();
+
+    // 清除本地数据
     localStorage.removeItem('auth_token');
     localStorage.removeItem('user_info');
     set({ token: null, user: null, isAuthenticated: false });
