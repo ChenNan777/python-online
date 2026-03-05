@@ -1,11 +1,86 @@
 import type { LoginRequest, LoginResponse } from '../types/auth';
 import { mockLogin } from './mock';
+import { httpClient } from '../utils/httpClient';
+import { encryptPassword } from '../utils/crypto';
+import type { ApiResponse, LoginApiResponse } from '../types/api';
+import { getTaskInfo } from './task';
 
-// 当前使用 Mock 数据，后续替换为真实 API
+const USE_MOCK = import.meta.env.VITE_USE_MOCK === 'true';
+
+/**
+ * 登录接口
+ */
+async function loginWithApi(request: LoginRequest): Promise<LoginResponse> {
+  try {
+    // 加密密码
+    const encryptedPassword = encryptPassword(request.password);
+
+    // 调用登录接口
+    const response = await httpClient.post<ApiResponse<LoginApiResponse>>('/admin/login', {
+      username: request.username,
+      password: encryptedPassword,
+    });
+
+    if (response.data.code !== 200) {
+      return {
+        success: false,
+        message: response.data.message || '登录失败',
+      };
+    }
+
+    const loginData = response.data.data;
+
+    // 临时保存 token 以便后续请求使用
+    const fullToken = `${loginData.tokenHead}${loginData.token}`;
+    localStorage.setItem('auth_token', fullToken);
+
+    // 获取任务信息
+    const user = await getTaskInfo(
+      loginData.adminInfo.nickName || loginData.adminInfo.username,
+      loginData.adminInfo.id
+    );
+
+    return {
+      success: true,
+      data: {
+        token: fullToken,
+        user,
+      },
+    };
+  } catch (error: any) {
+    // 清除临时 token
+    localStorage.removeItem('auth_token');
+
+    return {
+      success: false,
+      message: error.message || '登录失败',
+    };
+  }
+}
+
+/**
+ * 登出接口
+ */
+async function logoutWithApi(): Promise<void> {
+  try {
+    await httpClient.post('/admin/logout');
+  } catch (error) {
+    console.error('Logout API error:', error);
+    // 即使 API 调用失败，也继续清除本地数据
+  }
+}
+
 export const authApi = {
   login: async (request: LoginRequest): Promise<LoginResponse> => {
-    // TODO: 替换为真实 API 调用
-    // return axios.post('/api/auth/login', request);
-    return mockLogin(request);
+    if (USE_MOCK) {
+      return mockLogin(request);
+    }
+    return loginWithApi(request);
+  },
+
+  logout: async (): Promise<void> => {
+    if (!USE_MOCK) {
+      await logoutWithApi();
+    }
   },
 };
