@@ -1,5 +1,5 @@
-import React, { useMemo, useState } from 'react';
-import { MapContainer, TileLayer, GeoJSON, Polyline, Marker, Tooltip, useMapEvents } from 'react-leaflet';
+import React, { useMemo, useState, useEffect } from 'react';
+import { MapContainer, TileLayer, GeoJSON, Polyline, Marker, Tooltip, useMapEvents, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import { message } from 'antd';
 import { usePythonStore } from '../store/usePythonStore';
@@ -350,6 +350,19 @@ const MapPanel: React.FC<MapPanelProps> = ({ roadNetwork }) => {
     return null;
   };
 
+  // Component to fix map size on mount
+  const MapSizeFixer = () => {
+    const map = useMap();
+    useEffect(() => {
+      // Invalidate size after a short delay to ensure container is rendered
+      const timer = setTimeout(() => {
+        map.invalidateSize();
+      }, 100);
+      return () => clearTimeout(timer);
+    }, [map]);
+    return null;
+  };
+
   // Allow rendering when either roadNetwork or positioningData exists
   if (!roadNetwork && !positioningData) {
     return <div className="map-panel">加载地图数据中...</div>;
@@ -400,6 +413,7 @@ const MapPanel: React.FC<MapPanelProps> = ({ roadNetwork }) => {
         style={{ height: '100%', width: '100%' }}
       >
         <MapEventHandler />
+        <MapSizeFixer />
         <TileLayer
           attribution='&copy; <a href="http://www.tianditu.gov.cn">天地图</a>'
           url={`${tiandituBaseUrl}?T=img_w&x={x}&y={y}&l={z}&tk=${tiandituKey}`}

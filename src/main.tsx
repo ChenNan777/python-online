@@ -8,6 +8,7 @@ import DebuggerPage from "./pages/DebuggerPage";
 import ChallengePage from "./pages/ChallengePage";
 import LoginPage from "./pages/LoginPage";
 import DashboardPage from "./pages/DashboardPage";
+import PracticePage from "./pages/PracticePage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { useAuthStore } from "./store/useAuthStore";
 import { setupMonaco } from "./monaco/setupMonaco";
@@ -22,6 +23,7 @@ createRoot(document.getElementById("root")!).render(
     <BrowserRouter>
       <Routes>
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/practice" element={<PracticePage />} />
         <Route path="/debugger" element={<DebuggerPage />} />
         {/* 练习模式路由 - 无需登录 */}
         <Route path="/practice/:type" element={<ChallengePage />} />

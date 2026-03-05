@@ -236,7 +236,7 @@ def solve(graph, start, end):
   },
   {
     id: "bearing-positioning",
-    title: "方位角定位",
+    title: "定位分析",
     difficulty: "困难",
     description: `实现函数 solve(stations, measurements)，根据多个观测站的方位角测量值，求目标点经纬度。
 

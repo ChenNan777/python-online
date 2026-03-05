@@ -543,17 +543,13 @@ function DebuggerPage() {
       {messageContextHolder}
       <Layout.Header className="flex items-center px-2 h-12! bg-transparent!">
         <Space size={6} align="center" className="min-w-0">
-          <Segmented
+          <Button
             size="small"
-            value="debugger"
-            options={[
-              { label: "调试器", value: "debugger" },
-              { label: "编程挑战", value: "challenge" },
-            ]}
-            onChange={(v) => {
-              if (v === "challenge") navigate("/challenge");
-            }}
-          />
+            onClick={() => navigate('/login')}
+            disabled={isRunning}
+          >
+            返回
+          </Button>
           <Tag className="ml-1 text-xs w-14 text-center!">{status}</Tag>
           {hasContext ? (
             <Tag className="ml-1 text-xs" color="blue">

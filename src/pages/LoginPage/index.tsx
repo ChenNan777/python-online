@@ -74,30 +74,13 @@ export default function LoginPage() {
             </Button>
           </Form.Item>
 
-          <Form.Item>
+          <Form.Item style={{ marginBottom: 0, textAlign: 'center' }}>
             <Button
-              block
-              onClick={() => navigate('/debugger')}
+              type="link"
+              onClick={() => navigate('/practice')}
+              style={{ textDecoration: 'underline' }}
             >
-              进入调试器（无需登录）
-            </Button>
-          </Form.Item>
-
-          <Form.Item>
-            <Button
-              block
-              onClick={() => navigate('/practice/positioning')}
-            >
-              定位分析练习（无需登录）
-            </Button>
-          </Form.Item>
-
-          <Form.Item>
-            <Button
-              block
-              onClick={() => navigate('/practice/pathfinding')}
-            >
-              路径规划练习（无需登录）
+              练习
             </Button>
           </Form.Item>
         </Form>
