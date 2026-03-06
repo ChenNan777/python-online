@@ -1,2 +1,2 @@
 // 页面私有领域逻辑导出入口
-export {};
+export { buildPathfindingSetup } from "./pathfindingSetup";
