@@ -6,6 +6,7 @@ import OutputPanel from "./OutputPanel";
 import VariablePanel from "./VariablePanel";
 import MapPanel from "../../components/MapPanel";
 import GraphPanel from "../../components/GraphPanel";
+import type { ChallengePanelTab } from "../../constants/challenge";
 import type { RunStatus } from "../../types";
 import { usePythonStore } from "../../store/usePythonStore";
 import type { RoadNetwork } from "../../utils/parseRoadNetwork";
@@ -33,7 +34,7 @@ function OutputPanelTitle({ status, durationMs }: { status: RunStatus; durationM
 }
 
 type Props = {
-  activeTab: "debugger" | "graph" | "graph-debug" | "positioning-debug" | "map-debug";
+  activeTab: "debugger" | "graph" | "graph-debug" | ChallengePanelTab;
   extraPanels?: DebugPanel[];
   roadNetwork?: RoadNetwork | null;
   isPracticeMode?: boolean;
