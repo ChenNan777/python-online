@@ -295,7 +295,7 @@ export default function ChallengePage() {
   return (
     <Layout className="flex flex-col h-full theme-page theme-app">
       {messageContextHolder}
-      <Layout.Header className="flex items-center pl-1.5 pr-2 h-12! shrink-0 theme-toolbar">
+      <Layout.Header className="flex items-center pl-1.5 pr-2 h-12! shrink-0 theme-toolbar" style={{padding: '0 10px'}}>
         <Space size={4} align="center" className="min-w-0">
           {user?.task.memberName && user?.team.name && (
             <span className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>

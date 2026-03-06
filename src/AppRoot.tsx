@@ -1,11 +1,14 @@
 import { ConfigProvider } from 'antd';
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
-import ChallengePage from './pages/ChallengePage';
-import DashboardPage from './pages/DashboardPage';
-import DebuggerPage from './pages/DebuggerPage';
-import LoginPage from './pages/LoginPage';
-import PracticePage from './pages/PracticePage';
-import ProtectedRoute from './components/ProtectedRoute';
+import { lazy } from 'react';
+
+// 使用 React.lazy 实现动态加载
+const ChallengePage = lazy(() => import('./pages/ChallengePage'));
+const DashboardPage = lazy(() => import('./pages/DashboardPage'));
+const DebuggerPage = lazy(() => import('./pages/DebuggerPage'));
+const LoginPage = lazy(() => import('./pages/LoginPage'));
+const PracticePage = lazy(() => import('./pages/PracticePage'));
+const ProtectedRoute = lazy(() => import('./components/ProtectedRoute'));
 import {
   CHALLENGE_PATH,
   DASHBOARD_PATH,

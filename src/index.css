@@ -50,7 +50,7 @@ body {
   border-radius: 10px;
   height: 30px;
   padding-inline: 9px;
-  font-weight: 500;
+  font-weight: 400;
   font-size: 12px;
   transition: background-color 0.22s ease, border-color 0.22s ease, color 0.22s ease, box-shadow 0.22s ease, transform 0.22s ease;
 }
@@ -194,30 +194,30 @@ body {
 .theme-switcher {
   padding: 2px;
   border-radius: 999px;
-  background: color-mix(in srgb, var(--bg-panel-muted) 88%, transparent) !important;
+  background: color-mix(in srgb, var(--bg-panel-muted) 92%, transparent) !important;
   border: 1px solid color-mix(in srgb, var(--accent-primary) 10%, var(--border-default));
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
 }
 
 .theme-switcher .ant-segmented-item {
-  min-width: 34px;
+  min-width: 28px;
   border-radius: 999px;
 }
 
 .theme-switcher .ant-segmented-thumb {
   border-radius: 999px;
-  background: color-mix(in srgb, var(--accent-primary) 18%, var(--bg-panel-strong) 82%);
-  box-shadow: 0 0 0 1px rgba(var(--color-primary), 0.08), 0 6px 16px rgba(var(--color-primary), 0.08);
+  background: color-mix(in srgb, var(--accent-primary) 14%, var(--bg-panel-strong) 86%);
+  box-shadow: 0 0 0 1px rgba(var(--color-primary), 0.05), 0 3px 8px rgba(var(--color-primary), 0.06);
   transition: transform 0.2s ease, background-color 0.22s ease, box-shadow 0.22s ease;
 }
 
 .theme-switcher__icon {
-  width: 24px;
-  height: 24px;
+  width: 20px;
+  height: 20px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 14px;
+  font-size: 13px;
 }
 
 .theme-switcher .ant-segmented-item-selected .theme-switcher__icon {
@@ -232,17 +232,20 @@ body {
 .theme-toolbar .theme-text-danger {
   padding: 4px 10px;
   border-radius: 999px;
-  font-weight: 600;
+  font-weight: 500;
   font-size: 11px;
   letter-spacing: 0.02em;
+  border: 1px solid transparent;
 }
 
 .theme-toolbar .theme-text-success {
-  background: var(--success-soft);
+  background: color-mix(in srgb, var(--success-soft) 90%, white 10%);
+  border-color: color-mix(in srgb, var(--success-strong) 14%, var(--border-default));
 }
 
 .theme-toolbar .theme-text-danger {
-  background: var(--danger-soft);
+  background: color-mix(in srgb, var(--danger-soft) 90%, white 10%);
+  border-color: color-mix(in srgb, var(--danger-strong) 14%, var(--border-default));
 }
 
 .theme-run-controls {
@@ -250,21 +253,21 @@ body {
 }
 
 .theme-run-btn.ant-btn {
-  width: 32px;
-  min-width: 32px;
-  height: 32px;
-  border-radius: 11px;
+  width: 28px;
+  min-width: 28px;
+  height: 28px;
+  border-radius: 999px;
   padding: 0;
-  border-color: color-mix(in srgb, var(--accent-primary) 16%, var(--border-default));
-  background: linear-gradient(180deg, color-mix(in srgb, var(--bg-panel-muted) 96%, white 4%) 0%, color-mix(in srgb, var(--bg-panel-muted) 88%, transparent) 100%);
+  border-color: color-mix(in srgb, var(--accent-primary) 10%, var(--border-default));
+  background: color-mix(in srgb, var(--bg-panel-muted) 96%, transparent);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
 
 .theme-run-btn.ant-btn:hover:not(:disabled) {
   color: var(--accent-primary);
-  border-color: color-mix(in srgb, var(--accent-primary) 28%, var(--border-default));
-  background: linear-gradient(180deg, color-mix(in srgb, var(--accent-soft) 58%, white 42%) 0%, color-mix(in srgb, var(--accent-soft) 72%, var(--bg-panel-muted) 28%) 100%);
-  box-shadow: 0 0 0 1px rgba(var(--color-primary), 0.06), 0 8px 18px rgba(var(--color-primary), 0.08);
+  border-color: color-mix(in srgb, var(--accent-primary) 18%, var(--border-default));
+  background: color-mix(in srgb, var(--accent-soft) 44%, var(--bg-panel-muted) 56%);
+  box-shadow: 0 0 0 1px rgba(var(--color-primary), 0.04);
 }
 
 .theme-run-btn.ant-btn:disabled {
@@ -273,25 +276,27 @@ body {
 
 .theme-run-btn--primary.ant-btn,
 .theme-run-btn--primary.ant-btn.ant-btn-primary {
-  border-color: transparent;
-  background: linear-gradient(180deg, color-mix(in srgb, var(--accent-primary) 70%, white 30%) 0%, color-mix(in srgb, var(--accent-primary) 82%, #0f172a 18%) 100%);
-  box-shadow: 0 0 0 1px rgba(var(--color-primary), 0.12), 0 0 18px var(--accent-glow);
+  border-color: color-mix(in srgb, var(--accent-primary) 12%, var(--border-default));
+  background: color-mix(in srgb, var(--accent-primary) 14%, var(--bg-panel-muted) 86%);
+  color: var(--accent-primary);
+  box-shadow: 0 0 0 1px rgba(var(--color-primary), 0.03);
 }
 
 .theme-run-btn--primary.ant-btn:hover:not(:disabled),
 .theme-run-btn--primary.ant-btn.ant-btn-primary:hover:not(:disabled) {
-  background: linear-gradient(180deg, color-mix(in srgb, var(--accent-primary) 74%, white 26%) 0%, color-mix(in srgb, var(--accent-primary) 86%, #0f172a 14%) 100%) !important;
+  background: color-mix(in srgb, var(--accent-primary) 18%, var(--bg-panel-muted) 82%) !important;
+  color: var(--accent-primary) !important;
 }
 
 .theme-run-btn--danger.ant-btn {
-  border-color: color-mix(in srgb, var(--danger-strong) 22%, var(--border-default));
-  background: linear-gradient(180deg, color-mix(in srgb, var(--danger-soft) 88%, white 12%) 0%, color-mix(in srgb, var(--danger-soft) 76%, var(--bg-panel-muted) 24%) 100%);
+  border-color: color-mix(in srgb, var(--danger-strong) 12%, var(--border-default));
+  background: color-mix(in srgb, var(--danger-soft) 86%, var(--bg-panel-muted) 14%);
   color: var(--danger-strong);
 }
 
 .theme-run-btn--danger.ant-btn:hover:not(:disabled) {
-  border-color: color-mix(in srgb, var(--danger-strong) 34%, var(--border-default));
-  background: linear-gradient(180deg, color-mix(in srgb, var(--danger-soft) 76%, white 24%) 0%, color-mix(in srgb, var(--danger-soft) 88%, var(--bg-panel-muted) 12%) 100%);
+  border-color: color-mix(in srgb, var(--danger-strong) 18%, var(--border-default));
+  background: color-mix(in srgb, var(--danger-soft) 92%, var(--bg-panel-muted) 8%);
   color: var(--danger-strong) !important;
 }
 

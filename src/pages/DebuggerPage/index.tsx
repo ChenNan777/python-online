@@ -552,7 +552,7 @@ function DebuggerPage() {
   return (
     <Layout className="flex flex-col h-full theme-page theme-app">
       {messageContextHolder}
-      <Layout.Header className="flex items-center pl-1.5 pr-2 h-12! theme-toolbar">
+      <Layout.Header className="flex items-center pl-1.5 pr-2 h-12! theme-toolbar" style={{padding: '0 10px'}}>
         <Space size={4} align="center" className="min-w-0">
           <Button
             size="small"
@@ -620,7 +620,7 @@ function DebuggerPage() {
             </>
         </Space>
         <div className="flex-1" />
-        <div className="flex items-center justify-end shrink-0 gap-2 min-w-[120px]">
+        <div className="theme-toolbar-group shrink-0 min-w-[120px]">
           <ThemeSwitcher />
           <RunControls
             onRun={runCode}
