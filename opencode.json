@@ -1,8 +1,5 @@
 {
   "$schema": "https://opencode.ai/config.json",
-  "instructions": [
-    ".ai/AGENTS.md"
-  ],
   "permission": {
     "read": {
       "*": "allow",
