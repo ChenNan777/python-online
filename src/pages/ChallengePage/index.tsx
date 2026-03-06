@@ -45,7 +45,7 @@ import { generatePositioningData } from "../../utils/generatePositioning";
 import { parseRoadNetwork } from '../../utils/parseRoadNetwork';
 import type { RoadNetwork } from '../../utils/parseRoadNetwork';
 import { useAuthStore } from '../../store/useAuthStore';
-import { buildPathfindingSetup } from "./domain";
+import { buildPathfindingSetup, buildPositioningSetup } from "./domain";
 
 function RunControls(props: {
   onRun: () => void;
@@ -138,15 +138,6 @@ function RunControls(props: {
 
 function escapeJsonForPyString(value: unknown): string {
   return JSON.stringify(value).replace(/\\/g, "\\\\").replace(/'/g, "\\'");
-}
-
-function buildPositioningSetup(): string {
-  const positioningData = generatePositioningData();
-  const stationsJson = escapeJsonForPyString(positioningData.stations);
-  const measurementsJson = escapeJsonForPyString(positioningData.measurements);
-  return `import json as __pjson__
-stations = __pjson__.loads('${stationsJson}')
-measurements = __pjson__.loads('${measurementsJson}')`;
 }
 
 export default function ChallengePage() {
