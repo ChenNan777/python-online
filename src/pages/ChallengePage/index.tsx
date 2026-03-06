@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import Editor, { type OnMount } from "@monaco-editor/react";
+import Editor from "@monaco-editor/react";
 import {
   Button,
   Layout,
@@ -42,6 +42,7 @@ import {
   escapeJsonForPyString,
 } from "./domain";
 import { RunControls } from "./components";
+import { useEditorDecorations } from "./hooks";
 
 export default function ChallengePage() {
   const navigate = useNavigate();
@@ -93,9 +94,6 @@ export default function ChallengePage() {
   const isPracticeMode = isPracticeRoute ? storePracticeMode : false;
 
   const editorRef = useRef<MonacoEditor.IStandaloneCodeEditor | null>(null);
-  const monacoRef = useRef<Parameters<OnMount>[1] | null>(null);
-  const hasRunErrorMarkerRef = useRef(false);
-  const decorationsRef = useRef<string[]>([]);
 
   const [depsModalOpen, setDepsModalOpen] = useState(false);
   const [contextModalOpen, setContextModalOpen] = useState(false);
@@ -223,38 +221,16 @@ export default function ChallengePage() {
   );
   const allBreakpointLines = useMemo(() => breakpoints.map((b) => b.line), [breakpoints]);
 
-  const clearEditorRunError = useCallback(() => {
-    hasRunErrorMarkerRef.current = false;
-    const editor = editorRef.current;
-    const monaco = monacoRef.current;
-    if (!editor || !monaco) return;
-    const model = editor.getModel();
-    if (!model) return;
-    monaco.editor.setModelMarkers(model, "python-run", []);
-  }, []);
-
-  const showEditorRunError = useCallback(
-    (args: { message: string; lineno?: number | null; filename?: string }) => {
-      const editor = editorRef.current;
-      const monaco = monacoRef.current;
-      if (!editor || !monaco) return;
-      const model = editor.getModel();
-      if (!model) return;
-      const rawLine = typeof args.lineno === "number" && Number.isFinite(args.lineno) ? args.lineno : null;
-      const line = args.filename === "<user_code>"
-        ? Math.min(Math.max(1, rawLine ?? 1), model.getLineCount()) : 1;
-      monaco.editor.setModelMarkers(model, "python-run", [{
-        severity: monaco.MarkerSeverity.Error,
-        message: args.filename && args.filename !== "<user_code>"
-          ? `上下文代码错误：${args.message}` : args.message,
-        startLineNumber: line, startColumn: 1,
-        endLineNumber: line, endColumn: model.getLineMaxColumn(line),
-      }]);
-      hasRunErrorMarkerRef.current = true;
-      editor.revealLineInCenter(line);
-    },
-    [],
-  );
+  const { clearEditorRunError, showEditorRunError, handleEditorMount } = useEditorDecorations({
+    editorRef,
+    breakpoints,
+    currentLine,
+    hoverLine,
+    allBreakpointLines,
+    enabledBreakpointLines,
+    toggleBreakpoint,
+    setHoverLine,
+  });
 
   const {
     depsLoading, basePackages, loadedPackages, loadExtraPackages,
@@ -283,75 +259,6 @@ export default function ChallengePage() {
       );
     } catch { /* ignore */ }
   }, [output]);
-
-  // Editor decorations
-  useEffect(() => {
-    const editor = editorRef.current;
-    if (!editor) return;
-    const newDecorations: MonacoEditor.IModelDeltaDecoration[] = [];
-    const enabledSet = new Set(enabledBreakpointLines);
-    const anySet = new Set(allBreakpointLines);
-    for (const bp of breakpoints) {
-      const line = bp.line;
-      const isCurrent = currentLine === line;
-      const isEnabled = enabledSet.has(line);
-      newDecorations.push({
-        range: { startLineNumber: line, startColumn: 1, endLineNumber: line, endColumn: 1 },
-        options: {
-          isWholeLine: false,
-          glyphMarginClassName: isCurrent
-            ? isEnabled ? "my-glyph-margin-current-breakpoint" : "my-glyph-margin-current-breakpoint-disabled"
-            : isEnabled ? "my-glyph-margin-breakpoint" : "my-glyph-margin-breakpoint-disabled",
-          glyphMarginHoverMessage: { value: isEnabled ? "断点" : "断点（停用）" },
-        },
-      });
-    }
-    if (hoverLine !== null && hoverLine !== currentLine && !anySet.has(hoverLine)) {
-      newDecorations.push({
-        range: { startLineNumber: hoverLine, startColumn: 1, endLineNumber: hoverLine, endColumn: 1 },
-        options: { isWholeLine: false, glyphMarginClassName: "my-glyph-margin-breakpoint-hover" },
-      });
-    }
-    if (currentLine !== null) {
-      if (!anySet.has(currentLine)) {
-        newDecorations.push({
-          range: { startLineNumber: currentLine, startColumn: 1, endLineNumber: currentLine, endColumn: 1 },
-          options: { isWholeLine: false, glyphMarginClassName: "my-glyph-margin-current", glyphMarginHoverMessage: { value: "当前执行行" } },
-        });
-      }
-      newDecorations.push({
-        range: { startLineNumber: currentLine, startColumn: 1, endLineNumber: currentLine, endColumn: 1 },
-        options: { isWholeLine: true, className: "my-content-execution-line" },
-      });
-    }
-    decorationsRef.current = editor.deltaDecorations(decorationsRef.current, newDecorations);
-  }, [allBreakpointLines, breakpoints, currentLine, enabledBreakpointLines, hoverLine]);
-
-  const handleEditorMount = useCallback<OnMount>((editor, monaco) => {
-    editorRef.current = editor;
-    monacoRef.current = monaco;
-    const model = editor.getModel();
-    if (model) monaco.editor.setModelLanguage(model, "python");
-    clearEditorRunError();
-    editor.onDidChangeModelContent(() => {
-      if (!hasRunErrorMarkerRef.current) return;
-      clearEditorRunError();
-    });
-    editor.onMouseDown((e) => {
-      if (e.target.type === monaco.editor.MouseTargetType.GUTTER_GLYPH_MARGIN) {
-        const lineNumber = e.target.position?.lineNumber;
-        if (lineNumber) toggleBreakpoint(lineNumber);
-      }
-    });
-    editor.onMouseMove((e) => {
-      const isGutter =
-        e.target.type === monaco.editor.MouseTargetType.GUTTER_GLYPH_MARGIN ||
-        e.target.type === monaco.editor.MouseTargetType.GUTTER_LINE_NUMBERS;
-      if (!isGutter) { setHoverLine(null); return; }
-      setHoverLine(e.target.position?.lineNumber ?? null);
-    });
-    editor.onMouseLeave(() => setHoverLine(null));
-  }, [clearEditorRunError, toggleBreakpoint, setHoverLine]);
 
   const baseDepth = Math.max(1, pausedDepth);
   const handleStepOver = useCallback(() => stepOver(baseDepth), [baseDepth, stepOver]);
