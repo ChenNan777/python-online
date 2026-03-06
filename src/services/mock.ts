@@ -1,4 +1,5 @@
 import type { LoginRequest, LoginResponse, User } from '../types/auth';
+import { PATHFINDING_TYPE, POSITIONING_TYPE } from '../constants/challenge';
 
 // Mock 用户数据
 const MOCK_USERS: Record<string, { password: string; user: User }> = {
@@ -7,7 +8,7 @@ const MOCK_USERS: Record<string, { password: string; user: User }> = {
     user: {
       id: 'user001',
       username: '张三',
-      role: 'positioning',
+      role: POSITIONING_TYPE,
       team: {
         id: 'team001',
         name: '第一小队',
@@ -24,7 +25,7 @@ const MOCK_USERS: Record<string, { password: string; user: User }> = {
     user: {
       id: 'user002',
       username: '李四',
-      role: 'pathfinding',
+      role: PATHFINDING_TYPE,
       team: {
         id: 'team002',
         name: '第二小队',

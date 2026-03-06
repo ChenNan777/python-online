@@ -1,9 +1,10 @@
 import type { TaskInfo } from './task';
+import type { ChallengeType } from '../constants/challenge';
 
 export interface User {
   id: string;
   username: string;
-  role: 'positioning' | 'pathfinding';
+  role: ChallengeType;
   team: Team;
   task: TaskInfo;
 }

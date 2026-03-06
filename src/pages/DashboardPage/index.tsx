@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button, Card, Descriptions, Space, Typography } from 'antd';
 import { LogoutOutlined, RocketOutlined } from '@ant-design/icons';
 import { useAuthStore } from '../../store/useAuthStore';
+import { getChallengeStartState } from '../../constants/challenge';
 import { buildChallengePath, LOGIN_PATH } from '../../constants/routes';
 import { useEffect } from 'react';
 import './DashboardPage.css';
@@ -22,8 +23,7 @@ export default function DashboardPage() {
   }
 
   const handleStart = () => {
-    const challengeType = user.role === 'positioning' ? 'positioning' : 'pathfinding';
-    navigate(buildChallengePath(challengeType));
+    navigate(buildChallengePath(user.role));
   };
 
   const handleLogout = async () => {
@@ -31,24 +31,8 @@ export default function DashboardPage() {
     navigate(LOGIN_PATH);
   };
 
-  const roleText = user.role === 'positioning' ? '定位分析' : '路径规划';
-
-  // 判断按钮是否可用
-  // taskStatus: 2-定位阶段, 3-规划阶段
-  // 定位角色只能在 taskStatus=2 时开始，规划角色只能在 taskStatus=3 时开始
-  const taskStatusNum = parseInt(user.task.taskStatus || '0', 10);
-  const expectedStatus = user.role === 'positioning' ? 2 : 3;
-  const canStart = taskStatusNum === expectedStatus;
-
-  // 根据状态显示不同的按钮文字
-  let buttonText: string;
-  if (canStart) {
-    buttonText = `开始${roleText}作业`;
-  } else if (taskStatusNum < expectedStatus) {
-    buttonText = '未开始';
-  } else {
-    buttonText = '已结束';
-  }
+  // 复用统一判定
+  const { canStart, buttonText } = getChallengeStartState(user.role, user.task.taskStatus);
 
   return (
     <div className="dashboard-page">

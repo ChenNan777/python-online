@@ -35,6 +35,12 @@ import {
   PRACTICE_CHALLENGE_PREFIX,
   PRACTICE_PATH,
 } from '../../constants/routes';
+import {
+  getChallengePanelTab,
+  getChallengeIdByType,
+  PATHFINDING_CHALLENGE_ID,
+  POSITIONING_CHALLENGE_ID,
+} from '../../constants/challenge';
 import { generatePositioningData } from "../../utils/generatePositioning";
 import { parseRoadNetwork } from '../../utils/parseRoadNetwork';
 import type { RoadNetwork } from '../../utils/parseRoadNetwork';
@@ -139,11 +145,7 @@ export default function ChallengePage() {
   const isPracticeRoute = location.pathname.startsWith(PRACTICE_CHALLENGE_PREFIX);
 
   // 根据路由参数确定挑战ID
-  const challengeId = type === 'positioning'
-    ? 'bearing-positioning'
-    : type === 'pathfinding'
-    ? 'shortest-path'
-    : null;
+  const challengeId = getChallengeIdByType(type);
 
   const fallbackChallenge = CHALLENGES[0]!;
   const matchedChallenge = challengeId
@@ -151,6 +153,9 @@ export default function ChallengePage() {
     : null;
   const isValidChallenge = Boolean(challengeId && matchedChallenge);
   const challenge = matchedChallenge ?? fallbackChallenge;
+  // 当前挑战类型标记
+  const isPathfindingChallenge = challenge.id === PATHFINDING_CHALLENGE_ID;
+  const isPositioningChallenge = challenge.id === POSITIONING_CHALLENGE_ID;
   const testCasesRef = useRef(challenge.testCases);
 
   useEffect(() => {
@@ -213,9 +218,9 @@ export default function ChallengePage() {
     }
   }, [isPracticeRoute, setChallengeMode]);
 
-  // Load road network when shortest-path challenge is selected
+  // Load road network when pathfinding challenge is selected
   useEffect(() => {
-    if (challenge.id === 'shortest-path') {
+    if (isPathfindingChallenge) {
       fetch('/road.geojson')
         .then(res => res.json())
         .then(geojson => {
@@ -227,10 +232,21 @@ export default function ChallengePage() {
     } else {
       setRoadNetworkLocal(null);
     }
-  }, [challenge.id, setGraphData]);
+  }, [isPathfindingChallenge, setGraphData]);
 
   // Reset when challenge changes
   useEffect(() => {
+    // 清理地图相关状态
+    const clearGraphState = () => {
+      setGraphData(null);
+      setGraphResult(null);
+    };
+    // 清理定位相关状态
+    const clearPositioningState = () => {
+      setPositioningData(null);
+      setPositioningResult(null);
+    };
+
     setCode(challenge.starterCode);
     setBreakpoints([]);
     setResults(null);
@@ -239,22 +255,18 @@ export default function ChallengePage() {
     setIsPaused(false);
     testCasesRef.current = challenge.testCases;
     if (editorRef.current) editorRef.current.setValue(challenge.starterCode);
-    if (challenge.id === "shortest-path") {
+    if (isPathfindingChallenge) {
       setGraphResult(null);
-      setPositioningData(null);
-      setPositioningResult(null);
-    } else if (challenge.id === "bearing-positioning") {
+      clearPositioningState();
+    } else if (isPositioningChallenge) {
       setPositioningData(generatePositioningData());
       setPositioningResult(null);
-      setGraphData(null);
-      setGraphResult(null);
+      clearGraphState();
     } else {
-      setGraphData(null);
-      setGraphResult(null);
-      setPositioningData(null);
-      setPositioningResult(null);
+      clearGraphState();
+      clearPositioningState();
     }
-  }, [challenge.id, challenge.starterCode, challenge.testCases, setBreakpoints, setCode, setCurrentLine, setGraphData, setGraphResult, setIsPaused, setPositioningData, setPositioningResult, setVariableScopes]);
+  }, [challenge.starterCode, challenge.testCases, isPathfindingChallenge, isPositioningChallenge, setBreakpoints, setCode, setCurrentLine, setGraphData, setGraphResult, setIsPaused, setPositioningData, setPositioningResult, setVariableScopes]);
 
   // Build effective context: test setup + optional road network + user context
   const effectiveContextCode = useMemo(() => {
@@ -264,7 +276,7 @@ export default function ChallengePage() {
     const testSetup = `import json as __json__\n__TEST_CASES__ = __json__.loads('${tcJson}')`;
 
     let graphSetup = "";
-    if (challenge.id === "shortest-path" && roadNetwork) {
+    if (isPathfindingChallenge && roadNetwork) {
       const graphJson = JSON.stringify(roadNetwork.graph).replace(/\\/g, "\\\\").replace(/'/g, "\\'");
       const positionsJson = JSON.stringify(roadNetwork.positions).replace(/\\/g, "\\\\").replace(/'/g, "\\'");
 
@@ -356,7 +368,7 @@ def __optimal_path__(g, s, e):
     }
 
     let positioningSetup = "";
-    if (challenge.id === "bearing-positioning") {
+    if (isPositioningChallenge) {
       const pd = generatePositioningData();
       const stationsJson = JSON.stringify(pd.stations).replace(/\\/g, "\\\\").replace(/'/g, "\\'");
       const measurementsJson = JSON.stringify(pd.measurements).replace(/\\/g, "\\\\").replace(/'/g, "\\'");
@@ -367,7 +379,7 @@ measurements = __pjson__.loads('${measurementsJson}')`;
 
     const parts = [testSetup, graphSetup, positioningSetup, contextCode].filter(Boolean);
     return parts.join("\n");
-  }, [challenge.id, challenge.testCases, contextCode, roadNetwork, debugMode, debugStartCoord, debugEndCoord]);
+  }, [challenge.testCases, contextCode, roadNetwork, debugMode, debugStartCoord, debugEndCoord, isPathfindingChallenge, isPositioningChallenge]);
 
   const enabledBreakpointLines = useMemo(
     () => breakpoints.filter((b) => b.enabled).map((b) => b.line),
@@ -581,7 +593,7 @@ measurements = __pjson__.loads('${measurementsJson}')`;
                 disabled={isRunning}>上下文</Button>
             </span>
           </Tooltip>
-          {challenge.id === "shortest-path" && isPracticeRoute && (
+          {isPathfindingChallenge && isPracticeRoute && (
             <Tooltip title="开启后可拖动起终点验证算法" placement="bottom">
               <Space size={4} align="center">
                 <span className="text-xs text-black/65">自定义起终点</span>
@@ -688,9 +700,8 @@ measurements = __pjson__.loads('${measurementsJson}')`;
             <div className="h-full">
               <RightPanelStack
                 activeTab={
-                  challenge.id === "shortest-path" ? "map-debug"
-                  : challenge.id === "bearing-positioning" ? "positioning-debug"
-                  : "debugger"
+                  // 按挑战类型选择默认调试面板
+                  getChallengePanelTab(challenge.id)
                 }
                 roadNetwork={roadNetwork}
                 isPracticeMode={isPracticeMode}

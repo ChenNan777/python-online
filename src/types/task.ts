@@ -1,8 +1,10 @@
+import type { TaskProgressStatus } from '../constants/challenge';
+
 export interface TaskInfo {
   id: string;
   name: string;
   description: string;
-  status?: 'not_started' | 'in_progress' | 'completed';
+  status?: TaskProgressStatus;
   startTime?: Date;
   endTime?: Date;
   stage?: string;

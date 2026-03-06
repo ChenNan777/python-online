@@ -1,3 +1,9 @@
+import {
+  PATHFINDING_CHALLENGE_ID,
+  POSITIONING_CHALLENGE_ID,
+} from '../../constants/challenge';
+import type { ChallengeId } from '../../constants/challenge';
+
 export type TestCase = {
   args: unknown[];
   expected: unknown;
@@ -12,7 +18,7 @@ export type Solution = {
 };
 
 export type Challenge = {
-  id: string;
+  id: ChallengeId;
   title: string;
   difficulty: "简单" | "中等" | "困难";
   description: string;
@@ -23,7 +29,7 @@ export type Challenge = {
 
 export const CHALLENGES: Challenge[] = [
   {
-    id: "shortest-path",
+    id: PATHFINDING_CHALLENGE_ID,
     title: "路径规划",
     difficulty: "困难",
     description: `实现函数 solve(graph, start, end)，在真实路网中找到从起点到终点的最短路径。
@@ -235,7 +241,7 @@ def solve(graph, start, end):
     ],
   },
   {
-    id: "bearing-positioning",
+    id: POSITIONING_CHALLENGE_ID,
     title: "定位分析",
     difficulty: "困难",
     description: `实现函数 solve(stations, measurements)，根据多个观测站的方位角测量值，求目标点经纬度。

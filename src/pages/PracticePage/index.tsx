@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { Card, Button, Space } from 'antd';
 import { CodeOutlined, CompassOutlined, AimOutlined } from '@ant-design/icons';
+import { PATHFINDING_TYPE, POSITIONING_TYPE } from '../../constants/challenge';
 import {
   buildPracticeChallengePath,
   DEBUGGER_PATH,
@@ -28,7 +29,7 @@ export default function PracticePage() {
             size="large"
             block
             icon={<CompassOutlined />}
-            onClick={() => navigate(buildPracticeChallengePath('positioning'))}
+            onClick={() => navigate(buildPracticeChallengePath(POSITIONING_TYPE))}
           >
             定位分析练习
           </Button>
@@ -37,7 +38,7 @@ export default function PracticePage() {
             size="large"
             block
             icon={<AimOutlined />}
-            onClick={() => navigate(buildPracticeChallengePath('pathfinding'))}
+            onClick={() => navigate(buildPracticeChallengePath(PATHFINDING_TYPE))}
           >
             路径规划练习
           </Button>
