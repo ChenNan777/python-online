@@ -19,8 +19,6 @@ type UseEditorDecorationsArgs = {
   breakpoints: Breakpoint[];
   currentLine: number | null;
   hoverLine: number | null;
-  allBreakpointLines: number[];
-  enabledBreakpointLines: number[];
   toggleBreakpoint: (line: number) => void;
   setHoverLine: (line: number | null) => void;
 };
@@ -31,8 +29,6 @@ export function useEditorDecorations(args: UseEditorDecorationsArgs) {
     breakpoints,
     currentLine,
     hoverLine,
-    allBreakpointLines,
-    enabledBreakpointLines,
     toggleBreakpoint,
     setHoverLine,
   } = args;
@@ -80,6 +76,8 @@ export function useEditorDecorations(args: UseEditorDecorationsArgs) {
     const editor = editorRef.current;
     if (!editor) return;
     const newDecorations: MonacoEditor.IModelDeltaDecoration[] = [];
+    const enabledBreakpointLines = breakpoints.filter((breakpoint) => breakpoint.enabled).map((breakpoint) => breakpoint.line);
+    const allBreakpointLines = breakpoints.map((breakpoint) => breakpoint.line);
     const enabledSet = new Set(enabledBreakpointLines);
     const anySet = new Set(allBreakpointLines);
     for (const breakpoint of breakpoints) {
@@ -120,7 +118,7 @@ export function useEditorDecorations(args: UseEditorDecorationsArgs) {
       });
     }
     decorationsRef.current = editor.deltaDecorations(decorationsRef.current, newDecorations);
-  }, [allBreakpointLines, breakpoints, currentLine, editorRef, enabledBreakpointLines, hoverLine]);
+  }, [breakpoints, currentLine, editorRef, hoverLine]);
 
   const handleEditorMount = useCallback<OnMount>((editor, monaco) => {
     editorRef.current = editor;

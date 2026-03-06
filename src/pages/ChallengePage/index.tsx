@@ -219,15 +219,12 @@ export default function ChallengePage() {
     () => breakpoints.filter((b) => b.enabled).map((b) => b.line),
     [breakpoints],
   );
-  const allBreakpointLines = useMemo(() => breakpoints.map((b) => b.line), [breakpoints]);
 
   const { clearEditorRunError, showEditorRunError, handleEditorMount } = useEditorDecorations({
     editorRef,
     breakpoints,
     currentLine,
     hoverLine,
-    allBreakpointLines,
-    enabledBreakpointLines,
     toggleBreakpoint,
     setHoverLine,
   });
