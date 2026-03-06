@@ -1,0 +1,66 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "instructions": [
+    ".ai/AGENTS.md"
+  ],
+  "permission": {
+    "read": {
+      "*": "allow",
+      "*.env": "deny",
+      "*.env.*": "deny"
+    },
+    "edit": {
+      "*": "allow",
+      "*.env": "deny",
+      "*.env.*": "deny",
+      ".env.local": "deny",
+      ".env.production": "deny",
+      "node_modules/**": "deny",
+      "dist/**": "deny",
+      "build/**": "deny",
+      "*.log": "deny",
+      ".git/**": "deny"
+    },
+    "bash": {
+      "*": "allow",
+      "git push*": "deny",
+      "git push --force*": "deny",
+      "git push -f*": "deny",
+      "git reset --hard*": "deny",
+      "git clean -fd*": "deny",
+      "git clean -fdx*": "deny",
+      "rm -rf /*": "deny",
+      "rm -rf /": "deny",
+      "rm -rf ~/*": "deny",
+      "rm -rf $HOME/*": "deny",
+      "sudo*": "deny",
+      "dd*": "deny",
+      "mkfs*": "deny",
+      "format*": "deny"
+    },
+    "glob": {
+      "*": "allow",
+      ".git/**": "deny"
+    },
+    "grep": {
+      "*": "allow",
+      "*.env": "deny",
+      "*.env.*": "deny"
+    },
+    "list": {
+      "*": "allow",
+      ".git": "deny"
+    },
+    "task": "allow",
+    "skill": "allow",
+    "lsp": "allow",
+    "todoread": "allow",
+    "todowrite": "allow",
+    "webfetch": "allow",
+    "websearch": "allow",
+    "codesearch": "allow",
+    "external_directory": {
+      "*": "ask"
+    }
+  }
+}

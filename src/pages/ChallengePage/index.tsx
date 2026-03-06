@@ -97,6 +97,14 @@ export default function ChallengePage() {
   const [messageApi, messageContextHolder] = message.useMessage();
   const [roadNetwork, setRoadNetworkLocal] = useState<RoadNetwork | null>(null);
 
+  // 同步代码到 store 与编辑器
+  const applyCodeToEditor = useCallback((nextCode: string) => {
+    setCode(nextCode);
+    if (editorRef.current) {
+      editorRef.current.setValue(nextCode);
+    }
+  }, [setCode]);
+
   // 清理地图状态
   const clearGraphState = useCallback(() => {
     setGraphData(null);
@@ -120,7 +128,7 @@ export default function ChallengePage() {
 
   // On mount: load first challenge code into store
   useEffect(() => {
-    setCode(fallbackChallenge.starterCode);
+    applyCodeToEditor(fallbackChallenge.starterCode);
     resetEditorRuntimeState();
     setContextCode("");
     clearGraphState();
@@ -153,7 +161,7 @@ export default function ChallengePage() {
 
   // Reset when challenge changes
   useEffect(() => {
-    setCode(challenge.starterCode);
+    applyCodeToEditor(challenge.starterCode);
     resetEditorRuntimeState();
     testCasesRef.current = challenge.testCases;
 
@@ -177,10 +185,10 @@ export default function ChallengePage() {
     isPathfindingChallenge,
     isPositioningChallenge,
     resetEditorRuntimeState,
-    setCode,
     setGraphResult,
     setPositioningData,
     setPositioningResult,
+    applyCodeToEditor,
   ]);
 
   const effectiveContextCode = useChallengeContextCode({
@@ -385,7 +393,7 @@ export default function ChallengePage() {
                        onChange={(idx: number) => {
                          const sol = challenge.solutions[idx];
                          if (!sol) return;
-                         setCode(sol.code);
+                         applyCodeToEditor(sol.code);
                        }}
                        value={null}
                      />
