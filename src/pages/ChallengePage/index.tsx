@@ -156,7 +156,6 @@ export default function ChallengePage() {
     setCode(challenge.starterCode);
     resetEditorRuntimeState();
     testCasesRef.current = challenge.testCases;
-    if (editorRef.current) editorRef.current.setValue(challenge.starterCode);
 
     // 只初始化当前挑战需要的数据
     if (isPathfindingChallenge) {
@@ -383,15 +382,14 @@ export default function ChallengePage() {
                       popupMatchSelectWidth={false}
                       style={{ minWidth: 120 }}
                       options={challenge.solutions.map((s, i) => ({ value: i, label: s.label }))}
-                      onChange={(idx: number) => {
-                        const sol = challenge.solutions[idx];
-                        if (!sol) return;
-                        setCode(sol.code);
-                        if (editorRef.current) editorRef.current.setValue(sol.code);
-                      }}
-                      value={null}
-                    />
-                  </div>
+                       onChange={(idx: number) => {
+                         const sol = challenge.solutions[idx];
+                         if (!sol) return;
+                         setCode(sol.code);
+                       }}
+                       value={null}
+                     />
+                   </div>
                 </div>
               </Pane>
               {/* Editor */}
