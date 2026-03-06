@@ -36,13 +36,8 @@ import { generatePositioningData } from "../../utils/generatePositioning";
 import { parseRoadNetwork } from '../../utils/parseRoadNetwork';
 import type { RoadNetwork } from '../../utils/parseRoadNetwork';
 import { useAuthStore } from '../../store/useAuthStore';
-import {
-  buildPathfindingSetup,
-  buildPositioningSetup,
-  escapeJsonForPyString,
-} from "./domain";
 import { RunControls } from "./components";
-import { useEditorDecorations } from "./hooks";
+import { useChallengeContextCode, useEditorDecorations } from "./hooks";
 
 export default function ChallengePage() {
   const navigate = useNavigate();
@@ -189,31 +184,16 @@ export default function ChallengePage() {
     setPositioningResult,
   ]);
 
-  // Build effective context: test setup + optional road network + user context
-  const effectiveContextCode = useMemo(() => {
-    const testCasesPayload = challenge.testCases.map((tc) => ({
-      args: tc.args,
-      expected: tc.expected,
-      tolerance: tc.tolerance,
-      checkIsPosition: tc.checkIsPosition,
-    }));
-    const tcJson = escapeJsonForPyString(testCasesPayload);
-    const testSetup = `import json as __json__\n__TEST_CASES__ = __json__.loads('${tcJson}')`;
-
-    const graphSetup = isPathfindingChallenge
-      ? buildPathfindingSetup({
-        roadNetwork,
-        debugMode,
-        debugStartCoord,
-        debugEndCoord,
-      })
-      : "";
-
-    const positioningSetup = isPositioningChallenge ? buildPositioningSetup() : "";
-
-    const parts = [testSetup, graphSetup, positioningSetup, contextCode].filter(Boolean);
-    return parts.join("\n");
-  }, [challenge.testCases, contextCode, roadNetwork, debugMode, debugStartCoord, debugEndCoord, isPathfindingChallenge, isPositioningChallenge]);
+  const effectiveContextCode = useChallengeContextCode({
+    testCases: challenge.testCases,
+    contextCode,
+    roadNetwork,
+    debugMode,
+    debugStartCoord,
+    debugEndCoord,
+    isPathfindingChallenge,
+    isPositioningChallenge,
+  });
 
   const enabledBreakpointLines = useMemo(
     () => breakpoints.filter((b) => b.enabled).map((b) => b.line),
