@@ -1,4 +1,5 @@
-import { loadPyodide, PyodideInterface } from "pyodide";
+import { loadPyodide } from "pyodide";
+import type { PyodideInterface } from "pyodide";
 import {
   CMD_PAUSE,
   CMD_RUN,

@@ -3,6 +3,26 @@ import type { User } from '../types/auth';
 import { authApi } from '../services/auth';
 import { getTaskInfo } from '../services/task';
 
+const AUTH_TOKEN_KEY = 'auth_token';
+const USER_INFO_KEY = 'user_info';
+
+function saveAuthToStorage(token: string, user: User): void {
+  localStorage.setItem(AUTH_TOKEN_KEY, token);
+  localStorage.setItem(USER_INFO_KEY, JSON.stringify(user));
+}
+
+function clearAuthStorage(): void {
+  localStorage.removeItem(AUTH_TOKEN_KEY);
+  localStorage.removeItem(USER_INFO_KEY);
+}
+
+function readAuthFromStorage(): { token: string | null; userStr: string | null } {
+  return {
+    token: localStorage.getItem(AUTH_TOKEN_KEY),
+    userStr: localStorage.getItem(USER_INFO_KEY),
+  };
+}
+
 interface AuthStore {
   user: User | null;
   token: string | null;
@@ -19,8 +39,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
   isAuthenticated: false,
 
   setAuth: (token: string, user: User) => {
-    localStorage.setItem('auth_token', token);
-    localStorage.setItem('user_info', JSON.stringify(user));
+    saveAuthToStorage(token, user);
     set({ token, user, isAuthenticated: true });
   },
 
@@ -29,14 +48,12 @@ export const useAuthStore = create<AuthStore>((set) => ({
     await authApi.logout();
 
     // 清除本地数据
-    localStorage.removeItem('auth_token');
-    localStorage.removeItem('user_info');
+    clearAuthStorage();
     set({ token: null, user: null, isAuthenticated: false });
   },
 
   loadFromStorage: () => {
-    const token = localStorage.getItem('auth_token');
-    const userStr = localStorage.getItem('user_info');
+    const { token, userStr } = readAuthFromStorage();
 
     if (token && userStr) {
       try {
@@ -44,8 +61,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
         set({ token, user, isAuthenticated: true });
       } catch (error) {
         console.error('Failed to parse user info:', error);
-        localStorage.removeItem('auth_token');
-        localStorage.removeItem('user_info');
+        clearAuthStorage();
       }
     }
   },
@@ -61,7 +77,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
       const updatedUser = await getTaskInfo(state.user.username, state.user.id);
 
       // 更新 store 和 localStorage
-      localStorage.setItem('user_info', JSON.stringify(updatedUser));
+      localStorage.setItem(USER_INFO_KEY, JSON.stringify(updatedUser));
       set({ user: updatedUser });
     } catch (error) {
       console.error('Failed to refresh task info:', error);

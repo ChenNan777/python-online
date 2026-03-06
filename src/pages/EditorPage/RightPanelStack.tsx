@@ -4,7 +4,6 @@ import DebugPanelStack, { type DebugPanel } from "../../components/DebugPanelSta
 import BreakpointPanel from "./BreakpointPanel";
 import OutputPanel from "./OutputPanel";
 import VariablePanel from "./VariablePanel";
-import PositioningPanel from "../../components/PositioningPanel";
 import MapPanel from "../../components/MapPanel";
 import GraphPanel from "../../components/GraphPanel";
 import type { RunStatus } from "../../types";

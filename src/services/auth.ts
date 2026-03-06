@@ -7,6 +7,17 @@ import { getTaskInfo } from './task';
 
 const USE_MOCK = import.meta.env.VITE_USE_MOCK === 'true';
 
+function buildFullToken(tokenHead: string, token: string): string {
+  return `${tokenHead}${token}`;
+}
+
+function getErrorMessage(error: unknown, fallback: string): string {
+  if (error instanceof Error && error.message) {
+    return error.message;
+  }
+  return fallback;
+}
+
 /**
  * 登录接口
  */
@@ -31,7 +42,7 @@ async function loginWithApi(request: LoginRequest): Promise<LoginResponse> {
     const loginData = response.data.data;
 
     // 临时保存 token 以便后续请求使用
-    const fullToken = `${loginData.tokenHead}${loginData.token}`;
+    const fullToken = buildFullToken(loginData.tokenHead, loginData.token);
     localStorage.setItem('auth_token', fullToken);
 
     // 获取任务信息
@@ -47,13 +58,13 @@ async function loginWithApi(request: LoginRequest): Promise<LoginResponse> {
         user,
       },
     };
-  } catch (error: any) {
+  } catch (error: unknown) {
     // 清除临时 token
     localStorage.removeItem('auth_token');
 
     return {
       success: false,
-      message: error.message || '登录失败',
+      message: getErrorMessage(error, '登录失败'),
     };
   }
 }

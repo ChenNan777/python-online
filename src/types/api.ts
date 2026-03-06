@@ -36,7 +36,7 @@ export interface LoginApiResponse {
     type: string;
     label: string;
     status: boolean;
-    children: any[];
+    children: unknown[];
   }>;
 }
 

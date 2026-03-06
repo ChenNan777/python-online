@@ -4,12 +4,10 @@ import Editor, { type OnMount } from "@monaco-editor/react";
 import {
   Button,
   Layout,
-  Segmented,
   Select,
   Space,
   Tag,
   Tooltip,
-  Typography,
   message,
 } from "antd";
 import {

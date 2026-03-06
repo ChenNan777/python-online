@@ -5,24 +5,24 @@ declare module 'leaflet' {
     function circle(options: {
       pixelSize: number;
       pathOptions: L.PathOptions;
-    }): any;
+    }): unknown;
 
     function arrowHead(options: {
       pixelSize?: number;
       polygon?: boolean;
       pathOptions?: L.PathOptions;
-    }): any;
+    }): unknown;
 
     function dash(options: {
       pixelSize?: number;
       pathOptions?: L.PathOptions;
-    }): any;
+    }): unknown;
   }
 
   interface PolylineDecoratorPattern {
     offset?: number | string;
     repeat?: number | string;
-    symbol: any;
+    symbol: unknown;
   }
 
   function polylineDecorator(

@@ -3,7 +3,6 @@ import Editor, { type OnMount } from "@monaco-editor/react";
 import {
   Button,
   Layout,
-  Segmented,
   Select,
   Space,
   Switch,
@@ -35,8 +34,6 @@ import { generatePositioningData } from "../../utils/generatePositioning";
 import { parseRoadNetwork } from '../../utils/parseRoadNetwork';
 import type { RoadNetwork } from '../../utils/parseRoadNetwork';
 import { useAuthStore } from '../../store/useAuthStore';
-
-const DIFFICULTY_COLOR = { 简单: "success", 中等: "warning", 困难: "error" } as const;
 
 function RunControls(props: {
   onRun: () => void;
@@ -143,21 +140,19 @@ export default function ChallengePage() {
     ? 'shortest-path'
     : null;
 
-  // 如果挑战ID无效，重定向到 dashboard
-  if (!challengeId) {
-    navigate('/dashboard', { replace: true });
-    return null;
-  }
-
-  // 查找对应的挑战
-  const initialChallenge = CHALLENGES.find((c) => c.id === challengeId);
-  if (!initialChallenge) {
-    navigate('/dashboard', { replace: true });
-    return null;
-  }
-
-  const challenge = CHALLENGES.find((c) => c.id === challengeId)!;
+  const fallbackChallenge = CHALLENGES[0]!;
+  const matchedChallenge = challengeId
+    ? CHALLENGES.find((c) => c.id === challengeId) ?? null
+    : null;
+  const isValidChallenge = Boolean(challengeId && matchedChallenge);
+  const challenge = matchedChallenge ?? fallbackChallenge;
   const testCasesRef = useRef(challenge.testCases);
+
+  useEffect(() => {
+    if (!isValidChallenge) {
+      navigate('/dashboard', { replace: true });
+    }
+  }, [isValidChallenge, navigate]);
 
   const {
     code, setCode,
@@ -167,7 +162,7 @@ export default function ChallengePage() {
     currentLine, hoverLine, setHoverLine,
     pausedDepth,
     output,
-    graphData, setGraphData, setGraphResult,
+    setGraphData, setGraphResult,
     setVariableScopes, setCurrentLine, setIsPaused,
     setPositioningData, setPositioningResult,
     debugMode, setDebugMode,
@@ -193,7 +188,7 @@ export default function ChallengePage() {
 
   // On mount: load first challenge code into store
   useEffect(() => {
-    setCode(CHALLENGES[0].starterCode);
+    setCode(fallbackChallenge.starterCode);
     setBreakpoints([]);
     setVariableScopes([]);
     setCurrentLine(null);
@@ -530,7 +525,7 @@ measurements = __pjson__.loads('${measurementsJson}')`;
   const allPassed = results !== null && totalCount > 0 && passedCount === totalCount;
   const hasContext = contextCode.trim().length > 0;
 
-const extraPanels = useMemo(() => [{
+  const extraPanels = useMemo(() => [{
     key: "test-cases",
     title: results !== null
       ? <><span>测试用例</span><span className={`ml-1 font-normal ${allPassed ? "text-green-600" : "text-red-500"}`}>{passedCount}/{totalCount}</span></>
@@ -544,6 +539,10 @@ const extraPanels = useMemo(() => [{
       />
     ),
   }], [results, allPassed, passedCount, totalCount, challenge.testCases, consoleOutput]);
+
+  if (!isValidChallenge) {
+    return null;
+  }
 
   return (
     <Layout className="flex flex-col h-full">

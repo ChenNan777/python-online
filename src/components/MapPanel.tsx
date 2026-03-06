@@ -1,6 +1,7 @@
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import { MapContainer, TileLayer, GeoJSON, Polyline, Marker, Tooltip, useMapEvents, useMap } from 'react-leaflet';
 import L from 'leaflet';
+import type { Feature, LineString } from 'geojson';
 import { message } from 'antd';
 import { usePythonStore } from '../store/usePythonStore';
 import type { RoadNetwork } from '../utils/parseRoadNetwork';
@@ -9,7 +10,7 @@ import type { RoadNetwork } from '../utils/parseRoadNetwork';
 import icon from 'leaflet/dist/images/marker-icon.png';
 import iconShadow from 'leaflet/dist/images/marker-shadow.png';
 
-let DefaultIcon = L.icon({
+const DefaultIcon = L.icon({
   iconUrl: icon,
   shadowUrl: iconShadow,
   iconSize: [25, 41],
@@ -66,9 +67,10 @@ const MapPanel: React.FC<MapPanelProps> = ({ roadNetwork, isPracticeMode: isPrac
 
     // GeoJSON coordinates are [lng, lat]
     const allCoords: number[][] = [];
-    roadNetwork.geojson.features.forEach((f: any) => {
-      if (f.geometry.type === 'LineString') {
-        allCoords.push(...f.geometry.coordinates);
+    roadNetwork.geojson.features.forEach((feature) => {
+      if (feature.geometry.type === 'LineString') {
+        const lineFeature = feature as Feature<LineString>;
+        allCoords.push(...(lineFeature.geometry.coordinates as number[][]));
       }
     });
 
@@ -114,21 +116,21 @@ const MapPanel: React.FC<MapPanelProps> = ({ roadNetwork, isPracticeMode: isPrac
   };
 
   // Convert node IDs to coordinates
-  const getPathCoordinates = (path: string[] | null | undefined) => {
+  const getPathCoordinates = useCallback((path: string[] | null | undefined) => {
     if (!path || !roadNetwork?.positions) return [];
     return path.map(nodeId => {
       const pos = roadNetwork.positions[nodeId];
       return pos ? [pos[1], pos[0]] : null; // [lat, lng] for Leaflet
     }).filter(Boolean) as [number, number][];
-  };
+  }, [roadNetwork]);
 
   const optimalPath = graphResult?.path;
   const userPath = graphResult?.userPath;
   const optimalWeight = graphResult?.optimalWeight;
   const userWeight = graphResult?.totalWeight;
 
-  const optimalCoords = useMemo(() => getPathCoordinates(optimalPath), [optimalPath, roadNetwork]);
-  const userCoords = useMemo(() => getPathCoordinates(userPath), [userPath, roadNetwork]);
+  const optimalCoords = useMemo(() => getPathCoordinates(optimalPath), [optimalPath, getPathCoordinates]);
+  const userCoords = useMemo(() => getPathCoordinates(userPath), [userPath, getPathCoordinates]);
 
   const bearingLineLength = useMemo(() => {
     if (!positioningData) return 2; // default 2km

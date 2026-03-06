@@ -1,6 +1,48 @@
 import axios, { AxiosError } from 'axios';
 import { message } from 'antd';
 
+const AUTH_TOKEN_KEY = 'auth_token';
+const USER_INFO_KEY = 'user_info';
+
+function getStoredAuthToken(): string | null {
+  return localStorage.getItem(AUTH_TOKEN_KEY);
+}
+
+function clearStoredAuthInfo(): void {
+  localStorage.removeItem(AUTH_TOKEN_KEY);
+  localStorage.removeItem(USER_INFO_KEY);
+}
+
+function redirectToLoginIfNeeded(): void {
+  if (window.location.pathname !== '/login') {
+    window.location.href = '/login';
+  }
+}
+
+function handleHttpStatusError(status: number): void {
+  switch (status) {
+    case 401:
+      clearStoredAuthInfo();
+      message.error('登录已过期，请重新登录');
+      redirectToLoginIfNeeded();
+      break;
+    case 403:
+      message.error('权限不足，无法访问');
+      break;
+    case 404:
+      message.error('请求的资源不存在');
+      break;
+    case 500:
+    case 502:
+    case 503:
+    case 504:
+      message.error('服务器错误，请稍后重试');
+      break;
+    default:
+      message.error('请求失败，请稍后重试');
+  }
+}
+
 // 创建 axios 实例
 export const httpClient = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:28888',
@@ -13,7 +55,7 @@ export const httpClient = axios.create({
 // 请求拦截器：注入 token
 httpClient.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('auth_token');
+    const token = getStoredAuthToken();
     if (token) {
       // token 已经包含 "Bearer " 前缀，直接使用
       config.headers.Authorization = token;
@@ -38,34 +80,7 @@ httpClient.interceptors.response.use(
     }
 
     // HTTP 错误状态码处理
-    const { status } = error.response;
-
-    switch (status) {
-      case 401:
-        // 未授权，清除 token 并跳转登录
-        localStorage.removeItem('auth_token');
-        localStorage.removeItem('user_info');
-        message.error('登录已过期，请重新登录');
-        // 跳转到登录页
-        if (window.location.pathname !== '/login') {
-          window.location.href = '/login';
-        }
-        break;
-      case 403:
-        message.error('权限不足，无法访问');
-        break;
-      case 404:
-        message.error('请求的资源不存在');
-        break;
-      case 500:
-      case 502:
-      case 503:
-      case 504:
-        message.error('服务器错误，请稍后重试');
-        break;
-      default:
-        message.error('请求失败，请稍后重试');
-    }
+    handleHttpStatusError(error.response.status);
 
     return Promise.reject(error);
   }

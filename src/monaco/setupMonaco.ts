@@ -1,6 +1,6 @@
 import { loader } from "@monaco-editor/react";
-import * as monaco from "monaco-editor/esm/vs/editor/editor.api";
-import "monaco-editor/esm/vs/basic-languages/python/python.contribution";
+import * as monaco from "monaco-editor/esm/vs/editor/editor.api.js";
+import "monaco-editor/esm/vs/basic-languages/python/python.contribution.js";
 import EditorWorker from "monaco-editor/esm/vs/editor/editor.worker?worker";
 import JsonWorker from "monaco-editor/esm/vs/language/json/json.worker?worker";
 import CssWorker from "monaco-editor/esm/vs/language/css/css.worker?worker";
@@ -130,7 +130,7 @@ export function setupMonaco() {
   };
 
   monaco.languages.registerHoverProvider("python", {
-    provideHover(model, position) {
+    provideHover(model: monaco.editor.ITextModel, position: monaco.Position) {
       const word = model.getWordAtPosition(position);
       if (!word) return null;
 
@@ -184,7 +184,10 @@ export function setupMonaco() {
   });
 
   monaco.languages.registerCompletionItemProvider("python", {
-    provideCompletionItems(model, position) {
+    provideCompletionItems(
+      model: monaco.editor.ITextModel,
+      position: monaco.Position,
+    ) {
       const { contextCode } = usePythonStore.getState();
       const contextSymbols = parseContextSymbols(contextCode);
 

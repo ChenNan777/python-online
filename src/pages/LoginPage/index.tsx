@@ -6,13 +6,20 @@ import { useAuthStore } from '../../store/useAuthStore';
 import { authApi } from '../../services/auth';
 import './LoginPage.css';
 
+type LoginLocationState = {
+  from?: {
+    pathname?: string;
+  };
+};
+
 export default function LoginPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const [loading, setLoading] = useState(false);
   const setAuth = useAuthStore((s) => s.setAuth);
 
-  const from = (location.state as any)?.from?.pathname || '/dashboard';
+  const state = location.state as LoginLocationState | null;
+  const from = state?.from?.pathname || '/dashboard';
 
   const onFinish = async (values: { username: string; password: string }) => {
     setLoading(true);

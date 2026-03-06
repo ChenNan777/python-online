@@ -2,6 +2,16 @@ import { httpClient } from '../utils/httpClient';
 import type { ApiResponse, TaskInfoApiResponse } from '../types/api';
 import type { User } from '../types/auth';
 
+const TASK_STAGE_TEXT_MAP: Record<number, string> = {
+  0: '已创建',
+  1: '准备就绪',
+  2: '目标侦察阶段进行中',
+  3: '路径规划阶段进行中',
+  4: '目标捕获阶段进行中',
+  5: '已完成',
+  6: '已取消',
+};
+
 /**
  * 将时间数组转换为 Date 对象
  */
@@ -15,16 +25,7 @@ function parseTimeArray(timeArray: number[]): Date {
  */
 function getTaskStageText(taskStatus: string): string {
   const statusNum = parseInt(taskStatus, 10);
-  const stageMap: Record<number, string> = {
-    0: '已创建',
-    1: '准备就绪',
-    2: '目标侦察阶段进行中',
-    3: '路径规划阶段进行中',
-    4: '目标捕获阶段进行中',
-    5: '已完成',
-    6: '已取消',
-  };
-  return stageMap[statusNum] || '未知状态';
+  return TASK_STAGE_TEXT_MAP[statusNum] || '未知状态';
 }
 
 /**
@@ -52,6 +53,11 @@ function adaptTaskInfoToUser(apiData: TaskInfoApiResponse, username: string, use
     taskStatus = 'completed';
   }
 
+  const startTime = parseTimeArray(apiData.startTime);
+  const endTime = parseTimeArray(apiData.endTime);
+  const stage = getTaskStageText(apiData.taskStatus);
+  const memberRole = getMemberRoleText(apiData.taskRoleId);
+
   return {
     id: userId,
     username,
@@ -65,12 +71,12 @@ function adaptTaskInfoToUser(apiData: TaskInfoApiResponse, username: string, use
       name: apiData.taskName,
       description: '', // 不再使用 description 字段
       status: taskStatus,
-      startTime: parseTimeArray(apiData.startTime),
-      endTime: parseTimeArray(apiData.endTime),
+      startTime,
+      endTime,
       // 添加额外字段供页面使用
-      stage: getTaskStageText(apiData.taskStatus),
+      stage,
       memberName: apiData.memberName,
-      memberRole: getMemberRoleText(apiData.taskRoleId),
+      memberRole,
       taskStatus: apiData.taskStatus, // 保留原始 taskStatus
     },
   };
