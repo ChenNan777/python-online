@@ -33,7 +33,7 @@ export default function BreakpointPanel({
 
   return (
     <div className="flex flex-col h-full">
-      <div className="flex gap-2 px-2 py-1.5 border-b border-black/12 font-semibold text-xs">
+      <div className="flex gap-2 px-2 py-1.5 font-semibold text-xs theme-toolbar">
         <div className="w-20">行号</div>
         <div className="flex-1">内容</div>
         <div className="w-10 text-right">操作</div>
@@ -47,9 +47,10 @@ export default function BreakpointPanel({
           rows.map((row) => (
             <div
               key={row.key}
-              className={`flex items-center gap-2 px-2 py-1.5 border-b border-black/[0.08] text-xs ${
-                row.enabled ? "" : "text-black/45"
+              className={`flex items-center gap-2 px-2 py-1.5 text-xs theme-border ${
+                row.enabled ? "" : "theme-text-tertiary"
               }`}
+              style={{ borderBottomWidth: 1, borderBottomStyle: 'solid' }}
             >
               <div className="w-20 flex items-center gap-2">
                 <Checkbox
@@ -72,7 +73,7 @@ export default function BreakpointPanel({
                 {row.content.length > 0 ? (
                   row.content
                 ) : (
-                  <span className="text-black/35">（空行）</span>
+                  <span className="theme-text-tertiary">（空行）</span>
                 )}
               </div>
 

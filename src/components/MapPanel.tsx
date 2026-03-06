@@ -19,6 +19,37 @@ const DefaultIcon = L.icon({
 
 L.Marker.prototype.options.icon = DefaultIcon;
 
+function buildGlowingMarkerIcon(args: {
+  label?: string;
+  tone: 'info' | 'success' | 'warning' | 'danger' | 'muted';
+  size?: number;
+}): L.DivIcon {
+  const colorMap = {
+    info: 'var(--info-strong)',
+    success: 'var(--success-strong)',
+    warning: 'var(--warning-strong)',
+    danger: 'var(--danger-strong)',
+    muted: 'var(--map-connection)',
+  } as const;
+
+  const size = args.size ?? 22;
+  const ringSize = size + 12;
+  const innerSize = Math.max(12, size - 8);
+  const color = colorMap[args.tone];
+  const label = args.label ?? '';
+
+  return L.divIcon({
+    className: 'map-tech-marker',
+    html: `<div class="map-tech-marker__root" style="--marker-color:${color};--marker-size:${size}px;--marker-ring-size:${ringSize}px;--marker-inner-size:${innerSize}px;">
+      <div class="map-tech-marker__ring"></div>
+      <div class="map-tech-marker__pulse"></div>
+      <div class="map-tech-marker__core">${label}</div>
+    </div>`,
+    iconSize: [ringSize, ringSize],
+    iconAnchor: [ringSize / 2, ringSize / 2],
+  });
+}
+
 interface MapPanelProps {
   roadNetwork: RoadNetwork | null;
   isPracticeMode?: boolean;
@@ -51,6 +82,22 @@ const MapPanel: React.FC<MapPanelProps> = ({ roadNetwork, isPracticeMode: isPrac
   const [contextMenuVisible, setContextMenuVisible] = useState(false);
   const [contextMenuPosition, setContextMenuPosition] = useState({ x: 0, y: 0 });
   const [clickedCoords, setClickedCoords] = useState<{ lat: number; lng: number } | null>(null);
+
+  const contextMenuStyle = useMemo(
+    () => ({
+      position: 'fixed' as const,
+      left: contextMenuPosition.x,
+      top: contextMenuPosition.y,
+      background: 'var(--bg-panel-strong)',
+      border: '1px solid var(--border-default)',
+      borderRadius: '8px',
+      boxShadow: 'var(--shadow-panel)',
+      color: 'var(--text-primary)',
+      zIndex: 9999,
+      minWidth: '120px',
+    }),
+    [contextMenuPosition.x, contextMenuPosition.y],
+  );
 
   // Compute center coordinates from road network
   const center = useMemo(() => {
@@ -384,17 +431,7 @@ const MapPanel: React.FC<MapPanelProps> = ({ roadNetwork, isPracticeMode: isPrac
       {/* Custom context menu */}
       {contextMenuVisible && (
         <div
-          style={{
-            position: 'fixed',
-            left: contextMenuPosition.x,
-            top: contextMenuPosition.y,
-            background: 'white',
-            border: '1px solid #d9d9d9',
-            borderRadius: '4px',
-            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.15)',
-            zIndex: 9999,
-            minWidth: '120px',
-          }}
+          style={contextMenuStyle}
           onClick={(e) => e.stopPropagation()}
         >
           <div
@@ -402,12 +439,13 @@ const MapPanel: React.FC<MapPanelProps> = ({ roadNetwork, isPracticeMode: isPrac
               padding: '8px 12px',
               cursor: 'pointer',
               fontSize: '14px',
+              color: 'var(--text-primary)',
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.background = '#f5f5f5';
+              e.currentTarget.style.background = 'var(--bg-panel-muted)';
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.background = 'white';
+              e.currentTarget.style.background = 'var(--bg-panel-strong)';
             }}
             onClick={handleCopyCoordinates}
           >
@@ -437,7 +475,7 @@ const MapPanel: React.FC<MapPanelProps> = ({ roadNetwork, isPracticeMode: isPrac
         {roadNetwork && (
           <GeoJSON
             data={roadNetwork.geojson}
-            style={{ color: '#10b981', weight: 3, opacity: 0.8 }}
+            style={{ color: 'var(--map-road)', weight: 3, opacity: 0.8 }}
             filter={(feature) => {
               // Only show LineString features, filter out Point features
               return feature.geometry.type === 'LineString';
@@ -484,7 +522,7 @@ const MapPanel: React.FC<MapPanelProps> = ({ roadNetwork, isPracticeMode: isPrac
                     width: 18px;
                     height: 18px;
                     border-radius: 50%;
-                    background: #3b82f6;
+                    background: var(--info-strong);
                     border: 2px solid white;
                     box-shadow: 0 2px 6px rgba(0,0,0,0.3);
                     display: flex;
@@ -505,9 +543,9 @@ const MapPanel: React.FC<MapPanelProps> = ({ roadNetwork, isPracticeMode: isPrac
                 iconAnchor: [20, 20],
               })}
             >
-              <Tooltip direction="top" offset={[0, -20]} opacity={0.95} permanent={false}>
+              <Tooltip direction="top" offset={[0, -20]} opacity={0.95} permanent={false} className="map-tech-tooltip">
                 <div style={{ fontSize: '12px', lineHeight: '1.6' }}>
-                  <div style={{ fontWeight: 'bold', marginBottom: '4px', color: '#1e40af' }}>
+                  <div style={{ fontWeight: 'bold', marginBottom: '4px', color: 'var(--info-strong)' }}>
                     观测站 {station.id}
                   </div>
                   <div><strong>经度:</strong> {station.lng.toFixed(6)}°</div>
@@ -555,15 +593,11 @@ const MapPanel: React.FC<MapPanelProps> = ({ roadNetwork, isPracticeMode: isPrac
         {isPracticeMode && positioningData?.trueTarget && (
           <Marker
             position={[positioningData.trueTarget.lat, positioningData.trueTarget.lng]}
-            icon={L.icon({
-              iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
-              shadowUrl: iconShadow,
-              iconSize: [25, 41],
-              iconAnchor: [12, 41],
-            })}
+            icon={buildGlowingMarkerIcon({ label: 'T', tone: 'success', size: 26 })}
           >
-            <Tooltip direction="top" offset={[0, -40]} opacity={0.95}>
+            <Tooltip direction="top" offset={[0, -24]} opacity={0.95} className="map-tech-tooltip">
               <div style={{ fontSize: '12px', lineHeight: '1.6' }}>
+                <div style={{ fontWeight: 'bold', marginBottom: '4px', color: 'var(--success-strong)' }}>真实目标</div>
                 <div><strong>经度:</strong> {positioningData.trueTarget.lng.toFixed(6)}°</div>
                 <div><strong>纬度:</strong> {positioningData.trueTarget.lat.toFixed(6)}°</div>
               </div>
@@ -575,15 +609,11 @@ const MapPanel: React.FC<MapPanelProps> = ({ roadNetwork, isPracticeMode: isPrac
         {positioningResult && (
           <Marker
             position={[positioningResult.userLat, positioningResult.userLng]}
-            icon={L.icon({
-              iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-orange.png',
-              shadowUrl: iconShadow,
-              iconSize: [25, 41],
-              iconAnchor: [12, 41],
-            })}
+            icon={buildGlowingMarkerIcon({ label: 'U', tone: 'warning', size: 24 })}
           >
-            <Tooltip direction="top" offset={[0, -40]} opacity={0.95}>
+            <Tooltip direction="top" offset={[0, -24]} opacity={0.95} className="map-tech-tooltip">
               <div style={{ fontSize: '12px', lineHeight: '1.6' }}>
+                <div style={{ fontWeight: 'bold', marginBottom: '4px', color: 'var(--warning-strong)' }}>你的解</div>
                 <div><strong>经度:</strong> {positioningResult.userLng.toFixed(6)}°</div>
                 <div><strong>纬度:</strong> {positioningResult.userLat.toFixed(6)}°</div>
               </div>
@@ -598,7 +628,7 @@ const MapPanel: React.FC<MapPanelProps> = ({ roadNetwork, isPracticeMode: isPrac
               [positioningData.trueTarget.lat, positioningData.trueTarget.lng],
               [positioningResult.userLat, positioningResult.userLng]
             ]}
-            color="#ef4444"
+            color="var(--danger-strong)"
             weight={2}
             opacity={0.7}
             dashArray="4 4"
@@ -609,7 +639,7 @@ const MapPanel: React.FC<MapPanelProps> = ({ roadNetwork, isPracticeMode: isPrac
         {isPracticeMode && optimalCoords.length > 0 && (
           <Polyline
             positions={optimalCoords}
-            color="#3b82f6"
+            color="var(--info-strong)"
             weight={4}
             opacity={0.8}
             className="path-flow-optimal"
@@ -620,7 +650,7 @@ const MapPanel: React.FC<MapPanelProps> = ({ roadNetwork, isPracticeMode: isPrac
         {userCoords.length > 0 && (
           <Polyline
             positions={userCoords}
-            color="#f59e0b"
+            color="var(--warning-strong)"
             weight={4}
             opacity={0.8}
             className="path-flow-user"
@@ -631,7 +661,7 @@ const MapPanel: React.FC<MapPanelProps> = ({ roadNetwork, isPracticeMode: isPrac
         {(debugMode || startNeedsConnection) && startTargetPosition && startPosition && (
           <Polyline
             positions={[startTargetPosition, startPosition]}
-            color="#9ca3af"
+            color="var(--map-connection)"
             weight={2}
             opacity={0.6}
             dashArray="4 4"
@@ -642,7 +672,7 @@ const MapPanel: React.FC<MapPanelProps> = ({ roadNetwork, isPracticeMode: isPrac
         {(debugMode || endNeedsConnection) && endTargetPosition && endPosition && (
           <Polyline
             positions={[endTargetPosition, endPosition]}
-            color="#9ca3af"
+            color="var(--map-connection)"
             weight={2}
             opacity={0.6}
             dashArray="4 4"
@@ -665,15 +695,11 @@ const MapPanel: React.FC<MapPanelProps> = ({ roadNetwork, isPracticeMode: isPrac
                 }
               },
             }}
-            icon={L.icon({
-              iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
-              shadowUrl: iconShadow,
-              iconSize: [25, 41],
-              iconAnchor: [12, 41],
-            })}
+            icon={buildGlowingMarkerIcon({ label: 'S', tone: 'success', size: 22 })}
           >
-            <Tooltip direction="top" offset={[0, -40]} opacity={0.95}>
+            <Tooltip direction="top" offset={[0, -24]} opacity={0.95} className="map-tech-tooltip">
               <div style={{ fontSize: '12px', lineHeight: '1.6' }}>
+                <div style={{ fontWeight: 'bold', marginBottom: '4px', color: 'var(--success-strong)' }}>起点目标</div>
                 <div><strong>经度:</strong> {startTargetPosition[1].toFixed(6)}°</div>
                 <div><strong>纬度:</strong> {startTargetPosition[0].toFixed(6)}°</div>
               </div>
@@ -696,15 +722,11 @@ const MapPanel: React.FC<MapPanelProps> = ({ roadNetwork, isPracticeMode: isPrac
                 }
               },
             }}
-            icon={L.icon({
-              iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
-              shadowUrl: iconShadow,
-              iconSize: [25, 41],
-              iconAnchor: [12, 41],
-            })}
+            icon={buildGlowingMarkerIcon({ label: 'E', tone: 'danger', size: 22 })}
           >
-            <Tooltip direction="top" offset={[0, -40]} opacity={0.95}>
+            <Tooltip direction="top" offset={[0, -24]} opacity={0.95} className="map-tech-tooltip">
               <div style={{ fontSize: '12px', lineHeight: '1.6' }}>
+                <div style={{ fontWeight: 'bold', marginBottom: '4px', color: 'var(--danger-strong)' }}>终点目标</div>
                 <div><strong>经度:</strong> {endTargetPosition[1].toFixed(6)}°</div>
                 <div><strong>纬度:</strong> {endTargetPosition[0].toFixed(6)}°</div>
               </div>
@@ -716,18 +738,16 @@ const MapPanel: React.FC<MapPanelProps> = ({ roadNetwork, isPracticeMode: isPrac
         {startPosition && (
           <Marker
             position={startPosition}
-            icon={L.icon({
-              iconUrl: (debugMode || startNeedsConnection)
-                ? 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-grey.png'
-                : 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
-              shadowUrl: iconShadow,
-              iconSize: (debugMode || startNeedsConnection) ? [20, 33] : [25, 41],
-              iconAnchor: (debugMode || startNeedsConnection) ? [10, 33] : [12, 41],
+            icon={buildGlowingMarkerIcon({
+              label: 'S',
+              tone: debugMode || startNeedsConnection ? 'muted' : 'success',
+              size: debugMode || startNeedsConnection ? 18 : 22,
             })}
           >
             {!(debugMode || startNeedsConnection) && (
-              <Tooltip direction="top" offset={[0, -40]} opacity={0.95}>
+              <Tooltip direction="top" offset={[0, -24]} opacity={0.95} className="map-tech-tooltip">
                 <div style={{ fontSize: '12px', lineHeight: '1.6' }}>
+                  <div style={{ fontWeight: 'bold', marginBottom: '4px', color: 'var(--success-strong)' }}>起点节点</div>
                   <div><strong>经度:</strong> {startPosition[1].toFixed(6)}°</div>
                   <div><strong>纬度:</strong> {startPosition[0].toFixed(6)}°</div>
                 </div>
@@ -740,18 +760,16 @@ const MapPanel: React.FC<MapPanelProps> = ({ roadNetwork, isPracticeMode: isPrac
         {endPosition && (
           <Marker
             position={endPosition}
-            icon={L.icon({
-              iconUrl: (debugMode || endNeedsConnection)
-                ? 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-grey.png'
-                : 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
-              shadowUrl: iconShadow,
-              iconSize: (debugMode || endNeedsConnection) ? [20, 33] : [25, 41],
-              iconAnchor: (debugMode || endNeedsConnection) ? [10, 33] : [12, 41],
+            icon={buildGlowingMarkerIcon({
+              label: 'E',
+              tone: debugMode || endNeedsConnection ? 'muted' : 'danger',
+              size: debugMode || endNeedsConnection ? 18 : 22,
             })}
           >
             {!(debugMode || endNeedsConnection) && (
-              <Tooltip direction="top" offset={[0, -40]} opacity={0.95}>
+              <Tooltip direction="top" offset={[0, -24]} opacity={0.95} className="map-tech-tooltip">
                 <div style={{ fontSize: '12px', lineHeight: '1.6' }}>
+                  <div style={{ fontWeight: 'bold', marginBottom: '4px', color: 'var(--danger-strong)' }}>终点节点</div>
                   <div><strong>经度:</strong> {endPosition[1].toFixed(6)}°</div>
                   <div><strong>纬度:</strong> {endPosition[0].toFixed(6)}°</div>
                 </div>
@@ -764,6 +782,10 @@ const MapPanel: React.FC<MapPanelProps> = ({ roadNetwork, isPracticeMode: isPrac
       {/* Info bar */}
       {((optimalWeight != null || userWeight != null) || positioningError != null) && (
         <div className="path-info">
+          <div className="path-info__header">
+            <span className="path-info__title">地图分析</span>
+            <span className="path-info__badge">实时</span>
+          </div>
           {isPracticeMode && optimalWeight != null && (
             <div className="info-item">
               <span className="label">最优解:</span>
@@ -778,7 +800,7 @@ const MapPanel: React.FC<MapPanelProps> = ({ roadNetwork, isPracticeMode: isPrac
                 {isPracticeMode && optimalWeight != null && optimalWeight > 0 && (
                   <span
                     className="offset"
-                    style={{ color: Math.abs(userWeight - optimalWeight) < 0.01 ? '#22c55e' : '#ef4444' }}
+                    style={{ color: Math.abs(userWeight - optimalWeight) < 0.01 ? 'var(--success-strong)' : 'var(--danger-strong)' }}
                   >
                     {' '}({userWeight - optimalWeight >= 0 ? '+' : ''}{(userWeight - optimalWeight).toFixed(2)})
                   </span>
@@ -789,7 +811,7 @@ const MapPanel: React.FC<MapPanelProps> = ({ roadNetwork, isPracticeMode: isPrac
           {isPracticeMode && positioningError != null && (
             <div className="info-item">
               <span className="label">定位误差:</span>
-              <span className="value user">
+              <span className="value user path-info__value-emphasis">
                 {positioningError.toFixed(2)} 米
               </span>
             </div>

@@ -3,24 +3,38 @@
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: var(--bg-app-gradient);
+  padding: 24px;
+}
+
+.login-shell {
+  width: min(440px, 100%);
+}
+
+.login-switcher {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 14px;
 }
 
 .login-card {
-  width: 400px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border: 1px solid var(--border-default);
+  background: var(--bg-panel);
+  box-shadow: var(--shadow-panel);
+  backdrop-filter: blur(18px);
 }
 
 .login-card .ant-card-head-title {
   text-align: center;
   font-size: 20px;
   font-weight: 600;
+  color: var(--text-primary);
 }
 
 .login-footer {
   margin-top: 16px;
   padding-top: 16px;
-  border-top: 1px solid #f0f0f0;
+  border-top: 1px solid var(--border-default);
   text-align: center;
   font-size: 14px;
 }
@@ -38,17 +52,4 @@
 
 .practice-link:hover {
   text-decoration: underline;
-}
-
-.login-hint {
-  margin-top: 16px;
-  padding: 12px;
-  background: #f5f5f5;
-  border-radius: 4px;
-  font-size: 12px;
-  color: #666;
-}
-
-.login-hint p {
-  margin: 4px 0;
 }

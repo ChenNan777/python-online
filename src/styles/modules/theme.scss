@@ -1,9 +1,72 @@
-:root {
+:root,
+:root[data-theme="light"] {
   --color-primary: 22 119 255;
   --color-danger: 255 77 79;
-  --color-fg: 0 0 0;
-  --color-muted: 0 0 0;
-  --color-border: 0 0 0;
   --radius-sm: 6px;
-  --radius-md: 8px;
+  --radius-md: 10px;
+  --bg-app: #eef3f8;
+  --bg-app-gradient: radial-gradient(circle at top, rgba(22, 119, 255, 0.12), transparent 34%), linear-gradient(180deg, #f8fbff 0%, #eef3f8 100%);
+  --bg-panel: rgba(255, 255, 255, 0.9);
+  --bg-panel-strong: #ffffff;
+  --bg-panel-muted: #f6f8fb;
+  --bg-elevated: #ffffff;
+  --bg-code: #f7f9fc;
+  --text-primary: #0f172a;
+  --text-secondary: #516072;
+  --text-tertiary: #7f8b99;
+  --border-default: rgba(15, 23, 42, 0.1);
+  --border-strong: rgba(15, 23, 42, 0.16);
+  --accent-primary: #1677ff;
+  --accent-soft: rgba(22, 119, 255, 0.12);
+  --accent-glow: rgba(59, 130, 246, 0.24);
+  --success-soft: #edfdf3;
+  --warning-soft: #fff7e8;
+  --danger-soft: #fff1f2;
+  --success-strong: #16a34a;
+  --warning-strong: #d97706;
+  --danger-strong: #dc2626;
+  --info-strong: #2563eb;
+  --graph-node-muted: #cbd5e1;
+  --graph-node-base: #94a3b8;
+  --graph-edge-base: #e2e8f0;
+  --map-road: #10b981;
+  --map-connection: #9ca3af;
+  --shadow-panel: 0 18px 50px rgba(15, 23, 42, 0.08);
+  --shadow-glow: 0 0 0 1px rgba(22, 119, 255, 0.08), 0 0 28px rgba(59, 130, 246, 0.12);
+}
+
+:root[data-theme="dark-tech"] {
+  --color-primary: 45 212 255;
+  --color-danger: 255 107 122;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --bg-app: #08111f;
+  --bg-app-gradient: radial-gradient(circle at top, rgba(45, 212, 255, 0.16), transparent 32%), linear-gradient(180deg, #08111f 0%, #050b14 100%);
+  --bg-panel: rgba(10, 21, 38, 0.88);
+  --bg-panel-strong: #101c31;
+  --bg-panel-muted: #0d1728;
+  --bg-elevated: #13233c;
+  --bg-code: #0a1627;
+  --text-primary: #e7f2ff;
+  --text-secondary: #98aac0;
+  --text-tertiary: #67809b;
+  --border-default: rgba(120, 166, 219, 0.18);
+  --border-strong: rgba(120, 166, 219, 0.28);
+  --accent-primary: #2dd4ff;
+  --accent-soft: rgba(45, 212, 255, 0.14);
+  --accent-glow: rgba(45, 212, 255, 0.28);
+  --success-soft: rgba(51, 209, 122, 0.14);
+  --warning-soft: rgba(255, 179, 71, 0.14);
+  --danger-soft: rgba(255, 107, 122, 0.12);
+  --success-strong: #33d17a;
+  --warning-strong: #ffb347;
+  --danger-strong: #ff6b7a;
+  --info-strong: #4faeff;
+  --graph-node-muted: #29445f;
+  --graph-node-base: #5b7592;
+  --graph-edge-base: #1e3248;
+  --map-road: #2ecc8a;
+  --map-connection: #6d8198;
+  --shadow-panel: 0 22px 60px rgba(0, 0, 0, 0.38);
+  --shadow-glow: 0 0 0 1px rgba(45, 212, 255, 0.1), 0 0 36px rgba(45, 212, 255, 0.16);
 }

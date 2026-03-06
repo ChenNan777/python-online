@@ -108,6 +108,68 @@ function parseContextSymbols(code: string): ParsedContextSymbols {
   return lastContextSymbols;
 }
 
+function defineCustomThemes(): void {
+  monaco.editor.defineTheme("python-online-light", {
+    base: "vs",
+    inherit: true,
+    rules: [
+      { token: "comment", foreground: "64748B", fontStyle: "italic" },
+      { token: "keyword", foreground: "1D4ED8", fontStyle: "bold" },
+      { token: "string", foreground: "0F766E" },
+      { token: "number", foreground: "B45309" },
+      { token: "identifier", foreground: "0F172A" },
+      { token: "type.identifier", foreground: "7C3AED" },
+      { token: "delimiter", foreground: "475569" },
+    ],
+    colors: {
+      "editor.background": "#F8FBFF",
+      "editor.foreground": "#0F172A",
+      "editorLineNumber.foreground": "#94A3B8",
+      "editorLineNumber.activeForeground": "#1D4ED8",
+      "editorCursor.foreground": "#0EA5E9",
+      "editor.lineHighlightBackground": "#D7E9FF",
+      "editor.selectionBackground": "#BFDBFE88",
+      "editor.inactiveSelectionBackground": "#DBEAFE66",
+      "editorGutter.background": "#F8FBFF",
+      "editorIndentGuide.background1": "#D7E4F3",
+      "editorIndentGuide.activeBackground1": "#93C5FD",
+      "editorLineNumber.border": "#E2E8F0",
+      "editorBracketMatch.background": "#DBEAFE88",
+      "editorBracketMatch.border": "#60A5FA",
+    },
+  });
+
+  monaco.editor.defineTheme("python-online-dark-tech", {
+    base: "vs-dark",
+    inherit: true,
+    rules: [
+      { token: "comment", foreground: "5F7C99", fontStyle: "italic" },
+      { token: "keyword", foreground: "61DAFB", fontStyle: "bold" },
+      { token: "string", foreground: "7EE787" },
+      { token: "number", foreground: "FFB86C" },
+      { token: "identifier", foreground: "E6F0FF" },
+      { token: "type.identifier", foreground: "C792EA" },
+      { token: "delimiter", foreground: "89A4C2" },
+    ],
+    colors: {
+      "editor.background": "#091728",
+      "editor.foreground": "#E6F0FF",
+      "editorLineNumber.foreground": "#4D6481",
+      "editorLineNumber.activeForeground": "#61DAFB",
+      "editorCursor.foreground": "#2DD4FF",
+      "editor.lineHighlightBackground": "#13304C",
+      "editor.selectionBackground": "#18588099",
+      "editor.inactiveSelectionBackground": "#13374F66",
+      "editorGutter.background": "#091728",
+      "editorIndentGuide.background1": "#173049",
+      "editorIndentGuide.activeBackground1": "#2DD4FF66",
+      "editorLineNumber.border": "#163450",
+      "editorBracketMatch.background": "#123F5D99",
+      "editorBracketMatch.border": "#2DD4FF",
+    },
+  });
+}
+
 export function setupMonaco() {
   if (isSetup) return;
   isSetup = true;
@@ -128,6 +190,8 @@ export function setupMonaco() {
       return new EditorWorker();
     },
   };
+
+  defineCustomThemes();
 
   monaco.languages.registerHoverProvider("python", {
     provideHover(model: monaco.editor.ITextModel, position: monaco.Position) {

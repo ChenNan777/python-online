@@ -1,6 +1,8 @@
 import Editor from "@monaco-editor/react";
 import { Button, Modal, Typography } from "antd";
 import { useCallback } from "react";
+import { useThemeStore } from "../store/useThemeStore";
+import { getMonacoTheme } from "../utils/theme";
 
 export default function ContextCodeModal(props: {
   open: boolean;
@@ -9,6 +11,7 @@ export default function ContextCodeModal(props: {
   onClose: () => void;
   onSave: () => void;
 }) {
+  const themeId = useThemeStore((state) => state.themeId);
   const handleSave = useCallback(() => {
     props.onSave();
   }, [props]);
@@ -27,12 +30,12 @@ export default function ContextCodeModal(props: {
         <Typography.Text type="secondary" className="text-xs">
           这里的代码不会显示在主编辑器里，但每次运行都会先执行，可在主代码中直接使用。
         </Typography.Text>
-        <div className="h-[360px] border border-black/10 rounded overflow-hidden">
+        <div className="h-[360px] border rounded overflow-hidden theme-border theme-code-surface">
           <Editor
             height="100%"
             defaultLanguage="python"
             language="python"
-            theme="vs"
+            theme={getMonacoTheme(themeId)}
             value={props.value}
             onChange={(val) => props.onChange(val || "")}
             options={{

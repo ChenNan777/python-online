@@ -32,7 +32,7 @@ function OutputPanelTitle({ status, durationMs }: { status: RunStatus; durationM
     <>
       <span className="shrink-0">输出</span>
       {statusNode}
-      {durationText && <span className="text-[11px] text-black/45 whitespace-nowrap">{durationText}</span>}
+      {durationText && <span className="text-[11px] whitespace-nowrap" style={{ color: 'var(--text-tertiary)' }}>{durationText}</span>}
     </>
   );
 }
@@ -98,7 +98,7 @@ export default function RightPanelStack({ activeTab, extraPanels, roadNetwork, i
   if (activeTab === "graph-debug") {
     return (
       <div className="h-full flex flex-col">
-        <div className="shrink-0 border-b border-black/8" style={{ height: "50%" }}>
+        <div className="shrink-0 theme-border" style={{ height: "50%", borderBottomWidth: 1, borderBottomStyle: 'solid' }}>
           <GraphPanel />
         </div>
         <div className="flex-1 min-h-0">{debugStack}</div>
@@ -109,7 +109,7 @@ export default function RightPanelStack({ activeTab, extraPanels, roadNetwork, i
   if (activeTab === POSITIONING_DEBUG_PANEL_TAB) {
     return (
       <div className="h-full flex flex-col">
-        <div className="shrink-0 border-b border-black/8" style={{ height: "50%" }}>
+        <div className="shrink-0 theme-border" style={{ height: "50%", borderBottomWidth: 1, borderBottomStyle: 'solid' }}>
           <MapPanel roadNetwork={null} isPracticeMode={isPracticeMode} />
         </div>
         <div className="flex-1 min-h-0">{debugStack}</div>
@@ -120,7 +120,7 @@ export default function RightPanelStack({ activeTab, extraPanels, roadNetwork, i
   if (activeTab === MAP_DEBUG_PANEL_TAB) {
     return (
       <div className="h-full flex flex-col">
-        <div className="shrink-0 border-b border-black/8" style={{ height: "50%" }}>
+        <div className="shrink-0 theme-border" style={{ height: "50%", borderBottomWidth: 1, borderBottomStyle: 'solid' }}>
           <MapPanel roadNetwork={roadNetwork || null} isPracticeMode={isPracticeMode} />
         </div>
         <div className="flex-1 min-h-0">{debugStack}</div>

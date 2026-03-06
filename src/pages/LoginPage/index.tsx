@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { Button, Form, Input, message, Card } from 'antd';
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
 import { useAuthStore } from '../../store/useAuthStore';
+import ThemeSwitcher from '../../components/ThemeSwitcher';
 import { authApi } from '../../services/auth';
 import { DASHBOARD_PATH, PRACTICE_PATH } from '../../constants/routes';
 import './LoginPage.css';
@@ -44,55 +45,60 @@ export default function LoginPage() {
 
   return (
     <div className="login-page">
-      <Card className="login-card" title="在线作业平台">
-        <Form
-          name="login"
-          onFinish={onFinish}
-          autoComplete="off"
-          size="large"
-        >
-          <Form.Item
-            name="username"
-            rules={[{ required: true, message: '请输入用户名' }]}
-          >
-            <Input
-              prefix={<UserOutlined />}
-              placeholder="用户名"
-            />
-          </Form.Item>
-
-          <Form.Item
-            name="password"
-            rules={[{ required: true, message: '请输入密码' }]}
-          >
-            <Input.Password
-              prefix={<LockOutlined />}
-              placeholder="密码"
-            />
-          </Form.Item>
-
-          <Form.Item>
-            <Button
-              type="primary"
-              htmlType="submit"
-              loading={loading}
-              block
-            >
-              登录
-            </Button>
-          </Form.Item>
-        </Form>
-
-        <div className="login-footer">
-          <Button
-            type="link"
-            onClick={() => navigate(PRACTICE_PATH)}
-            className="practice-link"
-          >
-            进入练习模式
-          </Button>
+      <div className="login-shell">
+        <div className="login-switcher">
+          <ThemeSwitcher />
         </div>
-      </Card>
+        <Card className="login-card" title="在线作业平台">
+          <Form
+            name="login"
+            onFinish={onFinish}
+            autoComplete="off"
+            size="large"
+          >
+            <Form.Item
+              name="username"
+              rules={[{ required: true, message: '请输入用户名' }]}
+            >
+              <Input
+                prefix={<UserOutlined />}
+                placeholder="用户名"
+              />
+            </Form.Item>
+
+            <Form.Item
+              name="password"
+              rules={[{ required: true, message: '请输入密码' }]}
+            >
+              <Input.Password
+                prefix={<LockOutlined />}
+                placeholder="密码"
+              />
+            </Form.Item>
+
+            <Form.Item>
+              <Button
+                type="primary"
+                htmlType="submit"
+                loading={loading}
+                block
+              >
+                登录
+              </Button>
+            </Form.Item>
+          </Form>
+
+          <div className="login-footer">
+            <Button
+              type="link"
+              onClick={() => navigate(PRACTICE_PATH)}
+              className="practice-link"
+            >
+              进入练习模式
+            </Button>
+          </div>
+        </Card>
+      </div>
     </div>
   );
 }

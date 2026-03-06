@@ -16,10 +16,10 @@ export default function VariablePanel({ scopes }: VariablePanelProps) {
 
         const body =
           entries.length === 0 ? (
-            <div className="p-2 text-black/45 text-xs">暂无变量</div>
+            <div className="p-2 text-xs theme-text-tertiary">暂无变量</div>
           ) : (
             <div className="flex flex-col">
-              <div className="flex gap-2 px-2 py-1.5 border-b border-black/12 font-semibold text-xs">
+              <div className="flex gap-2 px-2 py-1.5 font-semibold text-xs theme-toolbar">
                 <div className="w-20">变量</div>
                 <div className="flex-1">值</div>
               </div>
@@ -27,7 +27,8 @@ export default function VariablePanel({ scopes }: VariablePanelProps) {
                 {entries.map(([name, value]) => (
                   <div
                     key={`${scope.id}:${name}`}
-                    className="flex items-center gap-2 px-2 py-1.5 border-b border-black/[0.08] text-xs"
+                    className="flex items-center gap-2 px-2 py-1.5 text-xs theme-border"
+                    style={{ borderBottomWidth: 1, borderBottomStyle: 'solid' }}
                   >
                     <div
                       title={name}
@@ -66,7 +67,7 @@ export default function VariablePanel({ scopes }: VariablePanelProps) {
     <div className="flex flex-col h-full">
       <div className="flex-1 min-h-0 overflow-auto">
         {scopes.length === 0 ? (
-          <div className="p-2 text-black/45 text-xs">暂无变量</div>
+          <div className="p-2 text-xs theme-text-tertiary">暂无变量</div>
         ) : (
           <Collapse
             key={topKey}

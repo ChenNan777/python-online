@@ -7,22 +7,54 @@
   .leaflet-container {
     width: 100%;
     height: 100%;
-    background: #f0f0f0; // Add background to see if container is rendering
+    background: var(--bg-code);
   }
 
   .path-info {
     position: absolute;
     bottom: 10px;
     left: 10px;
-    background: rgba(255, 255, 255, 0.95);
-    padding: 8px 12px;
-    border-radius: 4px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    background: color-mix(in srgb, var(--bg-panel-strong) 94%, transparent);
+    padding: 10px 12px;
+    border-radius: 10px;
+    box-shadow: var(--shadow-panel);
+    border: 1px solid var(--border-default);
     z-index: 1000;
     font-size: 12px;
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 6px;
+    min-width: 150px;
+
+    &__header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 2px;
+    }
+
+    &__title {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      color: var(--text-primary);
+    }
+
+    &__badge {
+      padding: 2px 7px;
+      border-radius: 999px;
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--accent-primary);
+      background: color-mix(in srgb, var(--accent-soft) 72%, transparent);
+      border: 1px solid color-mix(in srgb, var(--accent-primary) 22%, var(--border-default));
+    }
+
+    &__value-emphasis {
+      font-size: 13px;
+      text-shadow: 0 0 14px color-mix(in srgb, var(--warning-strong) 22%, transparent);
+    }
 
     .info-item {
       display: flex;
@@ -30,7 +62,7 @@
       gap: 8px;
 
       .label {
-        color: rgba(0, 0, 0, 0.65);
+        color: var(--text-secondary);
         font-weight: 500;
       }
 
@@ -39,13 +71,93 @@
         font-family: monospace;
 
         &.optimal {
-          color: #3b82f6;
+          color: var(--info-strong);
         }
 
         &.user {
-          color: #f59e0b;
+          color: var(--warning-strong);
         }
       }
     }
+  }
+
+  .map-tech-marker {
+    background: transparent;
+    border: none;
+
+    &__root {
+      position: relative;
+      width: var(--marker-ring-size);
+      height: var(--marker-ring-size);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    &__ring,
+    &__pulse,
+    &__core {
+      position: absolute;
+      border-radius: 999px;
+    }
+
+    &__ring {
+      width: var(--marker-ring-size);
+      height: var(--marker-ring-size);
+      border: 1px solid color-mix(in srgb, var(--marker-color) 65%, transparent);
+      box-shadow: 0 0 18px color-mix(in srgb, var(--marker-color) 28%, transparent);
+      background: color-mix(in srgb, var(--marker-color) 10%, transparent);
+      backdrop-filter: blur(2px);
+    }
+
+    &__pulse {
+      width: calc(var(--marker-ring-size) - 8px);
+      height: calc(var(--marker-ring-size) - 8px);
+      background: color-mix(in srgb, var(--marker-color) 14%, transparent);
+      animation: map-tech-pulse 2.2s ease-out infinite;
+    }
+
+    &__core {
+      width: var(--marker-size);
+      height: var(--marker-size);
+      background: radial-gradient(circle at 35% 30%, rgba(255,255,255,0.45), transparent 36%), var(--marker-color);
+      border: 2px solid rgba(255, 255, 255, 0.92);
+      box-shadow: 0 0 0 1px color-mix(in srgb, var(--marker-color) 35%, transparent), 0 6px 18px rgba(0, 0, 0, 0.28);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: calc(var(--marker-inner-size) * 0.6);
+      font-weight: 800;
+      letter-spacing: 0.02em;
+    }
+  }
+
+  .map-tech-tooltip {
+    .leaflet-tooltip {
+      background: color-mix(in srgb, var(--bg-panel-strong) 96%, transparent);
+      color: var(--text-primary);
+      border: 1px solid var(--border-default);
+      box-shadow: var(--shadow-panel);
+      border-radius: 10px;
+      padding: 8px 10px;
+      backdrop-filter: blur(10px);
+    }
+
+    &.leaflet-tooltip-top:before {
+      border-top-color: var(--border-default);
+    }
+  }
+}
+
+@keyframes map-tech-pulse {
+  0% {
+    transform: scale(0.84);
+    opacity: 0.9;
+  }
+
+  100% {
+    transform: scale(1.18);
+    opacity: 0;
   }
 }

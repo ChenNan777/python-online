@@ -5,8 +5,8 @@ import { GRAPH_COLS, GRAPH_ROWS } from "../utils/generateGraph";
 const SVG_W = 640;
 const SVG_H = 520;
 
-const BASE_EDGE = { stroke: "#e2e8f0", width: 1, opacity: 0.7 };
-const BASE_NODE = { fill: "#e2e8f0", r: 2 };
+const BASE_EDGE = { stroke: 'var(--graph-edge-base)', width: 1, opacity: 0.7 };
+const BASE_NODE = { fill: 'var(--graph-node-muted)', r: 2 };
 
 export default function GraphPanel() {
   const { graphData, graphResult } = usePythonStore((s) => ({
@@ -61,17 +61,17 @@ export default function GraphPanel() {
 
   if (!graphData) {
     return (
-      <div className="flex flex-col items-center justify-center h-full gap-2 text-black/30 bg-slate-50">
+      <div className="flex flex-col items-center justify-center h-full gap-2 theme-empty-state">
         <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
-          <circle cx="8" cy="8" r="4" fill="#cbd5e1"/>
-          <circle cx="32" cy="8" r="4" fill="#cbd5e1"/>
-          <circle cx="8" cy="32" r="4" fill="#cbd5e1"/>
-          <circle cx="32" cy="32" r="4" fill="#cbd5e1"/>
-          <circle cx="20" cy="20" r="4" fill="#94a3b8"/>
-          <line x1="8" y1="8" x2="20" y2="20" stroke="#cbd5e1" strokeWidth="1.5"/>
-          <line x1="32" y1="8" x2="20" y2="20" stroke="#cbd5e1" strokeWidth="1.5"/>
-          <line x1="8" y1="32" x2="20" y2="20" stroke="#cbd5e1" strokeWidth="1.5"/>
-          <line x1="32" y1="32" x2="20" y2="20" stroke="#cbd5e1" strokeWidth="1.5"/>
+          <circle cx="8" cy="8" r="4" fill="var(--graph-node-muted)"/>
+          <circle cx="32" cy="8" r="4" fill="var(--graph-node-muted)"/>
+          <circle cx="8" cy="32" r="4" fill="var(--graph-node-muted)"/>
+          <circle cx="32" cy="32" r="4" fill="var(--graph-node-muted)"/>
+          <circle cx="20" cy="20" r="4" fill="var(--graph-node-base)"/>
+          <line x1="8" y1="8" x2="20" y2="20" stroke="var(--graph-node-muted)" strokeWidth="1.5"/>
+          <line x1="32" y1="8" x2="20" y2="20" stroke="var(--graph-node-muted)" strokeWidth="1.5"/>
+          <line x1="8" y1="32" x2="20" y2="20" stroke="var(--graph-node-muted)" strokeWidth="1.5"/>
+          <line x1="32" y1="32" x2="20" y2="20" stroke="var(--graph-node-muted)" strokeWidth="1.5"/>
         </svg>
         <span className="text-xs">暂无图数据</span>
       </div>
@@ -88,16 +88,16 @@ export default function GraphPanel() {
     graphResult.totalWeight === graphResult.optimalWeight;
 
   return (
-    <div className="w-full h-full flex flex-col overflow-hidden select-none bg-slate-50">
+    <div className="w-full h-full flex flex-col overflow-hidden select-none theme-subtle">
       {/* info bar */}
-      <div className="px-3 shrink-0 flex items-center gap-3 min-h-[36px] bg-white border-b border-slate-100 flex-wrap">
+      <div className="px-3 shrink-0 flex items-center gap-3 min-h-[36px] flex-wrap theme-toolbar">
         {graphResult && (hasOptPath || hasUserPath) ? (
           <div className="flex items-center gap-3 flex-1 min-w-0 flex-wrap py-1">
             {hasUserPath && (
               <span className="flex items-center gap-1.5">
                 <span className="inline-block w-4 h-1 rounded-full bg-amber-400" />
-                <span className="text-xs text-amber-700 font-medium">你的路径</span>
-                <span className="text-xs font-mono text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded">
+                <span className="text-xs font-medium" style={{ color: 'var(--warning-strong)' }}>你的路径</span>
+                <span className="text-xs font-mono px-1.5 py-0.5 rounded theme-warning-soft" style={{ color: 'var(--warning-strong)' }}>
                   {graphResult.totalWeight}
                 </span>
               </span>
@@ -105,9 +105,9 @@ export default function GraphPanel() {
             {hasOptPath && (
               <span className="flex items-center gap-1.5">
                 <span className="inline-block w-4 h-1 rounded-full bg-blue-500" />
-                <span className="text-xs text-blue-700 font-medium">最优路径</span>
+                <span className="text-xs font-medium" style={{ color: 'var(--info-strong)' }}>最优路径</span>
                 {graphResult.optimalWeight !== undefined && graphResult.optimalWeight > 0 && (
-                  <span className="text-xs font-mono text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded">
+                  <span className="text-xs font-mono px-1.5 py-0.5 rounded" style={{ color: 'var(--info-strong)', background: 'var(--accent-soft)' }}>
                     {graphResult.optimalWeight}
                   </span>
                 )}
@@ -115,22 +115,22 @@ export default function GraphPanel() {
             )}
             {graphResult.optimalWeight !== undefined && graphResult.optimalWeight > 0 && hasUserPath && (
               isOptimal ? (
-                <span className="text-xs text-emerald-600 font-semibold bg-emerald-50 px-2 py-0.5 rounded-full">
-                  ✓ 最优解
-                </span>
-              ) : (
-                <span className="text-xs text-orange-500 bg-orange-50 px-2 py-0.5 rounded-full">
-                  +{graphResult.totalWeight - graphResult.optimalWeight}（
-                  {(((graphResult.totalWeight - graphResult.optimalWeight) / graphResult.optimalWeight) * 100).toFixed(1)}%）
-                </span>
+                  <span className="text-xs font-semibold px-2 py-0.5 rounded-full theme-success-soft" style={{ color: 'var(--success-strong)' }}>
+                    ✓ 最优解
+                  </span>
+                ) : (
+                  <span className="text-xs px-2 py-0.5 rounded-full theme-warning-soft" style={{ color: 'var(--warning-strong)' }}>
+                    +{graphResult.totalWeight - graphResult.optimalWeight}（
+                    {(((graphResult.totalWeight - graphResult.optimalWeight) / graphResult.optimalWeight) * 100).toFixed(1)}%）
+                  </span>
               )
             )}
           </div>
         ) : (
-          <span className="text-xs text-slate-400 py-1">运行后显示路径（起点 0，终点 {endNodeId}）</span>
+          <span className="text-xs py-1 theme-text-tertiary">运行后显示路径（起点 0，终点 {endNodeId}）</span>
         )}
         <button
-          className="ml-auto shrink-0 text-[11px] text-slate-400 hover:text-slate-600 cursor-pointer transition-colors px-1 py-1"
+          className="ml-auto shrink-0 text-[11px] cursor-pointer transition-colors px-1 py-1 theme-reset-button"
           onClick={resetView}
           title="重置视图"
         >
@@ -139,20 +139,20 @@ export default function GraphPanel() {
       </div>
 
       {/* legend */}
-      <div className="px-3 py-1 flex items-center gap-4 bg-white border-b border-slate-100 shrink-0">
-        <span className="flex items-center gap-1.5 text-[10px] text-slate-400">
-          <span className="inline-block w-5 h-0.5 bg-slate-200 rounded" />路网
+      <div className="px-3 py-1 flex items-center gap-4 shrink-0 theme-toolbar">
+        <span className="flex items-center gap-1.5 text-[10px] theme-text-tertiary">
+          <span className="inline-block w-5 h-0.5 rounded" style={{ background: 'var(--graph-edge-base)' }} />路网
         </span>
-        <span className="flex items-center gap-1.5 text-[10px] text-slate-400">
-          <span className="inline-block w-5 h-0.5 bg-blue-500 rounded" />最优路径
+        <span className="flex items-center gap-1.5 text-[10px] theme-text-tertiary">
+          <span className="inline-block w-5 h-0.5 rounded" style={{ background: 'var(--info-strong)' }} />最优路径
         </span>
-        <span className="flex items-center gap-1.5 text-[10px] text-slate-400">
-          <span className="inline-block w-5 h-0.5 bg-amber-400 rounded" style={{ backgroundImage: "repeating-linear-gradient(90deg,#f59e0b 0,#f59e0b 6px,transparent 6px,transparent 9px)" }} />你的路径
+        <span className="flex items-center gap-1.5 text-[10px] theme-text-tertiary">
+          <span className="inline-block w-5 h-0.5 rounded" style={{ backgroundImage: 'repeating-linear-gradient(90deg, var(--warning-strong) 0, var(--warning-strong) 6px, transparent 6px, transparent 9px)' }} />你的路径
         </span>
-        <span className="flex items-center gap-1.5 text-[10px] text-slate-400">
+        <span className="flex items-center gap-1.5 text-[10px] theme-text-tertiary">
           <span className="inline-block w-3 h-3 rounded-full bg-emerald-500 border-2 border-white shadow-sm" />起点
         </span>
-        <span className="flex items-center gap-1.5 text-[10px] text-slate-400">
+        <span className="flex items-center gap-1.5 text-[10px] theme-text-tertiary">
           <span className="inline-block w-3 h-3 rounded-full bg-red-500 border-2 border-white shadow-sm" />终点
         </span>
       </div>
@@ -177,7 +177,7 @@ export default function GraphPanel() {
               <feMerge><feMergeNode in="blur"/><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
             </filter>
           </defs>
-          <rect width={SVG_W} height={SVG_H} fill="#f8fafc" />
+          <rect width={SVG_W} height={SVG_H} fill="var(--bg-code)" />
 
           <g transform={`translate(${offset.x},${offset.y}) scale(${scale})`}>
             {/* base road edges */}

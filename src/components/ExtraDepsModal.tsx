@@ -137,15 +137,15 @@ export default function ExtraDepsModal(props: {
             <Typography.Text className="text-xs font-semibold">
               已加载
             </Typography.Text>
-            <div className="border border-black/10 rounded p-2 min-h-[120px] max-h-[260px] overflow-auto">
+            <div className="border rounded p-2 min-h-[120px] max-h-[260px] overflow-auto theme-border theme-subtle">
               {props.basePackages.length === 0 &&
               props.loadedPackages.length === 0 ? (
-                <div className="text-black/45 text-xs">暂无</div>
+                <div className="text-xs theme-text-tertiary">暂无</div>
               ) : (
                 <div className="flex flex-col gap-2">
                   {props.basePackages.length > 0 ? (
                     <div>
-                      <div className="text-[11px] text-black/45 mb-1">
+                      <div className="text-[11px] mb-1 theme-text-tertiary">
                         Pyodide 内置
                       </div>
                       <div className="flex flex-wrap gap-1">
@@ -160,7 +160,7 @@ export default function ExtraDepsModal(props: {
 
                   {props.loadedPackages.length > 0 ? (
                     <div>
-                      <div className="text-[11px] text-black/45 mb-1">
+                      <div className="text-[11px] mb-1 theme-text-tertiary">
                         额外加载
                       </div>
                       <div className="flex flex-wrap gap-1">

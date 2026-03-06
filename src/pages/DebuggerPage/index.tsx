@@ -28,6 +28,9 @@ import type { CodeTemplate } from "../../types";
 import { usePythonStore } from "../../store/usePythonStore";
 import { usePyodideWorkerRuntime } from "../../features/pythonRunner";
 import { PRACTICE_PATH } from "../../constants/routes";
+import { useThemeStore } from "../../store/useThemeStore";
+import { getMonacoTheme } from "../../utils/theme";
+import ThemeSwitcher from "../../components/ThemeSwitcher";
 import "../../App.css";
 
 function RunControls(props: {
@@ -222,6 +225,7 @@ const CODE_TEMPLATES: CodeTemplate[] = [
 
 function DebuggerPage() {
   const navigate = useNavigate();
+  const themeId = useThemeStore((state) => state.themeId);
   const {
     code,
     contextCode,
@@ -538,9 +542,9 @@ function DebuggerPage() {
   const hasContext = contextCode.trim().length > 0;
 
   return (
-    <Layout className="flex flex-col h-full">
+    <Layout className="flex flex-col h-full theme-page theme-app">
       {messageContextHolder}
-      <Layout.Header className="flex items-center px-2 h-12! bg-transparent!">
+      <Layout.Header className="flex items-center px-2 h-12! theme-toolbar">
         <Space size={6} align="center" className="min-w-0">
           <Button
             size="small"
@@ -573,7 +577,7 @@ function DebuggerPage() {
                     <div className="text-[13px] leading-5 break-words whitespace-normal">
                       {String(option.data.rawLabel ?? option.label)}
                     </div>
-                    <div className="text-xs text-black/45 leading-4 break-words whitespace-normal">
+                    <div className="text-xs leading-4 break-words whitespace-normal" style={{ color: 'var(--text-tertiary)' }}>
                       {String(option.data.description ?? "")}
                     </div>
                   </div>
@@ -608,7 +612,8 @@ function DebuggerPage() {
             </>
         </Space>
         <div className="flex-1" />
-        <div className="flex items-center justify-end shrink-0 min-w-[120px]">
+        <div className="flex items-center justify-end shrink-0 gap-2 min-w-[120px]">
+          <ThemeSwitcher />
           <RunControls
             onRun={runCode}
             onContinue={continueExec}
@@ -647,22 +652,39 @@ function DebuggerPage() {
           className="h-full"
         >
           <Pane minSize={520} defaultSize="68%" className="min-h-0">
-            <div className="h-full">
-              <Editor
-                height="100%"
-                defaultLanguage="python"
-                theme="vs"
-                value={code}
-                onChange={(val) => setCode(val || "")}
-                onMount={handleEditorMount}
-                options={{
-                  minimap: { enabled: false },
-                  glyphMargin: true,
-                  lineNumbers: "on",
-                  scrollBeyondLastLine: false,
-                  renderLineHighlight: "line",
-                }}
-              />
+            <div className="theme-editor-shell theme-editor-shell--framed theme-glow">
+              <div className="theme-editor-chrome">
+                <div className="theme-editor-chrome__left">
+                  <div className="theme-editor-chrome__dots"><span /><span /><span /></div>
+                  <span className="theme-editor-chrome__title">sandbox.py</span>
+                </div>
+                <div className="theme-editor-chrome__meta">
+                  <span className="theme-editor-chip">Python</span>
+                  <span className="theme-editor-chip">Debugger</span>
+                </div>
+              </div>
+              <div className="theme-editor-body">
+                <Editor
+                  height="100%"
+                  defaultLanguage="python"
+                  theme={getMonacoTheme(themeId)}
+                  value={code}
+                  onChange={(val) => setCode(val || "")}
+                  onMount={handleEditorMount}
+                  options={{
+                    minimap: { enabled: false },
+                    glyphMargin: true,
+                    lineNumbers: "on",
+                    scrollBeyondLastLine: false,
+                    fontLigatures: true,
+                    smoothScrolling: true,
+                    renderLineHighlight: "all",
+                    bracketPairColorization: { enabled: true },
+                    guides: { bracketPairs: true, indentation: true },
+                    padding: { top: 14 },
+                  }}
+                />
+              </div>
             </div>
           </Pane>
           <Pane minSize={280} className="min-h-0">

@@ -29,17 +29,18 @@ export default function CollapsiblePanel({
 
   return (
     <div
-      className={`border-y-1 border-black/15 grid min-h-0 overflow-hidden transition-[grid-template-rows] duration-200 ease-out ${
+      className={`grid min-h-0 overflow-hidden transition-[grid-template-rows] duration-200 ease-out theme-border ${
         open ? "h-full grid-rows-[auto_1fr]" : "grid-rows-[auto_0fr]"
       }`}
+      style={{ borderTopWidth: 1, borderBottomWidth: 1, borderTopStyle: 'solid', borderBottomStyle: 'solid' }}
     >
       <button
         type="button"
         onClick={() => setOpen(!open)}
-        className="flex items-start justify-between w-full px-2 py-1.5 bg-transparent border-none border-b border-black/15 text-xs font-semibold cursor-pointer shrink-0"
+        className="flex items-start justify-between w-full px-2 py-1.5 bg-transparent border-none text-xs font-semibold cursor-pointer shrink-0 theme-toolbar"
       >
         <span className="min-w-0">{title}</span>
-        <span className="text-xs">{indicator}</span>
+        <span className="text-xs theme-text-tertiary">{indicator}</span>
       </button>
       <div className="min-h-0 overflow-hidden">
         <div

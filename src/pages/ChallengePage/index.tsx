@@ -36,11 +36,15 @@ import { generatePositioningData } from "../../utils/generatePositioning";
 import { parseRoadNetwork } from '../../utils/parseRoadNetwork';
 import type { RoadNetwork } from '../../utils/parseRoadNetwork';
 import { useAuthStore } from '../../store/useAuthStore';
+import { useThemeStore } from '../../store/useThemeStore';
+import { getMonacoTheme } from '../../utils/theme';
+import ThemeSwitcher from '../../components/ThemeSwitcher';
 import { RunControls } from "./components";
 import { useChallengeContextCode, useEditorDecorations } from "./hooks";
 
 export default function ChallengePage() {
   const navigate = useNavigate();
+  const themeId = useThemeStore((state) => state.themeId);
   const { type } = useParams<{ type: string }>();
   const location = useLocation();
   const { user } = useAuthStore();
@@ -272,7 +276,7 @@ export default function ChallengePage() {
   const extraPanels = useMemo(() => [{
     key: "test-cases",
     title: results !== null
-      ? <><span>测试用例</span><span className={`ml-1 font-normal ${allPassed ? "text-green-600" : "text-red-500"}`}>{passedCount}/{totalCount}</span></>
+      ? <><span>测试用例</span><span className={`ml-1 px-1.5 py-0.5 rounded-full text-[10px] font-semibold ${allPassed ? "theme-badge-success" : "theme-badge-fail"}`}>{passedCount}/{totalCount}</span></>
       : "测试用例",
     content: (
       <TestCasesPanel
@@ -289,12 +293,12 @@ export default function ChallengePage() {
   }
 
   return (
-    <Layout className="flex flex-col h-full">
+    <Layout className="flex flex-col h-full theme-page theme-app">
       {messageContextHolder}
-      <Layout.Header className="flex items-center px-3 h-12! bg-white! border-b border-black/8 shrink-0">
+      <Layout.Header className="flex items-center px-3 h-12! shrink-0 theme-toolbar">
         <Space size={8} align="center" className="min-w-0">
           {user?.task.memberName && user?.team.name && (
-            <span className="text-sm font-medium text-black/85">
+            <span className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
               {user.team.name} / {user.task.memberName}
             </span>
           )}
@@ -323,7 +327,7 @@ export default function ChallengePage() {
           {isPathfindingChallenge && isPracticeRoute && (
             <Tooltip title="开启后可拖动起终点验证算法" placement="bottom">
               <Space size={4} align="center">
-                <span className="text-xs text-black/65">自定义起终点</span>
+                <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>自定义起终点</span>
                 <Switch
                   size="small"
                   checked={debugMode}
@@ -336,8 +340,9 @@ export default function ChallengePage() {
         </Space>
         <div className="flex-1" />
         <Space size={8} align="center">
+          <ThemeSwitcher />
           {results !== null && (
-            <span className={`text-xs font-medium ${allPassed ? "text-green-600" : "text-red-500"}`}>
+            <span className={`text-xs font-medium ${allPassed ? "theme-text-success" : "theme-text-danger"}`}>
               {passedCount}/{totalCount} 通过
             </span>
           )}
@@ -376,15 +381,15 @@ export default function ChallengePage() {
               {/* Description */}
               <Pane minSize={150} defaultSize="35%" className="min-h-0">
                 <div className="h-full flex flex-col">
-                  <div className="px-4 py-3 border-b border-black/8 bg-[#fafafa] overflow-y-auto flex-1">
-                    <div className="text-[13px] font-semibold mb-1">{challenge.title}</div>
-                    <pre className="text-xs text-black/70 whitespace-pre-wrap font-sans leading-5 m-0">
-                      {challenge.description}
-                    </pre>
-                  </div>
-                  <div className="px-3 py-1.5 border-b border-black/8 bg-white shrink-0 flex items-center gap-2">
-                    <span className="text-xs text-black/45">查看解法：</span>
-                    <Select
+                    <div className="px-4 py-3 overflow-y-auto flex-1 theme-subtle theme-border" style={{ borderBottomWidth: 1, borderBottomStyle: 'solid' }}>
+                      <div className="text-[13px] font-semibold mb-1">{challenge.title}</div>
+                      <pre className="text-xs whitespace-pre-wrap font-sans leading-5 m-0" style={{ color: 'var(--text-secondary)' }}>
+                        {challenge.description}
+                      </pre>
+                    </div>
+                    <div className="px-3 py-1.5 shrink-0 flex items-center gap-2 theme-toolbar">
+                      <span className="text-xs" style={{ color: 'var(--text-tertiary)' }}>查看解法：</span>
+                      <Select
                       size="small"
                       placeholder="选择解法"
                       popupMatchSelectWidth={false}
@@ -402,22 +407,41 @@ export default function ChallengePage() {
               </Pane>
               {/* Editor */}
               <Pane minSize={200} className="min-h-0">
-                <Editor
-                  height="100%"
-                  defaultLanguage="python"
-                  theme="vs"
-                  value={code}
-                  onChange={(v) => setCode(v ?? "")}
-                  onMount={handleEditorMount}
-                  options={{
-                    minimap: { enabled: false },
-                    glyphMargin: true,
-                    lineNumbers: "on",
-                    scrollBeyondLastLine: false,
-                    fontSize: 13,
-                    renderLineHighlight: "line",
-                  }}
-                />
+                <div className="theme-editor-shell theme-editor-shell--framed theme-glow">
+                  <div className="theme-editor-chrome">
+                    <div className="theme-editor-chrome__left">
+                      <div className="theme-editor-chrome__dots"><span /><span /><span /></div>
+                      <span className="theme-editor-chrome__title">solve.py</span>
+                    </div>
+                    <div className="theme-editor-chrome__meta">
+                      <span className="theme-editor-chip">Python</span>
+                      <span className="theme-editor-chip">Challenge</span>
+                    </div>
+                  </div>
+                  <div className="theme-editor-body">
+                    <Editor
+                      height="100%"
+                      defaultLanguage="python"
+                      theme={getMonacoTheme(themeId)}
+                      value={code}
+                      onChange={(v) => setCode(v ?? "")}
+                      onMount={handleEditorMount}
+                      options={{
+                        minimap: { enabled: false },
+                        glyphMargin: true,
+                        lineNumbers: "on",
+                        scrollBeyondLastLine: false,
+                        fontSize: 13,
+                        fontLigatures: true,
+                        smoothScrolling: true,
+                        renderLineHighlight: "all",
+                        bracketPairColorization: { enabled: true },
+                        guides: { bracketPairs: true, indentation: true },
+                        padding: { top: 14 },
+                      }}
+                    />
+                  </div>
+                </div>
               </Pane>
             </SplitPane>
           </Pane>

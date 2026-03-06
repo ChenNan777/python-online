@@ -73,11 +73,11 @@ export default function PositioningPanel() {
 
   if (!positioningData) {
     return (
-      <div className="flex flex-col items-center justify-center h-full gap-2 text-black/30 bg-slate-50">
+      <div className="flex flex-col items-center justify-center h-full gap-2 theme-empty-state">
         <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
-          <circle cx="20" cy="20" r="14" stroke="#cbd5e1" strokeWidth="2" fill="none"/>
-          <line x1="20" y1="6" x2="20" y2="20" stroke="#94a3b8" strokeWidth="2"/>
-          <circle cx="20" cy="20" r="2" fill="#94a3b8"/>
+          <circle cx="20" cy="20" r="14" stroke="var(--graph-node-muted)" strokeWidth="2" fill="none"/>
+          <line x1="20" y1="6" x2="20" y2="20" stroke="var(--graph-node-base)" strokeWidth="2"/>
+          <circle cx="20" cy="20" r="2" fill="var(--graph-node-base)"/>
         </svg>
         <span className="text-xs">暂无定位数据</span>
       </div>
@@ -96,29 +96,29 @@ export default function PositioningPanel() {
     : null;
 
   return (
-    <div className="w-full h-full flex flex-col overflow-hidden select-none bg-slate-50">
+    <div className="w-full h-full flex flex-col overflow-hidden select-none theme-subtle">
       {/* info bar */}
-      <div className="px-3 shrink-0 flex items-center gap-3 min-h-[36px] bg-white border-b border-slate-100 flex-wrap">
+      <div className="px-3 shrink-0 flex items-center gap-3 min-h-[36px] flex-wrap theme-toolbar">
         {positioningResult ? (
           <div className="flex items-center gap-3 flex-1 min-w-0 flex-wrap py-1">
             <span className="flex items-center gap-1.5">
               <span className="inline-block w-3 h-3 rounded-full bg-amber-400" />
-              <span className="text-xs text-amber-700 font-medium">你的解</span>
-              {userDist !== null && (
-                <span className="text-xs font-mono text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded">
-                  误差 {userDist < 1000 ? `${userDist.toFixed(0)}m` : `${(userDist / 1000).toFixed(2)}km`}
-                </span>
-              )}
-            </span>
-            <span className="flex items-center gap-1.5">
-              <span className="inline-block w-3 h-3 rounded-full bg-emerald-500" />
-              <span className="text-xs text-emerald-700 font-medium">真实目标</span>
-            </span>
-          </div>
-        ) : (
-          <span className="text-xs text-slate-400 py-1">运行后显示定位结果</span>
+                <span className="text-xs font-medium" style={{ color: 'var(--warning-strong)' }}>你的解</span>
+                {userDist !== null && (
+                  <span className="text-xs font-mono px-1.5 py-0.5 rounded theme-warning-soft" style={{ color: 'var(--warning-strong)' }}>
+                    误差 {userDist < 1000 ? `${userDist.toFixed(0)}m` : `${(userDist / 1000).toFixed(2)}km`}
+                  </span>
+                )}
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className="inline-block w-3 h-3 rounded-full bg-emerald-500" />
+                <span className="text-xs font-medium" style={{ color: 'var(--success-strong)' }}>真实目标</span>
+              </span>
+            </div>
+          ) : (
+          <span className="text-xs py-1 theme-text-tertiary">运行后显示定位结果</span>
         )}
-        <button className="ml-auto shrink-0 text-[11px] text-slate-400 hover:text-slate-600 cursor-pointer transition-colors px-1 py-1" onClick={resetView} title="重置视图">
+        <button className="ml-auto shrink-0 text-[11px] cursor-pointer transition-colors px-1 py-1 theme-reset-button" onClick={resetView} title="重置视图">
           ⟳ 重置
         </button>
       </div>
@@ -133,7 +133,7 @@ export default function PositioningPanel() {
         onWheel={onWheel}
       >
         <svg width="100%" height="100%" viewBox={`0 0 ${SVG_W} ${SVG_H}`} style={{ display: "block" }}>
-          <rect width={SVG_W} height={SVG_H} fill="#f8fafc" />
+          <rect width={SVG_W} height={SVG_H} fill="var(--bg-code)" />
           <g transform={`translate(${offset.x},${offset.y}) scale(${scale})`}>
             {/* bearing lines */}
             {positioningData.stations.map((st) => {
@@ -148,7 +148,7 @@ export default function PositioningPanel() {
               return (
                 <line key={`bl-${st.id}`}
                   x1={sx} y1={sy} x2={end[0]} y2={end[1]}
-                  stroke="#94a3b8" strokeWidth={1} strokeOpacity={0.5} strokeDasharray="4 3"
+                  stroke="var(--graph-node-base)" strokeWidth={1} strokeOpacity={0.5} strokeDasharray="4 3"
                 />
               );
             })}
@@ -158,8 +158,8 @@ export default function PositioningPanel() {
               const [tx, ty] = toSvg(positioningData.trueTarget.lng, positioningData.trueTarget.lat, minLng, maxLng, minLat, maxLat);
               return (
                 <g key="true-target">
-                  <circle cx={tx} cy={ty} r={10} fill="#10b981" fillOpacity={0.15} stroke="none"/>
-                  <circle cx={tx} cy={ty} r={6} fill="#10b981" stroke="#fff" strokeWidth={2}/>
+                  <circle cx={tx} cy={ty} r={10} fill="var(--success-strong)" fillOpacity={0.15} stroke="none"/>
+                  <circle cx={tx} cy={ty} r={6} fill="var(--success-strong)" stroke="#fff" strokeWidth={2}/>
                   <text x={tx} y={ty + 0.5} textAnchor="middle" dominantBaseline="middle" fontSize={7} fontWeight="700" fill="#fff">T</text>
                 </g>
               );
@@ -173,8 +173,8 @@ export default function PositioningPanel() {
               const [ux, uy] = toSvg(positioningResult.userLng, positioningResult.userLat, minLng, maxLng, minLat, maxLat);
               return (
                 <g key="user">
-                  <circle cx={ux} cy={uy} r={8} fill="#f59e0b" fillOpacity={0.2} stroke="none"/>
-                  <circle cx={ux} cy={uy} r={5} fill="#f59e0b" stroke="#fff" strokeWidth={2}/>
+                  <circle cx={ux} cy={uy} r={8} fill="var(--warning-strong)" fillOpacity={0.2} stroke="none"/>
+                  <circle cx={ux} cy={uy} r={5} fill="var(--warning-strong)" stroke="#fff" strokeWidth={2}/>
                 </g>
               );
             })()}
@@ -184,7 +184,7 @@ export default function PositioningPanel() {
               const [sx, sy] = toSvg(st.lng, st.lat, minLng, maxLng, minLat, maxLat);
               return (
                 <g key={`st-${st.id}`}>
-                  <circle cx={sx} cy={sy} r={7} fill="#1d4ed8" stroke="#fff" strokeWidth={2}/>
+                  <circle cx={sx} cy={sy} r={7} fill="var(--info-strong)" stroke="#fff" strokeWidth={2}/>
                   <text x={sx} y={sy + 0.5} textAnchor="middle" dominantBaseline="middle" fontSize={7} fontWeight="700" fill="#fff">{st.id}</text>
                   <text x={sx + 10} y={sy - 8} fontSize={9} fill="#1d4ed8" fontWeight="600">{measurementMap[st.id]?.toFixed(1)}°</text>
                 </g>

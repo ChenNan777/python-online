@@ -72,7 +72,7 @@ export default function DebugPanelStack({ panels }: { panels: DebugPanel[] }) {
   }, []);
 
   return (
-    <div ref={containerRef} className="h-full flex flex-col overflow-hidden">
+    <div ref={containerRef} className="h-full flex flex-col overflow-hidden theme-panel-strong">
       {panels.map((panel, index) => {
         const isOpen = openKeys.has(panel.key);
         const contentHeight = heights[panel.key] ?? 120;
@@ -80,17 +80,17 @@ export default function DebugPanelStack({ panels }: { panels: DebugPanel[] }) {
         return (
           <div
             key={panel.key}
-            className={`flex flex-col border-b border-black/8 ${isLastPanel && isOpen ? 'flex-1 min-h-0' : 'shrink-0'}`}
+            className={`flex flex-col theme-border ${isLastPanel && isOpen ? 'flex-1 min-h-0' : 'shrink-0'}`}
             style={isOpen && !isLastPanel ? { height: contentHeight + HEADER_HEIGHT } : undefined}
           >
             <button
               type="button"
               onClick={() => toggle(panel.key)}
-              className="flex items-center justify-between w-full px-2 py-1.5 bg-white border-none border-b border-black/8 text-xs font-semibold cursor-pointer shrink-0 text-left hover:bg-black/[0.02]"
+              className="flex items-center justify-between w-full px-2 py-1.5 border-none text-xs font-semibold cursor-pointer shrink-0 text-left theme-toolbar"
               style={{ height: HEADER_HEIGHT }}
             >
               <span className="min-w-0 flex items-center gap-2">{panel.title}</span>
-              <span className="text-[10px] text-black/40 ml-2 shrink-0">{isOpen ? "▾" : "▸"}</span>
+              <span className="text-[10px] ml-2 shrink-0" style={{ color: 'var(--text-tertiary)' }}>{isOpen ? "▾" : "▸"}</span>
             </button>
             {isOpen && (
               <>

@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button, Card, Descriptions, Space, Typography } from 'antd';
 import { LogoutOutlined, RocketOutlined } from '@ant-design/icons';
 import { useAuthStore } from '../../store/useAuthStore';
+import ThemeSwitcher from '../../components/ThemeSwitcher';
 import { getChallengeStartState } from '../../constants/challenge';
 import { buildChallengePath, LOGIN_PATH } from '../../constants/routes';
 import { useEffect } from 'react';
@@ -38,17 +39,23 @@ export default function DashboardPage() {
     <div className="dashboard-page">
       <div className="dashboard-container">
         <div className="dashboard-header">
-          <Title level={2}>任务信息</Title>
-          <Button
-            icon={<LogoutOutlined />}
-            onClick={handleLogout}
-          >
-            退出登录
-          </Button>
+          <div>
+            <Title level={2}>任务信息</Title>
+            <div className="dashboard-subtitle">在线作业平台 · 当前任务概览</div>
+          </div>
+          <Space size="middle" wrap>
+            <ThemeSwitcher />
+            <Button
+              icon={<LogoutOutlined />}
+              onClick={handleLogout}
+            >
+              退出登录
+            </Button>
+          </Space>
         </div>
 
         <Space direction="vertical" size="large" style={{ width: '100%' }}>
-          <Card title="任务信息" bordered={false}>
+          <Card title="任务信息" bordered={false} className="dashboard-card">
             <Descriptions column={1}>
               <Descriptions.Item label="任务名称">{user.task.name}</Descriptions.Item>
               <Descriptions.Item label="当前阶段">{user.task.stage}</Descriptions.Item>
