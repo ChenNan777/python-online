@@ -35,6 +35,7 @@ export default function RunControls(props: RunControlsProps) {
       <Tooltip title={isReady ? "运行" : "加载中..."} placement="bottom">
         <span>
           <Button
+            className="theme-run-btn theme-run-btn--primary"
             size="small"
             type="primary"
             shape="circle"
@@ -49,16 +50,16 @@ export default function RunControls(props: RunControlsProps) {
 
   if (!hasBreakpoints && !isPaused && runStatus === "running") {
     return (
-      <Space size={4}>
+      <Space size={6} className="theme-run-controls">
         <Tooltip title="运行中" placement="bottom">
           <span>
-            <Button size="small" type="primary" shape="circle" disabled
+            <Button className="theme-run-btn theme-run-btn--primary" size="small" type="primary" shape="circle" disabled
               icon={<LoaderCircle size={14} className="animate-spin" />} />
           </span>
         </Tooltip>
         <Tooltip title="结束运行" placement="bottom">
           <span>
-            <Button size="small" shape="circle" danger onClick={props.onStop}
+            <Button className="theme-run-btn theme-run-btn--danger" size="small" shape="circle" danger onClick={props.onStop}
               icon={<SquareStop size={14} />} />
           </span>
         </Tooltip>
@@ -67,34 +68,34 @@ export default function RunControls(props: RunControlsProps) {
   }
 
   return (
-    <Space size={4}>
+    <Space size={6} className="theme-run-controls">
       <Tooltip title="继续运行" placement="bottom">
         <span>
-          <Button size="small" shape="circle" onClick={props.onContinue}
+          <Button className="theme-run-btn" size="small" shape="circle" onClick={props.onContinue}
             disabled={!isPaused} icon={<Play size={14} />} />
         </span>
       </Tooltip>
       <Tooltip title="单步（跳过函数）" placement="bottom">
         <span>
-          <Button size="small" shape="circle" onClick={props.onStepOver}
+          <Button className="theme-run-btn" size="small" shape="circle" onClick={props.onStepOver}
             disabled={!isPaused} icon={<StepForward size={14} />} />
         </span>
       </Tooltip>
       <Tooltip title="运行进函数" placement="bottom">
         <span>
-          <Button size="small" shape="circle" onClick={props.onStepInto}
+          <Button className="theme-run-btn" size="small" shape="circle" onClick={props.onStepInto}
             disabled={!isPaused} icon={<CornerDownRight size={14} />} />
         </span>
       </Tooltip>
       <Tooltip title="运行出函数" placement="bottom">
         <span>
-          <Button size="small" shape="circle" onClick={props.onStepOut}
+          <Button className="theme-run-btn" size="small" shape="circle" onClick={props.onStepOut}
             disabled={!isPaused} icon={<CornerUpLeft size={14} />} />
         </span>
       </Tooltip>
       <Tooltip title="结束运行" placement="bottom">
         <span>
-          <Button size="small" shape="circle" danger onClick={props.onStop}
+          <Button className="theme-run-btn theme-run-btn--danger" size="small" shape="circle" danger onClick={props.onStop}
             icon={<SquareStop size={14} />} />
         </span>
       </Tooltip>

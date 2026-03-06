@@ -55,6 +55,7 @@ function RunControls(props: {
       <Tooltip title={isReady ? "开始运行" : "加载中..."} placement="bottom">
         <span>
           <Button
+            className="theme-run-btn theme-run-btn--primary"
             size="small"
             type="primary"
             shape="circle"
@@ -76,10 +77,11 @@ function RunControls(props: {
 
   if (!hasBreakpoints && !isPaused && runStatus === "running") {
     return (
-      <Space size={4}>
+      <Space size={6} className="theme-run-controls">
         <Tooltip title="运行中" placement="bottom">
           <span>
             <Button
+              className="theme-run-btn theme-run-btn--primary"
               size="small"
               type="primary"
               shape="circle"
@@ -92,6 +94,7 @@ function RunControls(props: {
         <Tooltip title="结束运行" placement="bottom">
           <span>
             <Button
+              className="theme-run-btn theme-run-btn--danger"
               size="small"
               shape="circle"
               danger
@@ -106,10 +109,11 @@ function RunControls(props: {
   }
 
   return (
-    <Space size={4}>
+    <Space size={6} className="theme-run-controls">
       <Tooltip title="继续运行" placement="bottom">
         <span>
           <Button
+            className="theme-run-btn"
             size="small"
             shape="circle"
             onClick={props.onContinue}
@@ -122,6 +126,7 @@ function RunControls(props: {
       <Tooltip title="单步（跳过函数）" placement="bottom">
         <span>
           <Button
+            className="theme-run-btn"
             size="small"
             shape="circle"
             onClick={props.onStepOver}
@@ -134,6 +139,7 @@ function RunControls(props: {
       <Tooltip title="运行进函数" placement="bottom">
         <span>
           <Button
+            className="theme-run-btn"
             size="small"
             shape="circle"
             onClick={props.onStepInto}
@@ -146,6 +152,7 @@ function RunControls(props: {
       <Tooltip title="运行出函数" placement="bottom">
         <span>
           <Button
+            className="theme-run-btn"
             size="small"
             shape="circle"
             onClick={props.onStepOut}
@@ -158,6 +165,7 @@ function RunControls(props: {
       <Tooltip title="结束运行" placement="bottom">
         <span>
           <Button
+            className="theme-run-btn theme-run-btn--danger"
             size="small"
             shape="circle"
             danger
@@ -544,8 +552,8 @@ function DebuggerPage() {
   return (
     <Layout className="flex flex-col h-full theme-page theme-app">
       {messageContextHolder}
-      <Layout.Header className="flex items-center px-2 h-12! theme-toolbar">
-        <Space size={6} align="center" className="min-w-0">
+      <Layout.Header className="flex items-center pl-1.5 pr-2 h-12! theme-toolbar">
+        <Space size={4} align="center" className="min-w-0">
           <Button
             size="small"
             onClick={() => navigate(PRACTICE_PATH)}

@@ -48,22 +48,67 @@ body {
 .theme-toolbar .ant-btn,
 .theme-toolbar .ant-btn-sm {
   border-radius: 10px;
+  height: 30px;
+  padding-inline: 9px;
+  font-weight: 500;
+  font-size: 12px;
+  transition: background-color 0.22s ease, border-color 0.22s ease, color 0.22s ease, box-shadow 0.22s ease, transform 0.22s ease;
 }
 
 .theme-toolbar .ant-btn:not(.ant-btn-primary):not(.ant-btn-dangerous) {
-  background: color-mix(in srgb, var(--bg-panel-muted) 88%, transparent);
-  border-color: color-mix(in srgb, var(--accent-primary) 14%, var(--border-default));
+  background: color-mix(in srgb, var(--bg-panel-muted) 92%, transparent);
+  border-color: color-mix(in srgb, var(--accent-primary) 10%, var(--border-default));
+  color: var(--text-primary);
 }
 
 .theme-toolbar .ant-btn:hover:not(.ant-btn-primary):not(.ant-btn-dangerous) {
   color: var(--accent-primary);
-  border-color: color-mix(in srgb, var(--accent-primary) 35%, var(--border-default));
-  box-shadow: 0 0 0 1px rgba(var(--color-primary), 0.08);
+  border-color: color-mix(in srgb, var(--accent-primary) 24%, var(--border-default));
+  background: color-mix(in srgb, var(--accent-soft) 55%, var(--bg-panel-muted) 45%);
+  box-shadow: 0 0 0 1px rgba(var(--color-primary), 0.05);
+}
+
+.theme-toolbar .ant-btn:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.theme-toolbar .ant-btn-primary {
+  border-color: transparent;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--accent-primary) 78%, white 22%) 0%, color-mix(in srgb, var(--accent-primary) 74%, #0f172a 26%) 100%);
+}
+
+.theme-toolbar .ant-btn-primary:hover {
+  background: linear-gradient(180deg, color-mix(in srgb, var(--accent-primary) 82%, white 18%) 0%, color-mix(in srgb, var(--accent-primary) 78%, #0f172a 22%) 100%) !important;
+}
+
+.theme-toolbar .ant-btn-circle,
+.theme-toolbar .ant-btn.ant-btn-icon-only {
+  width: 30px;
+  min-width: 30px;
+  padding-inline: 0;
+}
+
+.theme-toolbar .ant-select .ant-select-selector,
+.theme-toolbar .ant-select-selector {
+  min-height: 30px !important;
+  border-radius: 10px !important;
+}
+
+.theme-toolbar .ant-switch {
+  background: color-mix(in srgb, var(--bg-panel-muted) 88%, var(--border-default) 12%);
+}
+
+.theme-toolbar .ant-switch.ant-switch-checked {
+  background: color-mix(in srgb, var(--accent-primary) 78%, white 22%);
 }
 
 .theme-toolbar .ant-tag {
   border-radius: 999px;
-  border-color: color-mix(in srgb, var(--accent-primary) 18%, var(--border-default));
+  border-color: color-mix(in srgb, var(--accent-primary) 12%, var(--border-default));
+  background: color-mix(in srgb, var(--bg-panel-muted) 96%, transparent);
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 500;
 }
 
 .theme-subtle {
@@ -78,10 +123,11 @@ body {
   position: relative;
   height: 100%;
   overflow: hidden;
-  border: 1px solid color-mix(in srgb, var(--accent-primary) 18%, var(--border-default));
+  border: 1px solid var(--editor-shell-border);
   border-radius: 10px;
-  background: linear-gradient(180deg, color-mix(in srgb, var(--bg-code) 88%, #0b2036 12%) 0%, var(--bg-code) 100%);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04), 0 14px 34px rgba(0, 0, 0, 0.22);
+  background: linear-gradient(180deg, var(--editor-shell-bg-start) 0%, var(--editor-shell-bg-end) 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04), var(--editor-shell-shadow);
+  margin-top: 8px;
 }
 
 .theme-editor-shell--framed {
@@ -95,8 +141,8 @@ body {
   justify-content: space-between;
   gap: 12px;
   padding: 8px 12px;
-  border-bottom: 1px solid color-mix(in srgb, var(--accent-primary) 18%, var(--border-default));
-  background: linear-gradient(180deg, color-mix(in srgb, var(--bg-panel-strong) 92%, transparent) 0%, color-mix(in srgb, var(--bg-code) 94%, transparent) 100%);
+  border-bottom: 1px solid color-mix(in srgb, var(--accent-primary) 12%, var(--border-default));
+  background: var(--editor-chrome-bg);
 }
 
 .theme-editor-chrome__left {
@@ -122,7 +168,7 @@ body {
 
 .theme-editor-chrome__title {
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 600;
   letter-spacing: 0.03em;
   color: var(--text-primary);
 }
@@ -138,7 +184,7 @@ body {
   padding: 2px 8px;
   border-radius: 999px;
   font-size: 10px;
-  font-weight: 700;
+  font-weight: 600;
   letter-spacing: 0.04em;
   color: var(--text-secondary);
   background: color-mix(in srgb, var(--accent-soft) 70%, var(--bg-panel-muted) 30%);
@@ -148,8 +194,8 @@ body {
 .theme-switcher {
   padding: 2px;
   border-radius: 999px;
-  background: color-mix(in srgb, var(--bg-panel-muted) 82%, transparent) !important;
-  border: 1px solid color-mix(in srgb, var(--accent-primary) 18%, var(--border-default));
+  background: color-mix(in srgb, var(--bg-panel-muted) 88%, transparent) !important;
+  border: 1px solid color-mix(in srgb, var(--accent-primary) 10%, var(--border-default));
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
 }
 
@@ -160,8 +206,9 @@ body {
 
 .theme-switcher .ant-segmented-thumb {
   border-radius: 999px;
-  background: linear-gradient(180deg, color-mix(in srgb, var(--accent-primary) 86%, white 14%) 0%, color-mix(in srgb, var(--accent-primary) 64%, #09111f 36%) 100%);
-  box-shadow: 0 0 0 1px rgba(var(--color-primary), 0.18), 0 0 18px var(--accent-glow);
+  background: color-mix(in srgb, var(--accent-primary) 18%, var(--bg-panel-strong) 82%);
+  box-shadow: 0 0 0 1px rgba(var(--color-primary), 0.08), 0 6px 16px rgba(var(--color-primary), 0.08);
+  transition: transform 0.2s ease, background-color 0.22s ease, box-shadow 0.22s ease;
 }
 
 .theme-switcher__icon {
@@ -173,11 +220,20 @@ body {
   font-size: 14px;
 }
 
+.theme-switcher .ant-segmented-item-selected .theme-switcher__icon {
+  color: var(--accent-primary);
+}
+
+.theme-switcher .ant-segmented-item {
+  transition: color 0.22s ease;
+}
+
 .theme-toolbar .theme-text-success,
 .theme-toolbar .theme-text-danger {
   padding: 4px 10px;
   border-radius: 999px;
-  font-weight: 700;
+  font-weight: 600;
+  font-size: 11px;
   letter-spacing: 0.02em;
 }
 
@@ -187,6 +243,56 @@ body {
 
 .theme-toolbar .theme-text-danger {
   background: var(--danger-soft);
+}
+
+.theme-run-controls {
+  align-items: center;
+}
+
+.theme-run-btn.ant-btn {
+  width: 32px;
+  min-width: 32px;
+  height: 32px;
+  border-radius: 11px;
+  padding: 0;
+  border-color: color-mix(in srgb, var(--accent-primary) 16%, var(--border-default));
+  background: linear-gradient(180deg, color-mix(in srgb, var(--bg-panel-muted) 96%, white 4%) 0%, color-mix(in srgb, var(--bg-panel-muted) 88%, transparent) 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.theme-run-btn.ant-btn:hover:not(:disabled) {
+  color: var(--accent-primary);
+  border-color: color-mix(in srgb, var(--accent-primary) 28%, var(--border-default));
+  background: linear-gradient(180deg, color-mix(in srgb, var(--accent-soft) 58%, white 42%) 0%, color-mix(in srgb, var(--accent-soft) 72%, var(--bg-panel-muted) 28%) 100%);
+  box-shadow: 0 0 0 1px rgba(var(--color-primary), 0.06), 0 8px 18px rgba(var(--color-primary), 0.08);
+}
+
+.theme-run-btn.ant-btn:disabled {
+  opacity: 0.72;
+}
+
+.theme-run-btn--primary.ant-btn,
+.theme-run-btn--primary.ant-btn.ant-btn-primary {
+  border-color: transparent;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--accent-primary) 70%, white 30%) 0%, color-mix(in srgb, var(--accent-primary) 82%, #0f172a 18%) 100%);
+  box-shadow: 0 0 0 1px rgba(var(--color-primary), 0.12), 0 0 18px var(--accent-glow);
+}
+
+.theme-run-btn--primary.ant-btn:hover:not(:disabled),
+.theme-run-btn--primary.ant-btn.ant-btn-primary:hover:not(:disabled) {
+  background: linear-gradient(180deg, color-mix(in srgb, var(--accent-primary) 74%, white 26%) 0%, color-mix(in srgb, var(--accent-primary) 86%, #0f172a 14%) 100%) !important;
+}
+
+.theme-run-btn--danger.ant-btn {
+  border-color: color-mix(in srgb, var(--danger-strong) 22%, var(--border-default));
+  background: linear-gradient(180deg, color-mix(in srgb, var(--danger-soft) 88%, white 12%) 0%, color-mix(in srgb, var(--danger-soft) 76%, var(--bg-panel-muted) 24%) 100%);
+  color: var(--danger-strong);
+}
+
+.theme-run-btn--danger.ant-btn:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--danger-strong) 34%, var(--border-default));
+  background: linear-gradient(180deg, color-mix(in srgb, var(--danger-soft) 76%, white 24%) 0%, color-mix(in srgb, var(--danger-soft) 88%, var(--bg-panel-muted) 12%) 100%);
+  color: var(--danger-strong) !important;
 }
 
 .theme-editor-body {
