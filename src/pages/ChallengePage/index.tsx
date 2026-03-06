@@ -135,6 +135,143 @@ function RunControls(props: {
   );
 }
 
+type DebugCoord = { lng: number; lat: number };
+
+function escapeJsonForPyString(value: unknown): string {
+  return JSON.stringify(value).replace(/\\/g, "\\\\").replace(/'/g, "\\'");
+}
+
+function haversineDistance(lng1: number, lat1: number, lng2: number, lat2: number): number {
+  const R = 6371e3;
+  const phi1 = (lat1 * Math.PI) / 180;
+  const phi2 = (lat2 * Math.PI) / 180;
+  const deltaPhi = ((lat2 - lat1) * Math.PI) / 180;
+  const deltaLambda = ((lng2 - lng1) * Math.PI) / 180;
+  const a =
+    Math.sin(deltaPhi / 2) * Math.sin(deltaPhi / 2)
+    + Math.cos(phi1) * Math.cos(phi2) * Math.sin(deltaLambda / 2) * Math.sin(deltaLambda / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
+
+function findNearestNode(
+  positions: RoadNetwork["positions"],
+  target: DebugCoord,
+  candidateNodeIds?: Iterable<string>,
+): string | null {
+  let nearestNode: string | null = null;
+  let minDistance = Infinity;
+
+  if (candidateNodeIds) {
+    for (const nodeId of candidateNodeIds) {
+      const [lng, lat] = positions[nodeId];
+      const distance = haversineDistance(lng, lat, target.lng, target.lat);
+      if (distance < minDistance) {
+        minDistance = distance;
+        nearestNode = nodeId;
+      }
+    }
+    return nearestNode;
+  }
+
+  for (const nodeId in positions) {
+    const [lng, lat] = positions[nodeId];
+    const distance = haversineDistance(lng, lat, target.lng, target.lat);
+    if (distance < minDistance) {
+      minDistance = distance;
+      nearestNode = nodeId;
+    }
+  }
+
+  return nearestNode;
+}
+
+function getReachableNodes(graph: RoadNetwork["graph"], startNode: string): Set<string> {
+  const reachableNodes = new Set<string>();
+  const queue: string[] = [startNode];
+  reachableNodes.add(startNode);
+
+  while (queue.length > 0) {
+    const currentNode = queue.shift()!;
+    for (const neighborNode in graph[currentNode]) {
+      if (!reachableNodes.has(neighborNode)) {
+        reachableNodes.add(neighborNode);
+        queue.push(neighborNode);
+      }
+    }
+  }
+
+  return reachableNodes;
+}
+
+function buildPathfindingSetup(args: {
+  roadNetwork: RoadNetwork | null;
+  debugMode: boolean;
+  debugStartCoord: DebugCoord | null;
+  debugEndCoord: DebugCoord | null;
+}): string {
+  const { roadNetwork, debugMode, debugStartCoord, debugEndCoord } = args;
+  if (!roadNetwork) {
+    return "";
+  }
+
+  const graphJson = escapeJsonForPyString(roadNetwork.graph);
+  const positionsJson = escapeJsonForPyString(roadNetwork.positions);
+
+  let startNode = roadNetwork.start;
+  let endNode = roadNetwork.end;
+
+  // 调试模式允许用拖拽坐标重算起终点
+  if (debugMode && (debugStartCoord || debugEndCoord)) {
+    if (debugStartCoord) {
+      startNode = findNearestNode(roadNetwork.positions, debugStartCoord) ?? startNode;
+    }
+
+    if (debugEndCoord) {
+      const reachableNodes = getReachableNodes(roadNetwork.graph, startNode);
+      endNode = findNearestNode(roadNetwork.positions, debugEndCoord, reachableNodes) ?? endNode;
+    }
+  }
+
+  return `import json as __gjson__
+graph = __gjson__.loads('${graphJson}')
+positions = __gjson__.loads('${positionsJson}')
+start = "${startNode}"
+end = "${endNode}"
+
+import heapq as __hq__
+def __optimal_path__(g, s, e):
+    dist = {n: float('inf') for n in g}
+    dist[s] = 0
+    prev = {}
+    pq = [(0, s)]
+    while pq:
+        cost, u = __hq__.heappop(pq)
+        if cost > dist[u]: continue
+        for v, w in g[u].items():
+            if dist[u] + w < dist[v]:
+                dist[v] = dist[u] + w
+                prev[v] = u
+                __hq__.heappush(pq, (dist[v], v))
+    path, node = [], e
+    while node in prev:
+        path.append(node)
+        node = prev[node]
+    path.append(s)
+    path.reverse()
+    w = dist[e]
+    return path, (w if w != float('inf') else -1)`;
+}
+
+function buildPositioningSetup(): string {
+  const positioningData = generatePositioningData();
+  const stationsJson = escapeJsonForPyString(positioningData.stations);
+  const measurementsJson = escapeJsonForPyString(positioningData.measurements);
+  return `import json as __pjson__
+stations = __pjson__.loads('${stationsJson}')
+measurements = __pjson__.loads('${measurementsJson}')`;
+}
+
 export default function ChallengePage() {
   const navigate = useNavigate();
   const { type } = useParams<{ type: string }>();
@@ -270,112 +407,25 @@ export default function ChallengePage() {
 
   // Build effective context: test setup + optional road network + user context
   const effectiveContextCode = useMemo(() => {
-    const tcJson = JSON.stringify(
-      challenge.testCases.map((tc) => ({ args: tc.args, expected: tc.expected, tolerance: tc.tolerance, checkIsPosition: tc.checkIsPosition }))
-    ).replace(/\\/g, "\\\\").replace(/'/g, "\\'");
+    const testCasesPayload = challenge.testCases.map((tc) => ({
+      args: tc.args,
+      expected: tc.expected,
+      tolerance: tc.tolerance,
+      checkIsPosition: tc.checkIsPosition,
+    }));
+    const tcJson = escapeJsonForPyString(testCasesPayload);
     const testSetup = `import json as __json__\n__TEST_CASES__ = __json__.loads('${tcJson}')`;
 
-    let graphSetup = "";
-    if (isPathfindingChallenge && roadNetwork) {
-      const graphJson = JSON.stringify(roadNetwork.graph).replace(/\\/g, "\\\\").replace(/'/g, "\\'");
-      const positionsJson = JSON.stringify(roadNetwork.positions).replace(/\\/g, "\\\\").replace(/'/g, "\\'");
+    const graphSetup = isPathfindingChallenge
+      ? buildPathfindingSetup({
+        roadNetwork,
+        debugMode,
+        debugStartCoord,
+        debugEndCoord,
+      })
+      : "";
 
-      // In debug mode, use debug coordinates to find nearest nodes
-      let startNode = roadNetwork.start;
-      let endNode = roadNetwork.end;
-
-      if (debugMode && (debugStartCoord || debugEndCoord)) {
-        const haversineDistance = (lng1: number, lat1: number, lng2: number, lat2: number) => {
-          const R = 6371e3;
-          const φ1 = (lat1 * Math.PI) / 180;
-          const φ2 = (lat2 * Math.PI) / 180;
-          const Δφ = ((lat2 - lat1) * Math.PI) / 180;
-          const Δλ = ((lng2 - lng1) * Math.PI) / 180;
-          const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) + Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
-          const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-          return R * c;
-        };
-
-        if (debugStartCoord) {
-          let minDist = Infinity;
-          for (const nodeId in roadNetwork.positions) {
-            const [lng, lat] = roadNetwork.positions[nodeId];
-            const dist = haversineDistance(lng, lat, debugStartCoord.lng, debugStartCoord.lat);
-            if (dist < minDist) {
-              minDist = dist;
-              startNode = nodeId;
-            }
-          }
-        }
-
-        if (debugEndCoord) {
-          // Find all nodes reachable from start using BFS
-          const reachableFromStart = new Set<string>();
-          const queue: string[] = [startNode];
-          reachableFromStart.add(startNode);
-
-          while (queue.length > 0) {
-            const current = queue.shift()!;
-            for (const neighbor in roadNetwork.graph[current]) {
-              if (!reachableFromStart.has(neighbor)) {
-                reachableFromStart.add(neighbor);
-                queue.push(neighbor);
-              }
-            }
-          }
-
-          // Find nearest reachable node to debug end coordinates
-          let minDist = Infinity;
-          for (const nodeId of reachableFromStart) {
-            const [lng, lat] = roadNetwork.positions[nodeId];
-            const dist = haversineDistance(lng, lat, debugEndCoord.lng, debugEndCoord.lat);
-            if (dist < minDist) {
-              minDist = dist;
-              endNode = nodeId;
-            }
-          }
-        }
-      }
-
-      graphSetup = `import json as __gjson__
-graph = __gjson__.loads('${graphJson}')
-positions = __gjson__.loads('${positionsJson}')
-start = "${startNode}"
-end = "${endNode}"
-
-import heapq as __hq__
-def __optimal_path__(g, s, e):
-    dist = {n: float('inf') for n in g}
-    dist[s] = 0
-    prev = {}
-    pq = [(0, s)]
-    while pq:
-        cost, u = __hq__.heappop(pq)
-        if cost > dist[u]: continue
-        for v, w in g[u].items():
-            if dist[u] + w < dist[v]:
-                dist[v] = dist[u] + w
-                prev[v] = u
-                __hq__.heappush(pq, (dist[v], v))
-    path, node = [], e
-    while node in prev:
-        path.append(node)
-        node = prev[node]
-    path.append(s)
-    path.reverse()
-    w = dist[e]
-    return path, (w if w != float('inf') else -1)`;
-    }
-
-    let positioningSetup = "";
-    if (isPositioningChallenge) {
-      const pd = generatePositioningData();
-      const stationsJson = JSON.stringify(pd.stations).replace(/\\/g, "\\\\").replace(/'/g, "\\'");
-      const measurementsJson = JSON.stringify(pd.measurements).replace(/\\/g, "\\\\").replace(/'/g, "\\'");
-      positioningSetup = `import json as __pjson__
-stations = __pjson__.loads('${stationsJson}')
-measurements = __pjson__.loads('${measurementsJson}')`;
-    }
+    const positioningSetup = isPositioningChallenge ? buildPositioningSetup() : "";
 
     const parts = [testSetup, graphSetup, positioningSetup, contextCode].filter(Boolean);
     return parts.join("\n");
