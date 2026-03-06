@@ -1,10 +1,7 @@
 import type { RoadNetwork } from "../../../utils/parseRoadNetwork";
+import { escapeJsonForPyString } from "./escapeJsonForPyString";
 
 export type DebugCoord = { lng: number; lat: number };
-
-function escapeJsonForPyString(value: unknown): string {
-  return JSON.stringify(value).replace(/\\/g, "\\\\").replace(/'/g, "\\'");
-}
 
 function haversineDistance(lng1: number, lat1: number, lng2: number, lat2: number): number {
   const R = 6371e3;

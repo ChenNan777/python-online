@@ -45,7 +45,11 @@ import { generatePositioningData } from "../../utils/generatePositioning";
 import { parseRoadNetwork } from '../../utils/parseRoadNetwork';
 import type { RoadNetwork } from '../../utils/parseRoadNetwork';
 import { useAuthStore } from '../../store/useAuthStore';
-import { buildPathfindingSetup, buildPositioningSetup } from "./domain";
+import {
+  buildPathfindingSetup,
+  buildPositioningSetup,
+  escapeJsonForPyString,
+} from "./domain";
 
 function RunControls(props: {
   onRun: () => void;
@@ -134,10 +138,6 @@ function RunControls(props: {
       </Tooltip>
     </Space>
   );
-}
-
-function escapeJsonForPyString(value: unknown): string {
-  return JSON.stringify(value).replace(/\\/g, "\\\\").replace(/'/g, "\\'");
 }
 
 export default function ChallengePage() {

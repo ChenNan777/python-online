@@ -1,8 +1,5 @@
 import { generatePositioningData } from "../../../utils/generatePositioning";
-
-function escapeJsonForPyString(value: unknown): string {
-  return JSON.stringify(value).replace(/\\/g, "\\\\").replace(/'/g, "\\'");
-}
+import { escapeJsonForPyString } from "./escapeJsonForPyString";
 
 export function buildPositioningSetup(): string {
   const positioningData = generatePositioningData();
