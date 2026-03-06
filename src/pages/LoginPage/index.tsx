@@ -4,6 +4,7 @@ import { Button, Form, Input, message, Card } from 'antd';
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
 import { useAuthStore } from '../../store/useAuthStore';
 import { authApi } from '../../services/auth';
+import { DASHBOARD_PATH, PRACTICE_PATH } from '../../constants/routes';
 import './LoginPage.css';
 
 type LoginLocationState = {
@@ -19,7 +20,7 @@ export default function LoginPage() {
   const setAuth = useAuthStore((s) => s.setAuth);
 
   const state = location.state as LoginLocationState | null;
-  const from = state?.from?.pathname || '/dashboard';
+  const from = state?.from?.pathname || DASHBOARD_PATH;
 
   const onFinish = async (values: { username: string; password: string }) => {
     setLoading(true);
@@ -85,7 +86,7 @@ export default function LoginPage() {
         <div className="login-footer">
           <Button
             type="link"
-            onClick={() => navigate('/practice')}
+            onClick={() => navigate(PRACTICE_PATH)}
             className="practice-link"
           >
             进入练习模式

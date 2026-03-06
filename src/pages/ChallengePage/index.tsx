@@ -30,6 +30,11 @@ import ExtraDepsModal from "../../components/ExtraDepsModal";
 import ContextCodeModal from "../../components/ContextCodeModal";
 import RightPanelStack from "../EditorPage/RightPanelStack";
 import TestCasesPanel from "../../components/TestCasesPanel";
+import {
+  DASHBOARD_PATH,
+  PRACTICE_CHALLENGE_PREFIX,
+  PRACTICE_PATH,
+} from '../../constants/routes';
 import { generatePositioningData } from "../../utils/generatePositioning";
 import { parseRoadNetwork } from '../../utils/parseRoadNetwork';
 import type { RoadNetwork } from '../../utils/parseRoadNetwork';
@@ -131,7 +136,7 @@ export default function ChallengePage() {
   const { user } = useAuthStore();
 
   // 检测当前是练习模式还是考试模式
-  const isPracticeRoute = location.pathname.startsWith('/practice/');
+  const isPracticeRoute = location.pathname.startsWith(PRACTICE_CHALLENGE_PREFIX);
 
   // 根据路由参数确定挑战ID
   const challengeId = type === 'positioning'
@@ -150,7 +155,7 @@ export default function ChallengePage() {
 
   useEffect(() => {
     if (!isValidChallenge) {
-      navigate('/dashboard', { replace: true });
+      navigate(DASHBOARD_PATH, { replace: true });
     }
   }, [isValidChallenge, navigate]);
 
@@ -557,7 +562,7 @@ measurements = __pjson__.loads('${measurementsJson}')`;
           {isPracticeRoute && (
             <Button
               size="small"
-              onClick={() => navigate('/practice')}
+              onClick={() => navigate(PRACTICE_PATH)}
               disabled={isRunning}
             >
               返回

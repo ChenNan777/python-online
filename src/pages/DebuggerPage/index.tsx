@@ -27,6 +27,7 @@ import ExtraDepsModal from "../../components/ExtraDepsModal";
 import type { CodeTemplate } from "../../types";
 import { usePythonStore } from "../../store/usePythonStore";
 import { usePyodideWorkerRuntime } from "../../features/pythonRunner";
+import { PRACTICE_PATH } from "../../constants/routes";
 import "../../App.css";
 
 function RunControls(props: {
@@ -543,7 +544,7 @@ function DebuggerPage() {
         <Space size={6} align="center" className="min-w-0">
           <Button
             size="small"
-            onClick={() => navigate('/practice')}
+            onClick={() => navigate(PRACTICE_PATH)}
             disabled={isRunning}
           >
             返回

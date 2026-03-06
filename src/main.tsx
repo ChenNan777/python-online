@@ -10,6 +10,15 @@ import LoginPage from "./pages/LoginPage";
 import DashboardPage from "./pages/DashboardPage";
 import PracticePage from "./pages/PracticePage";
 import ProtectedRoute from "./components/ProtectedRoute";
+import {
+  CHALLENGE_PATH,
+  DASHBOARD_PATH,
+  DEBUGGER_PATH,
+  LOGIN_PATH,
+  PRACTICE_CHALLENGE_PATH,
+  PRACTICE_PATH,
+  ROOT_PATH,
+} from "./constants/routes";
 import { useAuthStore } from "./store/useAuthStore";
 import { setupMonaco } from "./monaco/setupMonaco";
 
@@ -22,17 +31,17 @@ createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <BrowserRouter>
       <Routes>
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/practice" element={<PracticePage />} />
-        <Route path="/debugger" element={<DebuggerPage />} />
+        <Route path={LOGIN_PATH} element={<LoginPage />} />
+        <Route path={PRACTICE_PATH} element={<PracticePage />} />
+        <Route path={DEBUGGER_PATH} element={<DebuggerPage />} />
         {/* 练习模式路由 - 无需登录 */}
-        <Route path="/practice/:type" element={<ChallengePage />} />
+        <Route path={PRACTICE_CHALLENGE_PATH} element={<ChallengePage />} />
         <Route element={<ProtectedRoute />}>
-          <Route path="/dashboard" element={<DashboardPage />} />
-          <Route path="/challenge/:type" element={<ChallengePage />} />
+          <Route path={DASHBOARD_PATH} element={<DashboardPage />} />
+          <Route path={CHALLENGE_PATH} element={<ChallengePage />} />
         </Route>
-        <Route path="/" element={<Navigate to="/dashboard" replace />} />
-        <Route path="*" element={<Navigate to="/dashboard" replace />} />
+        <Route path={ROOT_PATH} element={<Navigate to={DASHBOARD_PATH} replace />} />
+        <Route path="*" element={<Navigate to={DASHBOARD_PATH} replace />} />
       </Routes>
     </BrowserRouter>
   </React.StrictMode>,

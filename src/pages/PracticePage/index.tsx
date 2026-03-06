@@ -1,6 +1,11 @@
 import { useNavigate } from 'react-router-dom';
 import { Card, Button, Space } from 'antd';
 import { CodeOutlined, CompassOutlined, AimOutlined } from '@ant-design/icons';
+import {
+  buildPracticeChallengePath,
+  DEBUGGER_PATH,
+  LOGIN_PATH,
+} from '../../constants/routes';
 import './PracticePage.css';
 
 export default function PracticePage() {
@@ -14,7 +19,7 @@ export default function PracticePage() {
             size="large"
             block
             icon={<CodeOutlined />}
-            onClick={() => navigate('/debugger')}
+            onClick={() => navigate(DEBUGGER_PATH)}
           >
             进入调试器
           </Button>
@@ -23,7 +28,7 @@ export default function PracticePage() {
             size="large"
             block
             icon={<CompassOutlined />}
-            onClick={() => navigate('/practice/positioning')}
+            onClick={() => navigate(buildPracticeChallengePath('positioning'))}
           >
             定位分析练习
           </Button>
@@ -32,7 +37,7 @@ export default function PracticePage() {
             size="large"
             block
             icon={<AimOutlined />}
-            onClick={() => navigate('/practice/pathfinding')}
+            onClick={() => navigate(buildPracticeChallengePath('pathfinding'))}
           >
             路径规划练习
           </Button>
@@ -41,7 +46,7 @@ export default function PracticePage() {
             size="large"
             block
             type="link"
-            onClick={() => navigate('/login')}
+            onClick={() => navigate(LOGIN_PATH)}
           >
             返回登录
           </Button>

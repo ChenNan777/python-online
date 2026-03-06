@@ -2,9 +2,7 @@ import { create } from 'zustand';
 import type { User } from '../types/auth';
 import { authApi } from '../services/auth';
 import { getTaskInfo } from '../services/task';
-
-const AUTH_TOKEN_KEY = 'auth_token';
-const USER_INFO_KEY = 'user_info';
+import { AUTH_TOKEN_KEY, USER_INFO_KEY } from '../constants/auth';
 
 function saveAuthToStorage(token: string, user: User): void {
   localStorage.setItem(AUTH_TOKEN_KEY, token);

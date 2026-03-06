@@ -1,8 +1,7 @@
 import axios, { AxiosError } from 'axios';
 import { message } from 'antd';
-
-const AUTH_TOKEN_KEY = 'auth_token';
-const USER_INFO_KEY = 'user_info';
+import { AUTH_TOKEN_KEY, USER_INFO_KEY } from '../constants/auth';
+import { LOGIN_PATH } from '../constants/routes';
 
 function getStoredAuthToken(): string | null {
   return localStorage.getItem(AUTH_TOKEN_KEY);
@@ -14,8 +13,8 @@ function clearStoredAuthInfo(): void {
 }
 
 function redirectToLoginIfNeeded(): void {
-  if (window.location.pathname !== '/login') {
-    window.location.href = '/login';
+  if (window.location.pathname !== LOGIN_PATH) {
+    window.location.href = LOGIN_PATH;
   }
 }
 

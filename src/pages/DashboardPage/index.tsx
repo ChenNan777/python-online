@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button, Card, Descriptions, Space, Typography } from 'antd';
 import { LogoutOutlined, RocketOutlined } from '@ant-design/icons';
 import { useAuthStore } from '../../store/useAuthStore';
+import { buildChallengePath, LOGIN_PATH } from '../../constants/routes';
 import { useEffect } from 'react';
 import './DashboardPage.css';
 
@@ -22,12 +23,12 @@ export default function DashboardPage() {
 
   const handleStart = () => {
     const challengeType = user.role === 'positioning' ? 'positioning' : 'pathfinding';
-    navigate(`/challenge/${challengeType}`);
+    navigate(buildChallengePath(challengeType));
   };
 
   const handleLogout = async () => {
     await logout();
-    navigate('/login');
+    navigate(LOGIN_PATH);
   };
 
   const roleText = user.role === 'positioning' ? '定位分析' : '路径规划';

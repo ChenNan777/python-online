@@ -3,6 +3,7 @@ import { mockLogin } from './mock';
 import { httpClient } from '../utils/httpClient';
 import { encryptPassword } from '../utils/crypto';
 import type { ApiResponse, LoginApiResponse } from '../types/api';
+import { AUTH_TOKEN_KEY } from '../constants/auth';
 import { getTaskInfo } from './task';
 
 const USE_MOCK = import.meta.env.VITE_USE_MOCK === 'true';
@@ -43,7 +44,7 @@ async function loginWithApi(request: LoginRequest): Promise<LoginResponse> {
 
     // 临时保存 token 以便后续请求使用
     const fullToken = buildFullToken(loginData.tokenHead, loginData.token);
-    localStorage.setItem('auth_token', fullToken);
+    localStorage.setItem(AUTH_TOKEN_KEY, fullToken);
 
     // 获取任务信息
     const user = await getTaskInfo(
@@ -60,7 +61,7 @@ async function loginWithApi(request: LoginRequest): Promise<LoginResponse> {
     };
   } catch (error: unknown) {
     // 清除临时 token
-    localStorage.removeItem('auth_token');
+    localStorage.removeItem(AUTH_TOKEN_KEY);
 
     return {
       success: false,
