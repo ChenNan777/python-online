@@ -6,7 +6,11 @@ import OutputPanel from "./OutputPanel";
 import VariablePanel from "./VariablePanel";
 import MapPanel from "../../components/MapPanel";
 import GraphPanel from "../../components/GraphPanel";
-import type { ChallengePanelTab } from "../../constants/challenge";
+import {
+  MAP_DEBUG_PANEL_TAB,
+  POSITIONING_DEBUG_PANEL_TAB,
+  type ChallengePanelTab,
+} from "../../constants/challenge";
 import type { RunStatus } from "../../types";
 import { usePythonStore } from "../../store/usePythonStore";
 import type { RoadNetwork } from "../../utils/parseRoadNetwork";
@@ -102,7 +106,7 @@ export default function RightPanelStack({ activeTab, extraPanels, roadNetwork, i
     );
   }
 
-  if (activeTab === "positioning-debug") {
+  if (activeTab === POSITIONING_DEBUG_PANEL_TAB) {
     return (
       <div className="h-full flex flex-col">
         <div className="shrink-0 border-b border-black/8" style={{ height: "50%" }}>
@@ -113,7 +117,7 @@ export default function RightPanelStack({ activeTab, extraPanels, roadNetwork, i
     );
   }
 
-  if (activeTab === "map-debug") {
+  if (activeTab === MAP_DEBUG_PANEL_TAB) {
     return (
       <div className="h-full flex flex-col">
         <div className="shrink-0 border-b border-black/8" style={{ height: "50%" }}>

@@ -2,6 +2,10 @@ export type ChallengeType = 'positioning' | 'pathfinding';
 export type TaskProgressStatus = 'not_started' | 'in_progress' | 'completed';
 export type ChallengePanelTab = 'map-debug' | 'positioning-debug';
 
+// 调试面板 Tab
+export const MAP_DEBUG_PANEL_TAB: ChallengePanelTab = 'map-debug';
+export const POSITIONING_DEBUG_PANEL_TAB: ChallengePanelTab = 'positioning-debug';
+
 // 挑战类型常量
 export const POSITIONING_TYPE: ChallengeType = 'positioning';
 export const PATHFINDING_TYPE: ChallengeType = 'pathfinding';
@@ -128,8 +132,8 @@ export function getChallengeStartState(role: ChallengeType, taskStatus: string |
 export function getChallengePanelTab(challengeId: ChallengeId): ChallengePanelTab {
   // 路径规划显示地图调试
   if (challengeId === PATHFINDING_CHALLENGE_ID) {
-    return 'map-debug';
+    return MAP_DEBUG_PANEL_TAB;
   }
 
-  return 'positioning-debug';
+  return POSITIONING_DEBUG_PANEL_TAB;
 }
