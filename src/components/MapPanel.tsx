@@ -421,10 +421,12 @@ const MapPanel: React.FC<MapPanelProps> = ({ roadNetwork, isPracticeMode: isPrac
         <MapEventHandler />
         <MapSizeFixer />
         <TileLayer
+          crossOrigin
           attribution='&copy; <a href="http://www.tianditu.gov.cn">天地图</a>'
           url={`${tiandituBaseUrl}?T=img_w&x={x}&y={y}&l={z}&tk=${tiandituKey}`}
         />
         <TileLayer
+          crossOrigin
           attribution='&copy; <a href="http://www.tianditu.gov.cn">天地图</a>'
           url={`${tiandituBaseUrl}?T=cia_w&x={x}&y={y}&l={z}&tk=${tiandituKey}`}
         />
