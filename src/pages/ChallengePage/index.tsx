@@ -333,18 +333,34 @@ export default function ChallengePage() {
   const [messageApi, messageContextHolder] = message.useMessage();
   const [roadNetwork, setRoadNetworkLocal] = useState<RoadNetwork | null>(null);
 
-  // On mount: load first challenge code into store
-  useEffect(() => {
-    setCode(fallbackChallenge.starterCode);
+  // 清理地图状态
+  const clearGraphState = useCallback(() => {
+    setGraphData(null);
+    setGraphResult(null);
+  }, [setGraphData, setGraphResult]);
+
+  // 清理定位状态
+  const clearPositioningState = useCallback(() => {
+    setPositioningData(null);
+    setPositioningResult(null);
+  }, [setPositioningData, setPositioningResult]);
+
+  // 清理编辑态（断点/变量/暂停行等）
+  const resetEditorRuntimeState = useCallback(() => {
     setBreakpoints([]);
+    setResults(null);
     setVariableScopes([]);
     setCurrentLine(null);
     setIsPaused(false);
+  }, [setBreakpoints, setCurrentLine, setIsPaused, setVariableScopes]);
+
+  // On mount: load first challenge code into store
+  useEffect(() => {
+    setCode(fallbackChallenge.starterCode);
+    resetEditorRuntimeState();
     setContextCode("");
-    setGraphData(null);
-    setGraphResult(null);
-    setPositioningData(null);
-    setPositioningResult(null);
+    clearGraphState();
+    clearPositioningState();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -373,25 +389,12 @@ export default function ChallengePage() {
 
   // Reset when challenge changes
   useEffect(() => {
-    // 清理地图相关状态
-    const clearGraphState = () => {
-      setGraphData(null);
-      setGraphResult(null);
-    };
-    // 清理定位相关状态
-    const clearPositioningState = () => {
-      setPositioningData(null);
-      setPositioningResult(null);
-    };
-
     setCode(challenge.starterCode);
-    setBreakpoints([]);
-    setResults(null);
-    setVariableScopes([]);
-    setCurrentLine(null);
-    setIsPaused(false);
+    resetEditorRuntimeState();
     testCasesRef.current = challenge.testCases;
     if (editorRef.current) editorRef.current.setValue(challenge.starterCode);
+
+    // 只初始化当前挑战需要的数据
     if (isPathfindingChallenge) {
       setGraphResult(null);
       clearPositioningState();
@@ -403,7 +406,19 @@ export default function ChallengePage() {
       clearGraphState();
       clearPositioningState();
     }
-  }, [challenge.starterCode, challenge.testCases, isPathfindingChallenge, isPositioningChallenge, setBreakpoints, setCode, setCurrentLine, setGraphData, setGraphResult, setIsPaused, setPositioningData, setPositioningResult, setVariableScopes]);
+  }, [
+    challenge.starterCode,
+    challenge.testCases,
+    clearGraphState,
+    clearPositioningState,
+    isPathfindingChallenge,
+    isPositioningChallenge,
+    resetEditorRuntimeState,
+    setCode,
+    setGraphResult,
+    setPositioningData,
+    setPositioningResult,
+  ]);
 
   // Build effective context: test setup + optional road network + user context
   const effectiveContextCode = useMemo(() => {
