@@ -10,6 +10,15 @@ export const POSITIONING_DEBUG_PANEL_TAB: ChallengePanelTab = 'positioning-debug
 export const POSITIONING_TYPE: ChallengeType = 'positioning';
 export const PATHFINDING_TYPE: ChallengeType = 'pathfinding';
 
+export const TASK_STATUS_READY = 0;
+export const TASK_STATUS_START_TASK = 1;
+export const TASK_STATUS_DRONE_LAUNCH = 2;
+export const TASK_STATUS_SIGNAL_RECONNAISSANCE = 3;
+export const TASK_STATUS_POSITIONING_ANALYSIS = 4;
+export const TASK_STATUS_PATH_PLANNING = 5;
+export const TASK_STATUS_RAID_CAPTURE = 6;
+export const TASK_STATUS_END_TASK = 7;
+
 // 后端角色 ID
 export const POSITIONING_TASK_ROLE_ID = '2';
 export const PATHFINDING_TASK_ROLE_ID = '3';
@@ -30,19 +39,33 @@ const ROLE_LABEL_MAP: Record<ChallengeType, string> = {
 };
 
 const ROLE_EXPECTED_STATUS_MAP: Record<ChallengeType, number> = {
-  [POSITIONING_TYPE]: 2,
-  [PATHFINDING_TYPE]: 3,
+  [POSITIONING_TYPE]: TASK_STATUS_POSITIONING_ANALYSIS,
+  [PATHFINDING_TYPE]: TASK_STATUS_PATH_PLANNING,
 };
 
 const TASK_STAGE_TEXT_MAP: Record<number, string> = {
-  0: '已创建',
-  1: '准备就绪',
-  2: '目标侦察阶段进行中',
-  3: '路径规划阶段进行中',
-  4: '目标捕获阶段进行中',
-  5: '已完成',
-  6: '已取消',
+  [TASK_STATUS_READY]: '准备就绪',
+  [TASK_STATUS_START_TASK]: '开始任务',
+  [TASK_STATUS_DRONE_LAUNCH]: '无人机放飞',
+  [TASK_STATUS_SIGNAL_RECONNAISSANCE]: '信号侦察',
+  [TASK_STATUS_POSITIONING_ANALYSIS]: '定位分析',
+  [TASK_STATUS_PATH_PLANNING]: '路径规划',
+  [TASK_STATUS_RAID_CAPTURE]: '奔袭捕获',
+  [TASK_STATUS_END_TASK]: '结束任务',
 };
+
+const NOT_STARTED_TASK_STATUS_SET = new Set<number>([
+  TASK_STATUS_READY,
+  TASK_STATUS_START_TASK,
+  TASK_STATUS_DRONE_LAUNCH,
+  TASK_STATUS_SIGNAL_RECONNAISSANCE,
+]);
+
+const IN_PROGRESS_TASK_STATUS_SET = new Set<number>([
+  TASK_STATUS_POSITIONING_ANALYSIS,
+  TASK_STATUS_PATH_PLANNING,
+  TASK_STATUS_RAID_CAPTURE,
+]);
 
 function parseTaskStatusNumber(taskStatus: string | undefined): number {
   return parseInt(taskStatus || '0', 10);
@@ -86,17 +109,19 @@ export function getTaskStageText(taskStatus: string): string {
 export function getTaskProgressStatus(taskStatus: string): TaskProgressStatus {
   const statusNum = parseTaskStatusNumber(taskStatus);
 
-  // 0/1: 未开始
-  if (statusNum < 2) {
+  if (NOT_STARTED_TASK_STATUS_SET.has(statusNum)) {
     return 'not_started';
   }
 
-  // 2~4: 进行中
-  if (statusNum >= 2 && statusNum <= 4) {
+  if (IN_PROGRESS_TASK_STATUS_SET.has(statusNum)) {
     return 'in_progress';
   }
 
-  return 'completed';
+  if (statusNum === TASK_STATUS_END_TASK) {
+    return 'completed';
+  }
+
+  return 'not_started';
 }
 
 export function getChallengeStartState(role: ChallengeType, taskStatus: string | undefined): {
