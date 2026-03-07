@@ -7,8 +7,6 @@ export function buildPositioningSetup(positioningData: PositioningData | null): 
   }
 
   const stationsJson = escapeJsonForPyString(positioningData.stations);
-  const measurementsJson = escapeJsonForPyString(positioningData.measurements);
   return `import json as __pjson__
-stations = __pjson__.loads('${stationsJson}')
-measurements = __pjson__.loads('${measurementsJson}')`;
+stations = __pjson__.loads('${stationsJson}')`;
 }

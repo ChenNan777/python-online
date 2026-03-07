@@ -98,11 +98,11 @@ export default function DashboardPage() {
 
   const actionTitle = '开始作业';
   const actionHint = user.task
-    ? (startState.canStart ? '可开始' : '暂不可开始任务')
+    ? (startState.canStart ? '可开始' : startState.buttonText)
     : '暂无任务';
-  const actionButtonText = user.task && user.role && startState.canStart
-    ? `开始${getRoleLabel(user.role)}作业`
-    : '未就绪';
+  const actionButtonText = user.task && user.role
+    ? startState.buttonText
+    : '暂无任务';
 
   return (
     <div className="dashboard-page">

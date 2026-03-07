@@ -53,7 +53,10 @@ export function buildExamPositioningScene(
   return {
     positioningData: mergePositioningDataById({
       stations: fallback.stations,
-      measurements: fallback.measurements,
+      measurements: fallback.stations.map((station) => ({
+        stationId: station.id,
+        bearingDeg: station.bearingDeg,
+      })),
       trueTarget: fallback.trueTarget,
       targetId: assignment.targetId,
       source: 'fallback',

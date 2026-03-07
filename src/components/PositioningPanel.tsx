@@ -84,8 +84,6 @@ export default function PositioningPanel() {
     );
   }
 
-  const measurementMap = Object.fromEntries(positioningData.measurements.map((m) => [m.stationId, m.bearingDeg]));
-
   const userDist = positioningResult
     ? (() => {
         const latM = (positioningResult.userLat - positioningData.trueTarget.lat) * 111000;
@@ -137,8 +135,7 @@ export default function PositioningPanel() {
           <g transform={`translate(${offset.x},${offset.y}) scale(${scale})`}>
             {/* bearing lines */}
             {positioningData.stations.map((st) => {
-              const bearingDeg = measurementMap[st.id];
-              if (bearingDeg === undefined) return null;
+              const bearingDeg = st.bearingDeg;
               const [sx, sy] = toSvg(st.lng, st.lat, minLng, maxLng, minLat, maxLat);
               const theta = (bearingDeg * Math.PI) / 180;
               const dx = Math.sin(theta);
@@ -186,7 +183,7 @@ export default function PositioningPanel() {
                 <g key={`st-${st.id}`}>
                   <circle cx={sx} cy={sy} r={7} fill="var(--info-strong)" stroke="#fff" strokeWidth={2}/>
                   <text x={sx} y={sy + 0.5} textAnchor="middle" dominantBaseline="middle" fontSize={7} fontWeight="700" fill="#fff">{st.id}</text>
-                  <text x={sx + 10} y={sy - 8} fontSize={9} fill="#1d4ed8" fontWeight="600">{measurementMap[st.id]?.toFixed(1)}°</text>
+                  <text x={sx + 10} y={sy - 8} fontSize={9} fill="#1d4ed8" fontWeight="600">{st.bearingDeg.toFixed(1)}°</text>
                 </g>
               );
             })}

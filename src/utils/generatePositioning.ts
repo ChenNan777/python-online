@@ -1,4 +1,4 @@
-import type { ObserverStation, PositioningData } from "../types";
+import type { PositioningData, PositioningStation } from "../types";
 
 // Fixed scenario: 3 stations, lng/lat coordinate space (Changsha area)
 const TRUE_TARGET = { lng: 113.039765, lat: 28.266974 };
@@ -23,7 +23,7 @@ function bearingDeg(slng: number, slat: number, tlng: number, tlat: number): num
 let _cached: PositioningData | null = null;
 
 export function mergePositioningDataById(args: {
-  stations: ObserverStation[];
+  stations: Array<Omit<PositioningStation, 'bearingDeg'>>;
   measurements: Array<{ stationId: string; bearingDeg: number }>;
   trueTarget: { lng: number; lat: number };
   targetId?: string;
@@ -33,14 +33,14 @@ export function mergePositioningDataById(args: {
     args.measurements.map((measurement) => [measurement.stationId, measurement]),
   );
 
-  const observations = args.stations.flatMap((station) => {
+  const stations = args.stations.flatMap((station) => {
     const measurement = measurementMap.get(station.id);
     if (!measurement) {
       return [];
     }
 
     return [{
-      stationId: station.id,
+      id: station.id,
       lng: station.lng,
       lat: station.lat,
       frequency: station.frequency,
@@ -49,9 +49,7 @@ export function mergePositioningDataById(args: {
   });
 
   return {
-    stations: args.stations,
-    measurements: args.measurements,
-    observations,
+    stations,
     trueTarget: args.trueTarget,
     targetId: args.targetId,
     source: args.source ?? 'local',

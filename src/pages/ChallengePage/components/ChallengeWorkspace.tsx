@@ -325,16 +325,20 @@ export default function ChallengeWorkspace(props: ChallengeWorkspaceProps) {
               ) : null}
               {hasContext ? <Tag color="blue" className="text-xs">上下文</Tag> : null}
               {sceneNotice ? <Tag color="gold">{sceneNotice}</Tag> : null}
-              <Tooltip title="加载额外依赖" placement="bottom">
-                <span>
-                  <Button size="small" onClick={() => setDepsModalOpen(true)} disabled={isRunning || depsLoading}>加载依赖</Button>
-                </span>
-              </Tooltip>
-              <Tooltip title="添加隐藏上下文代码" placement="bottom">
-                <span>
-                  <Button size="small" onClick={() => { setContextDraft(contextCode); setContextModalOpen(true); }} disabled={isRunning}>上下文</Button>
-                </span>
-              </Tooltip>
+              {isPracticeRoute ? (
+                <Tooltip title="加载额外依赖" placement="bottom">
+                  <span>
+                    <Button size="small" onClick={() => setDepsModalOpen(true)} disabled={isRunning || depsLoading}>加载依赖</Button>
+                  </span>
+                </Tooltip>
+              ) : null}
+              {isPracticeRoute ? (
+                <Tooltip title="添加隐藏上下文代码" placement="bottom">
+                  <span>
+                    <Button size="small" onClick={() => { setContextDraft(contextCode); setContextModalOpen(true); }} disabled={isRunning}>上下文</Button>
+                  </span>
+                </Tooltip>
+              ) : null}
               {isPathfindingChallenge && isPracticeRoute ? (
                 <Tooltip title="开启后可拖动起终点验证算法" placement="bottom">
                   <Space size={4} align="center">
@@ -396,24 +400,26 @@ export default function ChallengeWorkspace(props: ChallengeWorkspaceProps) {
                       {challenge.description}
                     </pre>
                   </div>
-                  <div className="px-3 py-1.5 shrink-0 flex items-center gap-2 theme-toolbar">
-                    <span className="text-xs" style={{ color: 'var(--text-tertiary)' }}>查看解法：</span>
-                    <Select
-                      size="small"
-                      placeholder="选择解法"
-                      popupMatchSelectWidth={false}
-                      style={{ minWidth: 120 }}
-                      options={challenge.solutions.map((solution, index) => ({ value: index, label: solution.label }))}
-                      onChange={(index: number) => {
-                        const solution = challenge.solutions[index];
-                        if (!solution) {
-                          return;
-                        }
-                        applyCodeToEditor(solution.code);
-                      }}
-                      value={null}
-                    />
-                  </div>
+                  {isPracticeRoute ? (
+                    <div className="px-3 py-1.5 shrink-0 flex items-center gap-2 theme-toolbar">
+                      <span className="text-xs" style={{ color: 'var(--text-tertiary)' }}>查看解法：</span>
+                      <Select
+                        size="small"
+                        placeholder="选择解法"
+                        popupMatchSelectWidth={false}
+                        style={{ minWidth: 120 }}
+                        options={challenge.solutions.map((solution, index) => ({ value: index, label: solution.label }))}
+                        onChange={(index: number) => {
+                          const solution = challenge.solutions[index];
+                          if (!solution) {
+                            return;
+                          }
+                          applyCodeToEditor(solution.code);
+                        }}
+                        value={null}
+                      />
+                    </div>
+                  ) : null}
                 </div>
               </Pane>
               <Pane minSize={200} className="min-h-0">

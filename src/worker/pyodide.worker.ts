@@ -398,7 +398,7 @@ try:
         finally:
             sys.stdout = __old_stdout__
 
-    if "solve" in g and callable(g["solve"]) and "stations" in g and "measurements" in g:
+    if "solve" in g and callable(g["solve"]) and "stations" in g:
         import js as __js_pos__
         import sys
         import io
@@ -406,10 +406,9 @@ try:
         sys.stdout = io.StringIO()
         try:
             __pos_st__ = g.get("stations", [])
-            __pos_ms__ = g.get("measurements", [])
             __pos_ux__, __pos_uy__ = float('nan'), float('nan')
             try:
-                __pos_ur__ = g["solve"](__pos_st__, __pos_ms__)
+                __pos_ur__ = g["solve"](__pos_st__)
                 if __pos_ur__ is not None:
                     __pos_ux__ = float(__pos_ur__[0])
                     __pos_uy__ = float(__pos_ur__[1])

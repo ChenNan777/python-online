@@ -244,10 +244,9 @@ def solve(graph, start, end):
     id: POSITIONING_CHALLENGE_ID,
     title: "定位分析",
     difficulty: "困难",
-    description: `实现函数 solve(stations, measurements)，根据多个观测站的方位角测量值，求目标点经纬度。
+    description: `实现函数 solve(stations)，根据多个观测站的方位角测量值，求目标点经纬度。
 
-stations: 观测站列表，每项为 {"id": str, "lng": float, "lat": float}
-measurements: 测量列表，每项为 {"stationId": str, "bearingDeg": float}
+stations: 观测站列表，每项为 {"id": str, "lng": float, "lat": float, "bearingDeg": float}
   bearingDeg 为从正北方向顺时针的角度（0°=北，90°=东，180°=南，270°=西）
 
 返回值：(lng, lat) 元组，表示目标点经纬度。
@@ -257,19 +256,14 @@ measurements: 测量列表，每项为 {"stationId": str, "bearingDeg": float}
 
 本次输入：
   stations = [
-    {"id": "A", "lng": 116.350, "lat": 39.860},
-    {"id": "B", "lng": 116.450, "lat": 39.860},
-    {"id": "C", "lng": 116.420, "lat": 39.860}
-  ]
-  measurements = [
-    {"stationId": "A", "bearingDeg": 51.34},
-    {"stationId": "B", "bearingDeg": 308.66},
-    {"stationId": "C", "bearingDeg": 333.43}
+    {"id": "A", "lng": 116.350, "lat": 39.860, "bearingDeg": 51.34},
+    {"id": "B", "lng": 116.450, "lat": 39.860, "bearingDeg": 308.66},
+    {"id": "C", "lng": 116.420, "lat": 39.860, "bearingDeg": 333.43}
   ]
 
 提示：可用最小二乘法联立多条方位线方程求解。
 右侧面板会可视化观测站、方位线和你的解。`,
-    starterCode: `def solve(stations, measurements):
+    starterCode: `def solve(stations):
     pass
 `,
     solutions: [
@@ -277,12 +271,11 @@ measurements: 测量列表，每项为 {"stationId": str, "bearingDeg": float}
         label: "最小二乘法",
         code: `import math
 
-def solve(stations, measurements):
-    station_map = {s["id"]: (s["lng"], s["lat"]) for s in stations}
+def solve(stations):
     A, b = [], []
-    for m in measurements:
-        slng, slat = station_map[m["stationId"]]
-        theta = math.radians(m["bearingDeg"])
+    for station in stations:
+        slng, slat = station["lng"], station["lat"]
+        theta = math.radians(station["bearingDeg"])
         cos_t = math.cos(theta)
         sin_t = math.sin(theta)
         A.append([cos_t, -sin_t])
@@ -304,15 +297,14 @@ def solve(stations, measurements):
         label: "直接交叉法（两站）",
         code: `import math
 
-def solve(stations, measurements):
-    station_map = {s["id"]: (s["lng"], s["lat"]) for s in stations}
-    if len(measurements) < 2:
+def solve(stations):
+    if len(stations) < 2:
         return (0.0, 0.0)
-    m1, m2 = measurements[0], measurements[1]
-    lng1, lat1 = station_map[m1["stationId"]]
-    lng2, lat2 = station_map[m2["stationId"]]
-    t1 = math.radians(m1["bearingDeg"])
-    t2 = math.radians(m2["bearingDeg"])
+    st1, st2 = stations[0], stations[1]
+    lng1, lat1 = st1["lng"], st1["lat"]
+    lng2, lat2 = st2["lng"], st2["lat"]
+    t1 = math.radians(st1["bearingDeg"])
+    t2 = math.radians(st2["bearingDeg"])
     d1x, d1y = math.sin(t1), math.cos(t1)
     d2x, d2y = math.sin(t2), math.cos(t2)
     denom = d1x*d2y - d1y*d2x
@@ -326,17 +318,15 @@ def solve(stations, measurements):
         label: "三站平均交叉",
         code: `import math
 
-def solve(stations, measurements):
+def solve(stations):
     # 对所有站对求交叉点，取平均
-    station_map = {s["id"]: (s["lng"], s["lat"]) for s in stations}
     points = []
-    ms = measurements
-    for i in range(len(ms)):
-        for j in range(i + 1, len(ms)):
-            lng1, lat1 = station_map[ms[i]["stationId"]]
-            lng2, lat2 = station_map[ms[j]["stationId"]]
-            t1 = math.radians(ms[i]["bearingDeg"])
-            t2 = math.radians(ms[j]["bearingDeg"])
+    for i in range(len(stations)):
+        for j in range(i + 1, len(stations)):
+            lng1, lat1 = stations[i]["lng"], stations[i]["lat"]
+            lng2, lat2 = stations[j]["lng"], stations[j]["lat"]
+            t1 = math.radians(stations[i]["bearingDeg"])
+            t2 = math.radians(stations[j]["bearingDeg"])
             d1x, d1y = math.sin(t1), math.cos(t1)
             d2x, d2y = math.sin(t2), math.cos(t2)
             denom = d1x*d2y - d1y*d2x
@@ -354,14 +344,13 @@ def solve(stations, measurements):
         label: "梯度下降",
         code: `import math
 
-def solve(stations, measurements):
-    station_map = {s["id"]: (s["lng"], s["lat"]) for s in stations}
+def solve(stations):
     # 最小化各方位线到点的距离平方和
     def loss_grad(lng, lat):
         loss, glng, glat = 0.0, 0.0, 0.0
-        for m in measurements:
-            slng, slat = station_map[m["stationId"]]
-            theta = math.radians(m["bearingDeg"])
+        for station in stations:
+            slng, slat = station["lng"], station["lat"]
+            theta = math.radians(station["bearingDeg"])
             # 法向量 (cos_t, -sin_t)，方位线方程: cos_t*(L-slng) - sin_t*(B-slat) = 0
             cos_t, sin_t = math.cos(theta), math.sin(theta)
             r = cos_t*(lng - slng) - sin_t*(lat - slat)
@@ -385,16 +374,15 @@ def solve(stations, measurements):
         label: "加权最小二乘（距离权重）",
         code: `import math
 
-def solve(stations, measurements):
-    station_map = {s["id"]: (s["lng"], s["lat"]) for s in stations}
+def solve(stations):
     # 迭代加权：距离越近权重越大
     lng = sum(s["lng"] for s in stations) / len(stations)
     lat = sum(s["lat"] for s in stations) / len(stations)
     for _ in range(10):
         A, b, w = [], [], []
-        for m in measurements:
-            slng, slat = station_map[m["stationId"]]
-            theta = math.radians(m["bearingDeg"])
+        for station in stations:
+            slng, slat = station["lng"], station["lat"]
+            theta = math.radians(station["bearingDeg"])
             cos_t, sin_t = math.cos(theta), math.sin(theta)
             dist = max(1e-6, math.hypot(lng - slng, lat - slat))
             weight = 1.0 / dist
@@ -417,11 +405,10 @@ def solve(stations, measurements):
     testCases: [
       {
         args: [
-          [{ id: "A", lng: 116.350, lat: 39.860 }, { id: "B", lng: 116.450, lat: 39.860 }, { id: "C", lng: 116.420, lat: 39.860 }],
           [
-            { stationId: "A", bearingDeg: 51.34 },
-            { stationId: "B", bearingDeg: 308.66 },
-            { stationId: "C", bearingDeg: 333.43 },
+            { id: "A", lng: 116.350, lat: 39.860, bearingDeg: 51.34 },
+            { id: "B", lng: 116.450, lat: 39.860, bearingDeg: 308.66 },
+            { id: "C", lng: 116.420, lat: 39.860, bearingDeg: 333.43 },
           ],
         ],
         expected: null,

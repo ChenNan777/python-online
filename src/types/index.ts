@@ -41,18 +41,15 @@ export type ShortestPathResult = {
   userPath?: string[];   // user's algorithm path (if returned as dict)
 };
 
-export type ObserverStation = { id: string; lng: number; lat: number; frequency?: string };
-export type PositioningObservation = {
-  stationId: string;
+export type PositioningStation = {
+  id: string;
   lng: number;
   lat: number;
   frequency?: string;
   bearingDeg: number;
 };
 export type PositioningData = {
-  stations: ObserverStation[];
-  measurements: { stationId: string; bearingDeg: number }[];
-  observations: PositioningObservation[];
+  stations: PositioningStation[];
   trueTarget: { lng: number; lat: number };
   targetId?: string;
   source?: 'local' | 'exam' | 'fallback';

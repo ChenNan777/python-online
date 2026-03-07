@@ -485,8 +485,7 @@ const MapPanel: React.FC<MapPanelProps> = ({ roadNetwork, isPracticeMode: isPrac
 
         {/* Positioning stations */}
         {positioningData?.stations?.map((station) => {
-          const measurement = positioningData.measurements.find(m => m.stationId === station.id);
-          const bearingDeg = measurement?.bearingDeg ?? 0;
+          const bearingDeg = station.bearingDeg;
 
           return (
             <Marker
@@ -561,14 +560,12 @@ const MapPanel: React.FC<MapPanelProps> = ({ roadNetwork, isPracticeMode: isPrac
         })}
 
         {/* Bearing lines */}
-        {positioningData?.measurements?.map((measurement, idx) => {
-          const station = positioningData.stations.find(s => s.id === measurement.stationId);
-          if (!station) return null;
+        {positioningData?.stations?.map((station, idx) => {
 
           const endPoint = calculateBearingLineEnd(
             station.lng,
             station.lat,
-            measurement.bearingDeg,
+            station.bearingDeg,
             bearingLineLength
           );
 
@@ -576,7 +573,7 @@ const MapPanel: React.FC<MapPanelProps> = ({ roadNetwork, isPracticeMode: isPrac
 
           return (
             <Polyline
-              key={`bearing-${measurement.stationId}`}
+              key={`bearing-${station.id}`}
               positions={[
                 [station.lat, station.lng],
                 endPoint
