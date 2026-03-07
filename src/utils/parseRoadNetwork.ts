@@ -45,7 +45,13 @@ function haversineDistance(
  * @param geojson - GeoJSON 格式的路网数据
  * @returns 包含图结构、节点位置、边信息和起终点的路网对象
  */
-export function parseRoadNetwork(geojson: FeatureCollection): RoadNetwork {
+export function parseRoadNetwork(
+  geojson: FeatureCollection,
+  preferredCoords?: {
+    startCoord?: { lng: number; lat: number };
+    endCoord?: { lng: number; lat: number };
+  },
+): RoadNetwork {
   const graph: Record<string, Record<string, number>> = {};
   const positions: Record<string, [number, number]> = {};
   const nodes: Array<{ id: string; lng: number; lat: number }> = [];
@@ -89,8 +95,8 @@ export function parseRoadNetwork(geojson: FeatureCollection): RoadNetwork {
   }
 
   // 指定起点和终点坐标
-  const startCoord = { lng: 113.043225, lat: 28.254607 };
-  const endCoord = { lng: 113.039751, lat: 28.266712 };
+  const startCoord = preferredCoords?.startCoord ?? { lng: 113.043225, lat: 28.254607 };
+  const endCoord = preferredCoords?.endCoord ?? { lng: 113.039751, lat: 28.266712 };
 
   // 找到最接近指定坐标的节点
   let start = nodes[0].id;

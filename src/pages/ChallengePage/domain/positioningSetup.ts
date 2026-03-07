@@ -1,8 +1,11 @@
-import { generatePositioningData } from "../../../utils/generatePositioning";
+import type { PositioningData } from "../../../types";
 import { escapeJsonForPyString } from "./escapeJsonForPyString";
 
-export function buildPositioningSetup(): string {
-  const positioningData = generatePositioningData();
+export function buildPositioningSetup(positioningData: PositioningData | null): string {
+  if (!positioningData) {
+    return "";
+  }
+
   const stationsJson = escapeJsonForPyString(positioningData.stations);
   const measurementsJson = escapeJsonForPyString(positioningData.measurements);
   return `import json as __pjson__

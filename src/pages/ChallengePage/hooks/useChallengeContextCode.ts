@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 
+import type { PositioningData } from "../../../types";
 import type { RoadNetwork } from "../../../utils/parseRoadNetwork";
 import type { DebugCoord } from "../domain/pathfindingSetup";
 import {
@@ -19,6 +20,7 @@ type UseChallengeContextCodeArgs = {
   testCases: ChallengeTestCase[];
   contextCode: string;
   roadNetwork: RoadNetwork | null;
+  positioningData: PositioningData | null;
   debugMode: boolean;
   debugStartCoord: DebugCoord | null;
   debugEndCoord: DebugCoord | null;
@@ -31,6 +33,7 @@ export function useChallengeContextCode(args: UseChallengeContextCodeArgs): stri
     testCases,
     contextCode,
     roadNetwork,
+    positioningData,
     debugMode,
     debugStartCoord,
     debugEndCoord,
@@ -57,7 +60,9 @@ export function useChallengeContextCode(args: UseChallengeContextCodeArgs): stri
       })
       : "";
 
-    const positioningSetup = isPositioningChallenge ? buildPositioningSetup() : "";
+    const positioningSetup = isPositioningChallenge
+      ? buildPositioningSetup(positioningData)
+      : "";
 
     const parts = [testSetup, graphSetup, positioningSetup, contextCode].filter(Boolean);
     return parts.join("\n");
@@ -68,6 +73,7 @@ export function useChallengeContextCode(args: UseChallengeContextCodeArgs): stri
     debugStartCoord,
     isPathfindingChallenge,
     isPositioningChallenge,
+    positioningData,
     roadNetwork,
     testCases,
   ]);

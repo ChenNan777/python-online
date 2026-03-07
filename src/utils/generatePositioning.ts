@@ -1,4 +1,4 @@
-import type { PositioningData } from "../types";
+import type { ObserverStation, PositioningData } from "../types";
 
 // Fixed scenario: 3 stations, lng/lat coordinate space (Changsha area)
 const TRUE_TARGET = { lng: 113.039765, lat: 28.266974 };
@@ -22,6 +22,42 @@ function bearingDeg(slng: number, slat: number, tlng: number, tlat: number): num
 
 let _cached: PositioningData | null = null;
 
+export function mergePositioningDataById(args: {
+  stations: ObserverStation[];
+  measurements: Array<{ stationId: string; bearingDeg: number }>;
+  trueTarget: { lng: number; lat: number };
+  targetId?: string;
+  source?: PositioningData['source'];
+}): PositioningData {
+  const measurementMap = new Map(
+    args.measurements.map((measurement) => [measurement.stationId, measurement]),
+  );
+
+  const observations = args.stations.flatMap((station) => {
+    const measurement = measurementMap.get(station.id);
+    if (!measurement) {
+      return [];
+    }
+
+    return [{
+      stationId: station.id,
+      lng: station.lng,
+      lat: station.lat,
+      frequency: station.frequency,
+      bearingDeg: measurement.bearingDeg,
+    }];
+  });
+
+  return {
+    stations: args.stations,
+    measurements: args.measurements,
+    observations,
+    trueTarget: args.trueTarget,
+    targetId: args.targetId,
+    source: args.source ?? 'local',
+  };
+}
+
 export function generatePositioningData(): PositioningData {
   if (_cached) return _cached;
 
@@ -31,6 +67,11 @@ export function generatePositioningData(): PositioningData {
     bearingDeg: Math.round((bearingDeg(s.lng, s.lat, TRUE_TARGET.lng, TRUE_TARGET.lat) + NOISE[i]) * 100) / 100,
   }));
 
-  _cached = { stations, measurements, trueTarget: { ...TRUE_TARGET } };
+  _cached = mergePositioningDataById({
+    stations,
+    measurements,
+    trueTarget: { ...TRUE_TARGET },
+    source: 'local',
+  });
   return _cached;
 }

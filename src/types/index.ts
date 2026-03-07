@@ -42,10 +42,20 @@ export type ShortestPathResult = {
 };
 
 export type ObserverStation = { id: string; lng: number; lat: number; frequency?: string };
+export type PositioningObservation = {
+  stationId: string;
+  lng: number;
+  lat: number;
+  frequency?: string;
+  bearingDeg: number;
+};
 export type PositioningData = {
   stations: ObserverStation[];
   measurements: { stationId: string; bearingDeg: number }[];
+  observations: PositioningObservation[];
   trueTarget: { lng: number; lat: number };
+  targetId?: string;
+  source?: 'local' | 'exam' | 'fallback';
 };
 export type PositioningResult = {
   userLng: number;

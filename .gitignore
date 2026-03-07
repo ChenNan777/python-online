@@ -26,3 +26,4 @@ package-lock.json
 .claude/
 .worktrees/
 .env
+.cert/
