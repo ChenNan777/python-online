@@ -2881,231 +2881,231 @@ export type MemberDeviceRelationVo = {
 export type PageableObject = {
   offset?: number;
   sort?: SortObject;
-  pageNumber?: number;
   pageSize?: number;
-  paged?: boolean;
+  pageNumber?: number;
   unpaged?: boolean;
+  paged?: boolean;
 };
 
 export type PageAlertHistoryVo = {
-  totalElements?: number;
   totalPages?: number;
+  totalElements?: number;
+  first?: boolean;
+  last?: boolean;
   size?: number;
   content?: AlertHistoryVo[];
   number?: number;
   sort?: SortObject;
-  first?: boolean;
-  last?: boolean;
   numberOfElements?: number;
   pageable?: PageableObject;
   empty?: boolean;
 };
 
 export type PageAlertRulesVo = {
-  totalElements?: number;
   totalPages?: number;
+  totalElements?: number;
+  first?: boolean;
+  last?: boolean;
   size?: number;
   content?: AlertRulesVo[];
   number?: number;
   sort?: SortObject;
-  first?: boolean;
-  last?: boolean;
   numberOfElements?: number;
   pageable?: PageableObject;
   empty?: boolean;
 };
 
 export type PageDroneControlLogVo = {
-  totalElements?: number;
   totalPages?: number;
+  totalElements?: number;
+  first?: boolean;
+  last?: boolean;
   size?: number;
   content?: DroneControlLogVo[];
   number?: number;
   sort?: SortObject;
-  first?: boolean;
-  last?: boolean;
   numberOfElements?: number;
   pageable?: PageableObject;
   empty?: boolean;
 };
 
 export type PageDroneRealtimeStatusVo = {
-  totalElements?: number;
   totalPages?: number;
+  totalElements?: number;
+  first?: boolean;
+  last?: boolean;
   size?: number;
   content?: DroneRealtimeStatusVo[];
   number?: number;
   sort?: SortObject;
-  first?: boolean;
-  last?: boolean;
   numberOfElements?: number;
   pageable?: PageableObject;
   empty?: boolean;
 };
 
 export type PageDroneWarningVo = {
-  totalElements?: number;
   totalPages?: number;
+  totalElements?: number;
+  first?: boolean;
+  last?: boolean;
   size?: number;
   content?: DroneWarningVo[];
   number?: number;
   sort?: SortObject;
-  first?: boolean;
-  last?: boolean;
   numberOfElements?: number;
   pageable?: PageableObject;
   empty?: boolean;
 };
 
 export type PageLogBraceletVo = {
-  totalElements?: number;
   totalPages?: number;
+  totalElements?: number;
+  first?: boolean;
+  last?: boolean;
   size?: number;
   content?: LogBraceletVo[];
   number?: number;
   sort?: SortObject;
-  first?: boolean;
-  last?: boolean;
   numberOfElements?: number;
   pageable?: PageableObject;
   empty?: boolean;
 };
 
 export type PageLogMemberPathVo = {
-  totalElements?: number;
   totalPages?: number;
+  totalElements?: number;
+  first?: boolean;
+  last?: boolean;
   size?: number;
   content?: LogMemberPathVo[];
   number?: number;
   sort?: SortObject;
-  first?: boolean;
-  last?: boolean;
   numberOfElements?: number;
   pageable?: PageableObject;
   empty?: boolean;
 };
 
 export type PageLogPayloadVo = {
-  totalElements?: number;
   totalPages?: number;
+  totalElements?: number;
+  first?: boolean;
+  last?: boolean;
   size?: number;
   content?: LogPayloadVo[];
   number?: number;
   sort?: SortObject;
-  first?: boolean;
-  last?: boolean;
   numberOfElements?: number;
   pageable?: PageableObject;
   empty?: boolean;
 };
 
 export type PageMemberDeviceRelationVo = {
-  totalElements?: number;
   totalPages?: number;
+  totalElements?: number;
+  first?: boolean;
+  last?: boolean;
   size?: number;
   content?: MemberDeviceRelationVo[];
   number?: number;
   sort?: SortObject;
-  first?: boolean;
-  last?: boolean;
   numberOfElements?: number;
   pageable?: PageableObject;
   empty?: boolean;
 };
 
 export type PageScoresVo = {
-  totalElements?: number;
   totalPages?: number;
+  totalElements?: number;
+  first?: boolean;
+  last?: boolean;
   size?: number;
   content?: ScoresVo[];
   number?: number;
   sort?: SortObject;
-  first?: boolean;
-  last?: boolean;
   numberOfElements?: number;
   pageable?: PageableObject;
   empty?: boolean;
 };
 
 export type PageScoringStandardsVo = {
-  totalElements?: number;
   totalPages?: number;
+  totalElements?: number;
+  first?: boolean;
+  last?: boolean;
   size?: number;
   content?: ScoringStandardsVo[];
   number?: number;
   sort?: SortObject;
-  first?: boolean;
-  last?: boolean;
   numberOfElements?: number;
   pageable?: PageableObject;
   empty?: boolean;
 };
 
 export type PageStudentTargetAssignmentVo = {
-  totalElements?: number;
   totalPages?: number;
+  totalElements?: number;
+  first?: boolean;
+  last?: boolean;
   size?: number;
   content?: StudentTargetAssignmentVo[];
   number?: number;
   sort?: SortObject;
-  first?: boolean;
-  last?: boolean;
   numberOfElements?: number;
   pageable?: PageableObject;
   empty?: boolean;
 };
 
 export type PageTaskDroneConfigVo = {
-  totalElements?: number;
   totalPages?: number;
+  totalElements?: number;
+  first?: boolean;
+  last?: boolean;
   size?: number;
   content?: TaskDroneConfigVo[];
   number?: number;
   sort?: SortObject;
-  first?: boolean;
-  last?: boolean;
   numberOfElements?: number;
   pageable?: PageableObject;
   empty?: boolean;
 };
 
 export type PageThresholdsVo = {
-  totalElements?: number;
   totalPages?: number;
+  totalElements?: number;
+  first?: boolean;
+  last?: boolean;
   size?: number;
   content?: ThresholdsVo[];
   number?: number;
   sort?: SortObject;
-  first?: boolean;
-  last?: boolean;
   numberOfElements?: number;
   pageable?: PageableObject;
   empty?: boolean;
 };
 
 export type PageTrainingTaskAssignmentVo = {
-  totalElements?: number;
   totalPages?: number;
+  totalElements?: number;
+  first?: boolean;
+  last?: boolean;
   size?: number;
   content?: TrainingTaskAssignmentVo[];
   number?: number;
   sort?: SortObject;
-  first?: boolean;
-  last?: boolean;
   numberOfElements?: number;
   pageable?: PageableObject;
   empty?: boolean;
 };
 
 export type PageTrainingTaskVO = {
-  totalElements?: number;
   totalPages?: number;
+  totalElements?: number;
+  first?: boolean;
+  last?: boolean;
   size?: number;
   content?: TrainingTaskVO[];
   number?: number;
   sort?: SortObject;
-  first?: boolean;
-  last?: boolean;
   numberOfElements?: number;
   pageable?: PageableObject;
   empty?: boolean;
@@ -4113,7 +4113,7 @@ export type StudentTargetAssignment = {
   /** 队伍 ID */
   teamId?: number;
   /** 分配的目标 ID（无人机 ID） */
-  targetId?: number;
+  targetId?: string;
   /** 目标名称 */
   targetName?: string;
   /** 分配时间 */

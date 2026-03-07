@@ -718,6 +718,12 @@ export type CommonResultStudentPositioningInfoVO = {
   data?: StudentPositioningInfoVO;
 };
 
+export type CommonResultStudentTrainingAssignmentVO = {
+  code?: number;
+  message?: string;
+  data?: StudentTrainingAssignmentVO;
+};
+
 export type CommonResultTaskBasicInfoContext = {
   code?: number;
   message?: string;
@@ -1895,21 +1901,21 @@ export type OssPolicyResult = {
 export type PageableObject = {
   offset?: number;
   sort?: SortObject;
-  pageNumber?: number;
   pageSize?: number;
-  paged?: boolean;
+  pageNumber?: number;
   unpaged?: boolean;
+  paged?: boolean;
 };
 
 export type PageStudentOperationCodeVo = {
-  totalElements?: number;
   totalPages?: number;
+  totalElements?: number;
+  first?: boolean;
+  last?: boolean;
   size?: number;
   content?: StudentOperationCodeVo[];
   number?: number;
   sort?: SortObject;
-  first?: boolean;
-  last?: boolean;
   numberOfElements?: number;
   pageable?: PageableObject;
   empty?: boolean;
@@ -1954,6 +1960,10 @@ export type PathPlanningAssignmentDTO = {
   startLatitude?: number;
   deviceSn?: string;
   roadNetworkGeoJson?: string;
+};
+
+export type PathPlanningData = {
+  planningResult: PlanningResultDTO;
 };
 
 export type PathPlanningRequestDTO = {
@@ -2090,6 +2100,19 @@ export type PositioningAnalysisCurrentTaskReconDataUsingGetResponses = {
   200: StudentPositioningInfoVO;
 };
 
+export type PositioningAnalysisData = {
+  /** 无人机目标 ID */
+  uavId: number;
+  /** 定位经度 */
+  longitude: number;
+  /** 定位纬度 */
+  latitude: number;
+  /** 定位精度 (米) */
+  accuracy?: number;
+  /** 分析描述 */
+  analysisDescription?: string;
+};
+
 export type PositioningAnalysisResultDTO = {
   /** 任务ID */
   taskId: number;
@@ -2145,7 +2168,7 @@ export type PositioningAnalysisSubmitUsingPostResponses = {
   /**
    * OK
    */
-  200: boolean;
+  200: string;
 };
 
 export type RadiationPayload = {
@@ -2746,6 +2769,18 @@ export type SortObject = {
   unsorted?: boolean;
 };
 
+export type StudentOperationCodeAssignmentInfoUsingGetParams = {
+  /** 用户 ID */
+  userId: number;
+};
+
+export type StudentOperationCodeAssignmentInfoUsingGetResponses = {
+  /**
+   * OK
+   */
+  200: StudentTrainingAssignmentVO;
+};
+
 export type StudentOperationCodeDTO = {
   /** 任务 ID */
   taskId?: number;
@@ -2844,7 +2879,7 @@ export type StudentOperationCodeRequestParam = {
   sourceCode?: string;
 };
 
-export type StudentOperationCodeSaveUsingPostResponses = {
+export type StudentOperationCodeSaveCodeUsingPostResponses = {
   /**
    * OK
    */
@@ -2860,6 +2895,13 @@ export type StudentOperationCodeSearchUsingGetResponses = {
    * OK
    */
   200: PageStudentOperationCodeVo;
+};
+
+export type StudentOperationCodeSubmitUsingPostResponses = {
+  /**
+   * OK
+   */
+  200: string;
 };
 
 export type StudentOperationCodeUpdateUsingPutResponses = {
@@ -2913,6 +2955,54 @@ export type StudentPositioningInfoVO = {
   taskName?: string;
   /** 侦察数据列表 */
   reconnaissanceDataList?: ReconnaissanceDataVO[];
+};
+
+export type StudentTrainingAssignmentVO = {
+  /** 学生 ID */
+  memberId?: number;
+  /** 学生姓名 */
+  memberName?: string;
+  /** 所属队伍 ID */
+  teamId?: number;
+  /** 所属队伍名称 */
+  teamName?: string;
+  /** 参与的任务 ID */
+  taskId?: number;
+  /** 任务名称 */
+  taskName?: string;
+  /** 当前任务阶段码（4-定位分析，5-路径规划） */
+  taskPhaseCode?: string;
+  /** 平板序列号（路径规划使用） */
+  deviceSn?: string;
+  /** 目标 ID（定位分析为无人机 ID，路径规划为目标点 ID） */
+  targetId?: string;
+  /** 目标位置 - 经度 */
+  targetLongitude?: number;
+  /** 目标位置 - 纬度 */
+  targetLatitude?: number;
+  /** 人员开始位置 - 经度（路径规划使用） */
+  startLongitude?: number;
+  /** 人员开始位置 - 纬度（路径规划使用） */
+  startLatitude?: number;
+  /** 路网数据 GeoJSON（路径规划使用） */
+  roadNetworkGeoJson?: string;
+};
+
+export type StudentTrainingWorkSubmitDTO = {
+  /** 任务 ID */
+  taskId: number;
+  /** 队伍 ID */
+  teamId: number;
+  /** 成员 ID */
+  memberId: number;
+  /** 成员姓名 */
+  memberName?: string;
+  /** 作业类型（4-定位分析，5-路径规划） */
+  workType: 4 | 5;
+  /** 定位分析作业数据（作业类型为 4 时必填） */
+  positioningData?: PositioningAnalysisData;
+  /** 路径规划作业数据（作业类型为 5 时必填） */
+  pathPlanningData?: PathPlanningData;
 };
 
 export type TabletDeviceVO = {
@@ -4277,3 +4367,11 @@ export type WorkPlatformTaskVO = {
   /** 任务角色名称 */
   taskRoleName?: string;
 };
+
+/** 作业类型（4-定位分析，5-路径规划） */
+export enum WorkTypeEnum {
+  undefined = 4,
+  undefined = 5,
+}
+
+export type IWorkTypeEnum = keyof typeof WorkTypeEnum;

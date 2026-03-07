@@ -1,9 +1,10 @@
 /* eslint-disable */
 // @ts-ignore
 export * from './types';
+export * from './displayEnumLabel';
 
 export * from './trainingTeamMemberApi';
-export * from './studentOperationCodeApi';
+export * from './xueshengxunlianzuoyeguanli';
 export * from './webSocketMessageController';
 export * from './teamControlApi';
 export * from './taskControlApi';

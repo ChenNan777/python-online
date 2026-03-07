@@ -78,7 +78,7 @@ export function positioningAnalysisSubmitUsingPost({
   body: API.PositioningAnalysisResultDTO;
   options?: CustomRequestOptions;
 }) {
-  return request<boolean>('/positioning-analysis/submit', {
+  return request<string>('/positioning-analysis/submit', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
