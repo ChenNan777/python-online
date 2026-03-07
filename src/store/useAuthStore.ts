@@ -4,6 +4,8 @@ import { authApi } from '../services/auth';
 import { getTaskInfo } from '../services/task';
 import { AUTH_TOKEN_KEY, USER_INFO_KEY } from '../constants/auth';
 
+let refreshTaskInfoPromise: Promise<boolean> | null = null;
+
 function saveAuthToStorage(token: string, user: User): void {
   localStorage.setItem(AUTH_TOKEN_KEY, token);
   localStorage.setItem(USER_INFO_KEY, JSON.stringify(user));
@@ -65,22 +67,34 @@ export const useAuthStore = create<AuthStore>((set) => ({
   },
 
   refreshTaskInfo: async () => {
+    if (refreshTaskInfoPromise) {
+      return refreshTaskInfoPromise;
+    }
+
     const state = useAuthStore.getState();
     if (!state.user) {
       return false;
     }
 
-    try {
-      // 重新获取任务信息
-      const updatedUser = await getTaskInfo(state.user.username, state.user.id);
+    const currentUser = state.user;
 
-      // 更新 store 和 localStorage
-      localStorage.setItem(USER_INFO_KEY, JSON.stringify(updatedUser));
-      set({ user: updatedUser });
-      return true;
-    } catch (error) {
-      console.error('Failed to refresh task info:', error);
-      return false;
-    }
+    refreshTaskInfoPromise = (async () => {
+      try {
+        // 重新获取任务信息
+        const updatedUser = await getTaskInfo(currentUser.username, currentUser.id);
+
+        // 更新 store 和 localStorage
+        localStorage.setItem(USER_INFO_KEY, JSON.stringify(updatedUser));
+        set({ user: updatedUser });
+        return true;
+      } catch (error) {
+        console.error('Failed to refresh task info:', error);
+        return false;
+      } finally {
+        refreshTaskInfoPromise = null;
+      }
+    })();
+
+    return refreshTaskInfoPromise;
   },
 }));

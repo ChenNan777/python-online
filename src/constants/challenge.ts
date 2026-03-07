@@ -10,6 +10,7 @@ export const POSITIONING_DEBUG_PANEL_TAB: ChallengePanelTab = 'positioning-debug
 export const POSITIONING_TYPE: ChallengeType = 'positioning';
 export const PATHFINDING_TYPE: ChallengeType = 'pathfinding';
 
+// 任务状态常量定义
 export const TASK_STATUS_READY = 0;
 export const TASK_STATUS_START_TASK = 1;
 export const TASK_STATUS_DRONE_LAUNCH = 2;

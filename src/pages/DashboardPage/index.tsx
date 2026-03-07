@@ -1,20 +1,29 @@
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useNavigationType } from 'react-router-dom';
 import { Button, Card, Typography, message } from 'antd';
 import { LogoutOutlined, ReloadOutlined, RocketOutlined } from '@ant-design/icons';
 import { useAuthStore } from '../../store/useAuthStore';
 import ThemeSwitcher from '../../components/ThemeSwitcher';
 import { getChallengeStartState, getRoleLabel } from '../../constants/challenge';
 import { buildChallengePath, LOGIN_PATH } from '../../constants/routes';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import './DashboardPage.css';
 
 const { Paragraph, Title } = Typography;
 
 export default function DashboardPage() {
   const navigate = useNavigate();
+  const navigationType = useNavigationType();
   const { user, logout, refreshTaskInfo } = useAuthStore();
   const [refreshing, setRefreshing] = useState(false);
   const [messageApi, contextHolder] = message.useMessage();
+  const hasAutoRefreshed = useRef(false);
+
+  useEffect(() => {
+    if (!hasAutoRefreshed.current && user && navigationType === 'POP') {
+      hasAutoRefreshed.current = true;
+      void refreshTaskInfo();
+    }
+  }, [navigationType, refreshTaskInfo, user]);
 
   if (!user) {
     return null;
