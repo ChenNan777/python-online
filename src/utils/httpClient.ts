@@ -1,7 +1,9 @@
-import axios, { AxiosError } from 'axios';
+import axios, { AxiosError, AxiosRequestConfig } from 'axios';
 import { message } from 'antd';
 import { AUTH_TOKEN_KEY, USER_INFO_KEY } from '../constants/auth';
 import { LOGIN_PATH } from '../constants/routes';
+
+export type CustomRequestOptions = AxiosRequestConfig;
 
 function getStoredAuthToken(): string | null {
   return localStorage.getItem(AUTH_TOKEN_KEY);

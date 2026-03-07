@@ -5,7 +5,7 @@ import { useThemeStore, type ThemeId } from '../store/useThemeStore';
 
 const OPTIONS: Array<{ label: string; value: ThemeId; icon: ReactNode }> = [
   { label: '亮色', value: 'light', icon: <BulbOutlined /> },
-  { label: '暗黑科技', value: 'dark-tech', icon: <MoonOutlined /> },
+  { label: '暗色', value: 'dark-tech', icon: <MoonOutlined /> },
 ];
 
 export default function ThemeSwitcher() {
