@@ -1,5 +1,5 @@
 import { useNavigate, useNavigationType } from 'react-router-dom';
-import { Button, Card, Typography, message } from 'antd';
+import { Button, Card, Modal, Typography, message } from 'antd';
 import { LogoutOutlined, ReloadOutlined, RocketOutlined } from '@ant-design/icons';
 import { useAuthStore } from '../../store/useAuthStore';
 import ThemeSwitcher from '../../components/ThemeSwitcher';
@@ -38,8 +38,17 @@ export default function DashboardPage() {
   };
 
   const handleLogout = async () => {
-    await logout();
-    navigate(LOGIN_PATH);
+    Modal.confirm({
+      title: '确认退出登录？',
+      content: '退出后将返回登录页。',
+      okText: '退出登录',
+      cancelText: '取消',
+      okButtonProps: { danger: true },
+      onOk: async () => {
+        await logout();
+        navigate(LOGIN_PATH, { replace: true });
+      },
+    });
   };
 
   const handleRefresh = async () => {
