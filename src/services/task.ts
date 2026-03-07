@@ -55,14 +55,31 @@ function adaptTaskInfoToUser(apiData: TaskInfoApiResponse, username: string, use
   };
 }
 
+function buildUserWithoutTask(username: string, userId: string): User {
+  return {
+    id: userId,
+    username,
+    role: null,
+    team: {
+      id: '',
+      name: '',
+    },
+    task: null,
+  };
+}
+
 /**
  * 获取任务信息
  */
 export async function getTaskInfo(username: string, userId: string): Promise<User> {
-  const response = await httpClient.get<ApiResponse<TaskInfoApiResponse>>('/workPlatform/task');
+  const response = await httpClient.get<ApiResponse<TaskInfoApiResponse | null>>('/workPlatform/task');
 
   if (response.data.code !== 200) {
     throw new Error(response.data.message || '获取任务信息失败');
+  }
+
+  if (response.data.data === null) {
+    return buildUserWithoutTask(username, userId);
   }
 
   return adaptTaskInfoToUser(response.data.data, username, userId);

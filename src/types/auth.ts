@@ -4,9 +4,9 @@ import type { ChallengeType } from '../constants/challenge';
 export interface User {
   id: string;
   username: string;
-  role: ChallengeType;
+  role: ChallengeType | null;
   team: Team;
-  task: TaskInfo;
+  task: TaskInfo | null;
 }
 
 export interface Team {

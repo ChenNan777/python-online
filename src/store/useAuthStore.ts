@@ -28,7 +28,7 @@ interface AuthStore {
   setAuth: (token: string, user: User) => void;
   logout: () => Promise<void>;
   loadFromStorage: () => void;
-  refreshTaskInfo: () => Promise<void>;
+  refreshTaskInfo: () => Promise<boolean>;
 }
 
 export const useAuthStore = create<AuthStore>((set) => ({
@@ -67,7 +67,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
   refreshTaskInfo: async () => {
     const state = useAuthStore.getState();
     if (!state.user) {
-      return;
+      return false;
     }
 
     try {
@@ -77,8 +77,10 @@ export const useAuthStore = create<AuthStore>((set) => ({
       // 更新 store 和 localStorage
       localStorage.setItem(USER_INFO_KEY, JSON.stringify(updatedUser));
       set({ user: updatedUser });
+      return true;
     } catch (error) {
       console.error('Failed to refresh task info:', error);
+      return false;
     }
   },
 }));
