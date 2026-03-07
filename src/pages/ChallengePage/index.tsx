@@ -38,8 +38,10 @@ import type { RoadNetwork } from '../../utils/parseRoadNetwork';
 import { useAuthStore } from '../../store/useAuthStore';
 import { useThemeStore } from '../../store/useThemeStore';
 import { getMonacoTheme } from '../../utils/theme';
+import CodeEditorShell from '../../components/CodeEditorShell';
+import PageToolbar from '../../components/PageToolbar';
+import RunControls from '../../components/RunControls';
 import ThemeSwitcher from '../../components/ThemeSwitcher';
-import { RunControls } from "./components";
 import { useChallengeContextCode, useEditorDecorations } from "./hooks";
 
 export default function ChallengePage() {
@@ -71,6 +73,12 @@ export default function ChallengePage() {
       navigate(DASHBOARD_PATH, { replace: true });
     }
   }, [isValidChallenge, navigate]);
+
+  useEffect(() => {
+    if (!isPracticeRoute && user && !user.task) {
+      navigate(DASHBOARD_PATH, { replace: true });
+    }
+  }, [isPracticeRoute, navigate, user]);
 
   const {
     code, setCode,
@@ -295,66 +303,61 @@ export default function ChallengePage() {
   return (
     <Layout className="flex flex-col h-full theme-page theme-app">
       {messageContextHolder}
-      <Layout.Header className="flex items-center pl-1.5 pr-2 h-12! shrink-0 theme-toolbar" style={{padding: '0 10px'}}>
-        <Space size={4} align="center" className="min-w-0">
-          {user?.task.memberName && user?.team.name && (
-            <span className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
-              {user.team.name} / {user.task.memberName}
-            </span>
+      <Layout.Header className="pl-1.5 pr-2 h-12! shrink-0 theme-toolbar" style={{ padding: '0 10px' }}>
+        <PageToolbar
+          className="flex items-center h-full"
+          leftContent={(
+            <>
+              {user?.task?.memberName && user?.team.name ? (
+                <span className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
+                  {user.team.name} / {user.task.memberName}
+                </span>
+              ) : null}
+              {isPracticeRoute ? (
+                <Button size="small" onClick={() => navigate(PRACTICE_PATH)} disabled={isRunning}>
+                  返回
+                </Button>
+              ) : null}
+              {hasContext ? <Tag color="blue" className="text-xs">上下文</Tag> : null}
+              <Tooltip title="加载额外依赖" placement="bottom">
+                <span>
+                  <Button size="small" onClick={() => setDepsModalOpen(true)} disabled={isRunning || depsLoading}>加载依赖</Button>
+                </span>
+              </Tooltip>
+              <Tooltip title="添加隐藏上下文代码" placement="bottom">
+                <span>
+                  <Button size="small" onClick={() => { setContextDraft(contextCode); setContextModalOpen(true); }} disabled={isRunning}>上下文</Button>
+                </span>
+              </Tooltip>
+              {isPathfindingChallenge && isPracticeRoute ? (
+                <Tooltip title="开启后可拖动起终点验证算法" placement="bottom">
+                  <Space size={4} align="center">
+                    <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>自定义起终点</span>
+                    <Switch size="small" checked={debugMode} onChange={handleDebugModeChange} disabled={isRunning} />
+                  </Space>
+                </Tooltip>
+              ) : null}
+            </>
           )}
-          {isPracticeRoute && (
-            <Button
-              size="small"
-              onClick={() => navigate(PRACTICE_PATH)}
-              disabled={isRunning}
-            >
-              返回
-            </Button>
+          rightContent={(
+            <div className="theme-toolbar-group">
+              <ThemeSwitcher />
+              {results !== null ? (
+                <span className={`theme-toolbar-pill ${allPassed ? 'theme-text-success' : 'theme-text-danger'}`}>
+                  {passedCount}/{totalCount} 通过
+                </span>
+              ) : null}
+              <RunControls
+                onRun={runCode}
+                onContinue={continueExec}
+                onStepOver={handleStepOver}
+                onStepInto={handleStepInto}
+                onStepOut={handleStepOut}
+                onStop={stopExec}
+              />
+            </div>
           )}
-          {hasContext && <Tag color="blue" className="text-xs">上下文</Tag>}
-          <Tooltip title="加载额外依赖" placement="bottom">
-            <span>
-              <Button size="small" onClick={() => setDepsModalOpen(true)}
-                disabled={isRunning || depsLoading}>加载依赖</Button>
-            </span>
-          </Tooltip>
-          <Tooltip title="添加隐藏上下文代码" placement="bottom">
-            <span>
-              <Button size="small" onClick={() => { setContextDraft(contextCode); setContextModalOpen(true); }}
-                disabled={isRunning}>上下文</Button>
-            </span>
-          </Tooltip>
-          {isPathfindingChallenge && isPracticeRoute && (
-            <Tooltip title="开启后可拖动起终点验证算法" placement="bottom">
-              <Space size={4} align="center">
-                <span className="text-xs" style={{ color: 'var(--text-secondary)' }}>自定义起终点</span>
-                <Switch
-                  size="small"
-                  checked={debugMode}
-                  onChange={handleDebugModeChange}
-                  disabled={isRunning}
-                />
-              </Space>
-            </Tooltip>
-          )}
-        </Space>
-        <div className="flex-1" />
-        <Space size={8} align="center">
-          <ThemeSwitcher />
-          {results !== null && (
-            <span className={`text-xs font-medium ${allPassed ? "theme-text-success" : "theme-text-danger"}`}>
-              {passedCount}/{totalCount} 通过
-            </span>
-          )}
-          <RunControls
-            onRun={runCode}
-            onContinue={continueExec}
-            onStepOver={handleStepOver}
-            onStepInto={handleStepInto}
-            onStepOut={handleStepOut}
-            onStop={stopExec}
-          />
-        </Space>
+        />
       </Layout.Header>
 
       <ExtraDepsModal
@@ -407,41 +410,29 @@ export default function ChallengePage() {
               </Pane>
               {/* Editor */}
               <Pane minSize={200} className="min-h-0">
-                <div className="theme-editor-shell theme-editor-shell--framed theme-glow">
-                  <div className="theme-editor-chrome">
-                    <div className="theme-editor-chrome__left">
-                      <div className="theme-editor-chrome__dots"><span /><span /><span /></div>
-                      <span className="theme-editor-chrome__title">solve.py</span>
-                    </div>
-                    <div className="theme-editor-chrome__meta">
-                      <span className="theme-editor-chip">Python</span>
-                      <span className="theme-editor-chip">Challenge</span>
-                    </div>
-                  </div>
-                  <div className="theme-editor-body">
-                    <Editor
-                      height="100%"
-                      defaultLanguage="python"
-                      theme={getMonacoTheme(themeId)}
-                      value={code}
-                      onChange={(v) => setCode(v ?? "")}
-                      onMount={handleEditorMount}
-                      options={{
-                        minimap: { enabled: false },
-                        glyphMargin: true,
-                        lineNumbers: "on",
-                        scrollBeyondLastLine: false,
-                        fontSize: 13,
-                        fontLigatures: true,
-                        smoothScrolling: true,
-                        renderLineHighlight: "all",
-                        bracketPairColorization: { enabled: true },
-                        guides: { bracketPairs: true, indentation: true },
-                        padding: { top: 14 },
-                      }}
-                    />
-                  </div>
-                </div>
+                <CodeEditorShell title="solve.py" badges={["Python", "Challenge"]}>
+                  <Editor
+                    height="100%"
+                    defaultLanguage="python"
+                    theme={getMonacoTheme(themeId)}
+                    value={code}
+                    onChange={(v) => setCode(v ?? "")}
+                    onMount={handleEditorMount}
+                    options={{
+                      minimap: { enabled: false },
+                      glyphMargin: true,
+                      lineNumbers: "on",
+                      scrollBeyondLastLine: false,
+                      fontSize: 13,
+                      fontLigatures: true,
+                      smoothScrolling: true,
+                      renderLineHighlight: "all",
+                      bracketPairColorization: { enabled: true },
+                      guides: { bracketPairs: true, indentation: true },
+                      padding: { top: 14 },
+                    }}
+                  />
+                </CodeEditorShell>
               </Pane>
             </SplitPane>
           </Pane>

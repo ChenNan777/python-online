@@ -5,25 +5,18 @@ import {
   Button,
   Layout,
   Select,
-  Space,
   Tag,
   Tooltip,
   message,
 } from "antd";
-import {
-  CornerDownRight,
-  CornerUpLeft,
-  LoaderCircle,
-  Play,
-  PlayCircle,
-  SquareStop,
-  StepForward,
-} from "lucide-react";
 import type { editor as MonacoEditor } from "monaco-editor";
 import { Pane, SplitPane } from "react-split-pane";
+import CodeEditorShell from "../../components/CodeEditorShell";
 import RightPanelStack from "../EditorPage/RightPanelStack";
 import ContextCodeModal from "../../components/ContextCodeModal";
 import ExtraDepsModal from "../../components/ExtraDepsModal";
+import PageToolbar from "../../components/PageToolbar";
+import RunControls from "../../components/RunControls";
 import type { CodeTemplate } from "../../types";
 import { usePythonStore } from "../../store/usePythonStore";
 import { usePyodideWorkerRuntime } from "../../features/pythonRunner";
@@ -32,152 +25,6 @@ import { useThemeStore } from "../../store/useThemeStore";
 import { getMonacoTheme } from "../../utils/theme";
 import ThemeSwitcher from "../../components/ThemeSwitcher";
 import "../../App.css";
-
-function RunControls(props: {
-  onRun: () => void;
-  onContinue: () => void;
-  onStepOver: () => void;
-  onStepInto: () => void;
-  onStepOut: () => void;
-  onStop: () => void;
-}) {
-  const { isRunning, isPaused, isReady, hasBreakpoints, runStatus } =
-    usePythonStore((s) => ({
-      isRunning: s.isRunning,
-      isPaused: s.isPaused,
-      isReady: s.isReady,
-      hasBreakpoints: s.breakpoints.some((b) => b.enabled),
-      runStatus: s.runStatus,
-    }));
-
-  if (!isRunning) {
-    return (
-      <Tooltip title={isReady ? "开始运行" : "加载中..."} placement="bottom">
-        <span>
-          <Button
-            className="theme-run-btn theme-run-btn--primary"
-            size="small"
-            type="primary"
-            shape="circle"
-            onClick={props.onRun}
-            disabled={!isReady}
-            aria-label={isReady ? "开始运行" : "加载中"}
-            icon={
-              isReady ? (
-                <PlayCircle size={14} />
-              ) : (
-                <LoaderCircle size={14} className="animate-spin" />
-              )
-            }
-          />
-        </span>
-      </Tooltip>
-    );
-  }
-
-  if (!hasBreakpoints && !isPaused && runStatus === "running") {
-    return (
-      <Space size={6} className="theme-run-controls">
-        <Tooltip title="运行中" placement="bottom">
-          <span>
-            <Button
-              className="theme-run-btn theme-run-btn--primary"
-              size="small"
-              type="primary"
-              shape="circle"
-              disabled
-              aria-label="运行中"
-              icon={<LoaderCircle size={14} className="animate-spin" />}
-            />
-          </span>
-        </Tooltip>
-        <Tooltip title="结束运行" placement="bottom">
-          <span>
-            <Button
-              className="theme-run-btn theme-run-btn--danger"
-              size="small"
-              shape="circle"
-              danger
-              onClick={props.onStop}
-              aria-label="结束运行"
-              icon={<SquareStop size={14} />}
-            />
-          </span>
-        </Tooltip>
-      </Space>
-    );
-  }
-
-  return (
-    <Space size={6} className="theme-run-controls">
-      <Tooltip title="继续运行" placement="bottom">
-        <span>
-          <Button
-            className="theme-run-btn"
-            size="small"
-            shape="circle"
-            onClick={props.onContinue}
-            disabled={!isPaused}
-            aria-label="继续运行"
-            icon={<Play size={14} />}
-          />
-        </span>
-      </Tooltip>
-      <Tooltip title="单步（跳过函数）" placement="bottom">
-        <span>
-          <Button
-            className="theme-run-btn"
-            size="small"
-            shape="circle"
-            onClick={props.onStepOver}
-            disabled={!isPaused}
-            aria-label="单步（跳过函数）"
-            icon={<StepForward size={14} />}
-          />
-        </span>
-      </Tooltip>
-      <Tooltip title="运行进函数" placement="bottom">
-        <span>
-          <Button
-            className="theme-run-btn"
-            size="small"
-            shape="circle"
-            onClick={props.onStepInto}
-            disabled={!isPaused}
-            aria-label="运行进函数"
-            icon={<CornerDownRight size={14} />}
-          />
-        </span>
-      </Tooltip>
-      <Tooltip title="运行出函数" placement="bottom">
-        <span>
-          <Button
-            className="theme-run-btn"
-            size="small"
-            shape="circle"
-            onClick={props.onStepOut}
-            disabled={!isPaused}
-            aria-label="运行出函数"
-            icon={<CornerUpLeft size={14} />}
-          />
-        </span>
-      </Tooltip>
-      <Tooltip title="结束运行" placement="bottom">
-        <span>
-          <Button
-            className="theme-run-btn theme-run-btn--danger"
-            size="small"
-            shape="circle"
-            danger
-            onClick={props.onStop}
-            aria-label="结束运行"
-            icon={<SquareStop size={14} />}
-          />
-        </span>
-      </Tooltip>
-    </Space>
-  );
-}
 
 const CODE_TEMPLATES: CodeTemplate[] = [
   {
@@ -552,40 +399,45 @@ function DebuggerPage() {
   return (
     <Layout className="flex flex-col h-full theme-page theme-app">
       {messageContextHolder}
-      <Layout.Header className="flex items-center pl-1.5 pr-2 h-12! theme-toolbar" style={{padding: '0 10px'}}>
-        <Space size={4} align="center" className="min-w-0">
-          <Button
-            size="small"
-            onClick={() => navigate(PRACTICE_PATH)}
-            disabled={isRunning}
-          >
-            返回
-          </Button>
-          <Tag className="ml-1 text-xs w-14 text-center!">{status}</Tag>
-          {hasContext ? (
-            <Tag className="ml-1 text-xs" color="blue">
-              上下文
-            </Tag>
-          ) : null}
-          <>
-            <Select
+      <Layout.Header className="pl-1.5 pr-2 h-12! theme-toolbar" style={{ padding: "0 10px" }}>
+        <PageToolbar
+          className="flex items-center h-full"
+          leftContent={(
+            <>
+              <Button
+                size="small"
+                onClick={() => navigate(PRACTICE_PATH)}
+                disabled={isRunning}
+              >
+                返回
+              </Button>
+              <Tag className="ml-1 text-xs w-14 text-center!">{status}</Tag>
+              {hasContext ? (
+                <Tag className="ml-1 text-xs" color="blue">
+                  上下文
+                </Tag>
+              ) : null}
+              <Select
                 value={selectedTemplateId}
                 size="small"
                 className="min-w-0"
                 popupMatchSelectWidth={false}
                 disabled={isRunning}
-                options={CODE_TEMPLATES.map((t) => ({
-                  value: t.id,
-                  label: t.label,
-                  rawLabel: t.label,
-                  description: t.description,
+                options={CODE_TEMPLATES.map((template) => ({
+                  value: template.id,
+                  label: template.label,
+                  rawLabel: template.label,
+                  description: template.description,
                 }))}
                 optionRender={(option) => (
                   <div className="flex flex-col w-full max-w-full">
                     <div className="text-[13px] leading-5 break-words whitespace-normal">
                       {String(option.data.rawLabel ?? option.label)}
                     </div>
-                    <div className="text-xs leading-4 break-words whitespace-normal" style={{ color: 'var(--text-tertiary)' }}>
+                    <div
+                      className="text-xs leading-4 break-words whitespace-normal"
+                      style={{ color: "var(--text-tertiary)" }}
+                    >
                       {String(option.data.description ?? "")}
                     </div>
                   </div>
@@ -618,19 +470,21 @@ function DebuggerPage() {
                 </span>
               </Tooltip>
             </>
-        </Space>
-        <div className="flex-1" />
-        <div className="theme-toolbar-group shrink-0 min-w-[120px]">
-          <ThemeSwitcher />
-          <RunControls
-            onRun={runCode}
-            onContinue={continueExec}
-            onStepOver={handleStepOver}
-            onStepInto={handleStepInto}
-            onStepOut={handleStepOut}
-            onStop={stopExec}
-          />
-        </div>
+          )}
+          rightContent={(
+            <div className="theme-toolbar-group shrink-0 min-w-[120px]">
+              <ThemeSwitcher />
+              <RunControls
+                onRun={runCode}
+                onContinue={continueExec}
+                onStepOver={handleStepOver}
+                onStepInto={handleStepInto}
+                onStepOut={handleStepOut}
+                onStop={stopExec}
+              />
+            </div>
+          )}
+        />
       </Layout.Header>
 
       <ExtraDepsModal
@@ -660,18 +514,7 @@ function DebuggerPage() {
           className="h-full"
         >
           <Pane minSize={520} defaultSize="68%" className="min-h-0">
-            <div className="theme-editor-shell theme-editor-shell--framed theme-glow">
-              <div className="theme-editor-chrome">
-                <div className="theme-editor-chrome__left">
-                  <div className="theme-editor-chrome__dots"><span /><span /><span /></div>
-                  <span className="theme-editor-chrome__title">sandbox.py</span>
-                </div>
-                <div className="theme-editor-chrome__meta">
-                  <span className="theme-editor-chip">Python</span>
-                  <span className="theme-editor-chip">Debugger</span>
-                </div>
-              </div>
-              <div className="theme-editor-body">
+            <CodeEditorShell title="sandbox.py" badges={["Python", "Debugger"]}>
                 <Editor
                   height="100%"
                   defaultLanguage="python"
@@ -692,8 +535,7 @@ function DebuggerPage() {
                     padding: { top: 14 },
                   }}
                 />
-              </div>
-            </div>
+            </CodeEditorShell>
           </Pane>
           <Pane minSize={280} className="min-h-0">
             <div className="h-full">
