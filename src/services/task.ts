@@ -72,15 +72,15 @@ function buildUserWithoutTask(username: string, userId: string): User {
  * 获取任务信息
  */
 export async function getTaskInfo(username: string, userId: string): Promise<User> {
-  const response = await httpClient.get<ApiResponse<TaskInfoApiResponse | null>>('/workPlatform/task');
+  const response = (await httpClient.get<ApiResponse<TaskInfoApiResponse | null>>('/workPlatform/task')) as unknown as ApiResponse<TaskInfoApiResponse | null>;
 
-  if (response.data.code !== 200) {
-    throw new Error(response.data.message || '获取任务信息失败');
+  if (response.code !== 200) {
+    throw new Error(response.message || '获取任务信息失败');
   }
 
-  if (response.data.data === null) {
+  if (response.data === null) {
     return buildUserWithoutTask(username, userId);
   }
 
-  return adaptTaskInfoToUser(response.data.data, username, userId);
+  return adaptTaskInfoToUser(response.data, username, userId);
 }

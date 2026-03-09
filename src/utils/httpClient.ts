@@ -72,7 +72,7 @@ httpClient.interceptors.request.use(
 // 响应拦截器：统一错误处理
 httpClient.interceptors.response.use(
   (response) => {
-    return response;
+    return response.data;
   },
   (error: AxiosError) => {
     // 网络错误

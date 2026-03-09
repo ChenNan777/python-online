@@ -28,19 +28,19 @@ async function loginWithApi(request: LoginRequest): Promise<LoginResponse> {
     const encryptedPassword = encryptPassword(request.password);
 
     // 调用登录接口
-    const response = await httpClient.post<ApiResponse<LoginApiResponse>>('/admin/login', {
+    const response = (await httpClient.post<ApiResponse<LoginApiResponse>>('/admin/login', {
       username: request.username,
       password: encryptedPassword,
-    });
+    })) as unknown as ApiResponse<LoginApiResponse>;
 
-    if (response.data.code !== 200) {
+    if (response.code !== 200) {
       return {
         success: false,
-        message: response.data.message || '登录失败',
+        message: response.message || '登录失败',
       };
     }
 
-    const loginData = response.data.data;
+    const loginData = response.data;
 
     // 临时保存 token 以便后续请求使用
     const fullToken = buildFullToken(loginData.tokenHead, loginData.token);

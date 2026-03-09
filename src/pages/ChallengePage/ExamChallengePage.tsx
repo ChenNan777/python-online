@@ -109,6 +109,7 @@ export default function ExamChallengePage() {
     assignment.teamId != null &&
     !assignmentQuery.isLoading &&
     !historyQuery.isLoading;
+    // console.log('canAutoSave', canAutoSave, assignment);
   useExamAutoSave({
     enabled: canAutoSave,
     assignment,
