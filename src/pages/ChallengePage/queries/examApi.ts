@@ -41,7 +41,7 @@ export async function saveExamCode(args: {
 }) {
   const { assignment, operationType, sourceCode } = args;
   // 这三个字段缺一不可，否则后端无法识别当前学生作业上下文。
-  if (!assignment.taskId || !assignment.memberId || !assignment.teamId) {
+  if (assignment.taskId == null || assignment.memberId == null || assignment.teamId == null) {
     throw new Error('考试作业基础信息不完整，无法保存代码');
   }
 
@@ -67,7 +67,7 @@ export async function submitExamWork(args: {
 }) {
   const { assignment, workType, positioningData, pathPlanningData } = args;
   // 提交与保存共用同一组作业身份字段，先在前端做显式校验，避免发送无效请求。
-  if (!assignment.taskId || !assignment.memberId || !assignment.teamId) {
+  if (assignment.taskId == null || assignment.memberId == null || assignment.teamId == null) {
     throw new Error('考试作业基础信息不完整，无法提交');
   }
 

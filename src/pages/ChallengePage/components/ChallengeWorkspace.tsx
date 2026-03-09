@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
+import { useMemo, useState, type ReactNode } from 'react';
 import Editor from '@monaco-editor/react';
 import {
   Button,
@@ -10,7 +10,6 @@ import {
   Tooltip,
   message,
 } from 'antd';
-import type { editor as MonacoEditor } from 'monaco-editor';
 import { Pane, SplitPane } from 'react-split-pane';
 
 import CodeEditorShell from '@/components/CodeEditorShell';
@@ -20,22 +19,13 @@ import PageToolbar from '@/components/PageToolbar';
 import RunControls from '@/components/RunControls';
 import TestCasesPanel from '@/components/TestCasesPanel';
 import ThemeSwitcher from '@/components/ThemeSwitcher';
-import {
-  getChallengePanelTab,
-  PATHFINDING_CHALLENGE_ID,
-  POSITIONING_CHALLENGE_ID,
-} from '@/constants/challenge';
-import { usePyodideWorkerRuntime } from '@/features/pythonRunner';
-import { useAuthStore } from '@/store/useAuthStore';
-import { usePythonStore } from '@/store/usePythonStore';
-import { useThemeStore } from '@/store/useThemeStore';
+import { getChallengePanelTab } from '@/constants/challenge';
 import type { PositioningData } from '@/types';
 import { getMonacoTheme } from '@/utils/theme';
 import type { RoadNetwork } from '@/utils/parseRoadNetwork';
 
 import type { Challenge } from '../challenges';
-import type { TestResult } from '../useChallengeRunner';
-import { useChallengeContextCode, useEditorDecorations } from '../hooks';
+import { useChallengeWorkspaceRuntime } from '../hooks/useChallengeWorkspaceRuntime';
 import RightPanelStack from '../../EditorPage/RightPanelStack';
 
 type ChallengeWorkspaceProps = {
@@ -65,230 +55,51 @@ export default function ChallengeWorkspace(props: ChallengeWorkspaceProps) {
     rightActions,
   } = props;
 
-  const isPracticeRoute = mode === 'practice';
-  const themeId = useThemeStore((state) => state.themeId);
-  const { user } = useAuthStore();
-  const isPathfindingChallenge = challenge.id === PATHFINDING_CHALLENGE_ID;
-  const isPositioningChallenge = challenge.id === POSITIONING_CHALLENGE_ID;
-  const testCasesRef = useRef(challenge.testCases);
-  const editorRef = useRef<MonacoEditor.IStandaloneCodeEditor | null>(null);
-  const appliedCodeRef = useRef<string | null>(null);
-
-  const {
-    code,
-    setCode,
-    contextCode,
-    setContextCode,
-    breakpoints,
-    toggleBreakpoint,
-    setBreakpoints,
-    isRunning,
-    currentLine,
-    hoverLine,
-    setHoverLine,
-    pausedDepth,
-    output,
-    setGraphData,
-    setGraphResult,
-    setRoadNetwork,
-    setVariableScopes,
-    setCurrentLine,
-    setIsPaused,
-    setPositioningData,
-    setPositioningResult,
-    debugMode,
-    setDebugMode,
-    debugStartCoord,
-    setDebugStartCoord,
-    debugEndCoord,
-    setDebugEndCoord,
-    setChallengeMode,
-  } = usePythonStore();
-
   const [depsModalOpen, setDepsModalOpen] = useState(false);
   const [contextModalOpen, setContextModalOpen] = useState(false);
   const [contextDraft, setContextDraft] = useState('');
-  const [results, setResults] = useState<TestResult[] | null>(null);
   const [messageApi, messageContextHolder] = message.useMessage();
 
-  const applyCodeToEditor = useCallback((nextCode: string) => {
-    setCode(nextCode);
-    onCodeChange?.(nextCode);
-    if (editorRef.current) {
-      editorRef.current.setValue(nextCode);
-    }
-  }, [onCodeChange, setCode]);
-
-  const handleCodeChange = useCallback((nextCode: string) => {
-    setCode(nextCode);
-    onCodeChange?.(nextCode);
-  }, [onCodeChange, setCode]);
-
-  const clearGraphState = useCallback(() => {
-    setGraphData(null);
-    setGraphResult(null);
-    setRoadNetwork(null);
-  }, [setGraphData, setGraphResult, setRoadNetwork]);
-
-  const clearPositioningState = useCallback(() => {
-    setPositioningData(null);
-    setPositioningResult(null);
-  }, [setPositioningData, setPositioningResult]);
-
-  const resetEditorRuntimeState = useCallback(() => {
-    setBreakpoints([]);
-    setResults(null);
-    setVariableScopes([]);
-    setCurrentLine(null);
-    setIsPaused(false);
-  }, [setBreakpoints, setCurrentLine, setIsPaused, setVariableScopes]);
-
-  useEffect(() => {
-    setChallengeMode(isPracticeRoute);
-  }, [isPracticeRoute, setChallengeMode]);
-
-  useEffect(() => {
-    testCasesRef.current = challenge.testCases;
-  }, [challenge.testCases]);
-
-  useEffect(() => {
-    const nextCode = initialCode ?? challenge.starterCode;
-    const appliedKey = `${challenge.id}:${nextCode}`;
-    if (appliedCodeRef.current === appliedKey) {
-      return;
-    }
-
-    appliedCodeRef.current = appliedKey;
-    applyCodeToEditor(nextCode);
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    resetEditorRuntimeState();
-    setContextCode('');
-  }, [applyCodeToEditor, challenge.id, challenge.starterCode, initialCode, resetEditorRuntimeState, setContextCode]);
-
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    resetEditorRuntimeState();
-
-    if (isPathfindingChallenge) {
-      setRoadNetwork(roadNetwork);
-      setGraphResult(null);
-      clearPositioningState();
-      return;
-    }
-
-    if (isPositioningChallenge) {
-      setPositioningData(positioningData);
-      setPositioningResult(null);
-      clearGraphState();
-      return;
-    }
-
-    clearGraphState();
-    clearPositioningState();
-  }, [
-    challenge.id,
-    clearGraphState,
-    clearPositioningState,
-    isPathfindingChallenge,
-    isPositioningChallenge,
-    positioningData,
-    resetEditorRuntimeState,
-    roadNetwork,
-    setGraphResult,
-    setPositioningData,
-    setPositioningResult,
-    setRoadNetwork,
-  ]);
-
-  const effectiveContextCode = useChallengeContextCode({
-    testCases: challenge.testCases,
-    contextCode,
-    roadNetwork,
-    positioningData,
-    debugMode,
-    debugStartCoord,
-    debugEndCoord,
-    isPathfindingChallenge,
-    isPositioningChallenge,
-  });
-
-  const enabledBreakpointLines = useMemo(
-    () => breakpoints.filter((b) => b.enabled).map((b) => b.line),
-    [breakpoints],
-  );
-
-  const { clearEditorRunError, showEditorRunError, handleEditorMount } = useEditorDecorations({
-    editorRef,
-    breakpoints,
-    currentLine,
-    hoverLine,
-    toggleBreakpoint,
-    setHoverLine,
-  });
-
   const {
+    isPracticeRoute,
+    themeId,
+    memberName,
+    teamName,
+    isPathfindingChallenge,
+    code,
+    contextCode,
+    setContextCode,
+    debugMode,
+    handleDebugModeChange,
+    isRunning,
     depsLoading,
     basePackages,
     loadedPackages,
     loadExtraPackages,
     runCode,
     continueExec,
-    stepOver,
-    stepInto,
-    stepOut,
+    handleStepOver,
+    handleStepInto,
+    handleStepOut,
     stopExec,
-  } = usePyodideWorkerRuntime({
-    code,
-    contextCode: effectiveContextCode,
-    enabledBreakpointLines,
-    clearEditorRunError,
-    showEditorRunError,
+    handleCodeChange,
+    applyCodeToEditor,
+    handleEditorMount,
+    results,
+    consoleOutput,
+    passedCount,
+    totalCount,
+    allPassed,
+    hasContext,
+  } = useChallengeWorkspaceRuntime({
+    challenge,
+    mode,
+    initialCode,
+    roadNetwork,
+    positioningData,
+    onCodeChange,
     messageApi,
   });
-
-  useEffect(() => {
-    const resultLine = output.find((line) => line.startsWith('__RESULTS__:'));
-    if (!resultLine) {
-      return;
-    }
-
-    try {
-      const parsed: { passed: boolean; actual: string; expected: string }[] = JSON.parse(
-        resultLine.slice('__RESULTS__:'.length),
-      );
-      setResults(
-        parsed.map((result, index) => ({
-          ...result,
-          description: testCasesRef.current[index]?.description ?? `测试 ${index + 1}`,
-        })),
-      );
-    } catch {
-      // ignore parse failure
-    }
-  }, [output]);
-
-  const baseDepth = Math.max(1, pausedDepth);
-  const handleStepOver = useCallback(() => stepOver(baseDepth), [baseDepth, stepOver]);
-  const handleStepInto = useCallback(() => stepInto(baseDepth), [baseDepth, stepInto]);
-  const handleStepOut = useCallback(() => stepOut(baseDepth), [baseDepth, stepOut]);
-
-  const handleDebugModeChange = useCallback((enabled: boolean) => {
-    setDebugMode(enabled);
-    setGraphResult(null);
-    if (!enabled) {
-      setDebugStartCoord(null);
-      setDebugEndCoord(null);
-    }
-  }, [setDebugEndCoord, setDebugMode, setDebugStartCoord, setGraphResult]);
-
-  const consoleOutput = useMemo(
-    () => output.filter((line) => !line.startsWith('__RESULTS__:')),
-    [output],
-  );
-  const passedCount = results?.filter((result) => result.passed).length ?? 0;
-  const totalCount = results?.length ?? 0;
-  const allPassed = results !== null && totalCount > 0 && passedCount === totalCount;
-  const hasContext = contextCode.trim().length > 0;
 
   const extraPanels = useMemo(() => [{
     key: 'test-cases',
@@ -313,9 +124,9 @@ export default function ChallengeWorkspace(props: ChallengeWorkspaceProps) {
           className="flex items-center h-full"
           leftContent={(
             <>
-              {user?.task?.memberName && user?.team.name ? (
+              {memberName && teamName ? (
                 <span className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>
-                  {user.team.name} / {user.task.memberName}
+                  {teamName} / {memberName}
                 </span>
               ) : null}
               {isPracticeRoute && onBack ? (

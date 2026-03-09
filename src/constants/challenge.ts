@@ -24,10 +24,35 @@ export const TASK_STATUS_END_TASK = 7;
 export const POSITIONING_TASK_ROLE_ID = '2';
 export const PATHFINDING_TASK_ROLE_ID = '3';
 
+// 考试接口类型值（用于保存/提交时的 operationType/workType）
+export const POSITIONING_OPERATION_TYPE = '1';
+export const PATHFINDING_OPERATION_TYPE = '2';
+export const POSITIONING_WORK_TYPE = 4 as const;
+export const PATHFINDING_WORK_TYPE = 5 as const;
+
 // 挑战 ID
 export const POSITIONING_CHALLENGE_ID = 'bearing-positioning';
 export const PATHFINDING_CHALLENGE_ID = 'shortest-path';
 export type ChallengeId = typeof POSITIONING_CHALLENGE_ID | typeof PATHFINDING_CHALLENGE_ID;
+
+export type ExamChallengeMeta = {
+  role: ChallengeType;
+  operationType: typeof POSITIONING_OPERATION_TYPE | typeof PATHFINDING_OPERATION_TYPE;
+  workType: typeof POSITIONING_WORK_TYPE | typeof PATHFINDING_WORK_TYPE;
+};
+
+export const EXAM_META_BY_CHALLENGE_ID: Record<ChallengeId, ExamChallengeMeta> = {
+  [POSITIONING_CHALLENGE_ID]: {
+    role: POSITIONING_TYPE,
+    operationType: POSITIONING_OPERATION_TYPE,
+    workType: POSITIONING_WORK_TYPE,
+  },
+  [PATHFINDING_CHALLENGE_ID]: {
+    role: PATHFINDING_TYPE,
+    operationType: PATHFINDING_OPERATION_TYPE,
+    workType: PATHFINDING_WORK_TYPE,
+  },
+};
 
 const CHALLENGE_TYPE_TO_ID: Record<ChallengeType, ChallengeId> = {
   [POSITIONING_TYPE]: POSITIONING_CHALLENGE_ID,

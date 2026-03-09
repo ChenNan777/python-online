@@ -1,9 +1,10 @@
 import { useLocation } from 'react-router-dom';
+import { lazy } from 'react';
 
 import { PRACTICE_CHALLENGE_PREFIX } from '@/constants/routes';
 
-import ExamChallengePage from './ExamChallengePage';
-import PracticeChallengePage from './PracticeChallengePage';
+const ExamChallengePage = lazy(() => import('./ExamChallengePage'));
+const PracticeChallengePage = lazy(() => import('./PracticeChallengePage'));
 
 export default function ChallengePage() {
   const location = useLocation();

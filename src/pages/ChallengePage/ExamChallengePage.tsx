@@ -1,20 +1,24 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Button, Space, Tag, message } from 'antd';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Button, Space, Tag, Tooltip, message } from 'antd';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import { DASHBOARD_PATH } from '@/constants/routes';
-import { getChallengeIdByType } from '@/constants/challenge';
+import {
+  EXAM_META_BY_CHALLENGE_ID,
+  PATHFINDING_OPERATION_TYPE,
+  PATHFINDING_WORK_TYPE,
+  POSITIONING_TYPE,
+  getChallengeIdByType,
+} from '@/constants/challenge';
 import { usePythonStore } from '@/store/usePythonStore';
 import { useAuthStore } from '@/store/useAuthStore';
+import type { StudentOperationCodeVo } from '@/services/admin/types';
 
 import { CHALLENGES } from './challenges';
 import {
   buildExamPositioningScene,
   buildExamRoadNetwork,
   buildPathPlanningSubmitPayload,
-  getOperationTypeByChallenge,
-  getLatestHistoryCode,
-  getWorkTypeByChallenge,
 } from './adapters/examChallengeAdapter';
 import ChallengeWorkspace from './components/ChallengeWorkspace';
 import ExamHistoryModal from './components/ExamHistoryModal';
@@ -23,6 +27,8 @@ import { useExamHistoryQuery } from './queries/useExamHistoryQuery';
 import { useExamSceneQuery } from './queries/useExamSceneQuery';
 import { useSaveCodeMutation } from './queries/useSaveCodeMutation';
 import { useSubmitWorkMutation } from './queries/useSubmitWorkMutation';
+import { useExamAutoSave } from './hooks/useExamAutoSave';
+import { useExamEditorCode } from './hooks/useExamEditorCode';
 
 function parseUserId(rawUserId: string | undefined): number | null {
   if (!rawUserId) {
@@ -36,99 +42,83 @@ function parseUserId(rawUserId: string | undefined): number | null {
 export default function ExamChallengePage() {
   const navigate = useNavigate();
   const { type } = useParams<{ type: string }>();
-  const { user } = useAuthStore();
+
+  const rawUserId = useAuthStore((state) => state.user?.id);
+  const hasUserTask = useAuthStore((state) => Boolean(state.user?.task));
+  const userId = parseUserId(rawUserId);
+
   const challengeId = getChallengeIdByType(type);
   const challenge = useMemo(
     () => (challengeId ? CHALLENGES.find((item) => item.id === challengeId) ?? null : null),
     [challengeId],
   );
-  const isPositioningChallenge = challenge?.id === 'bearing-positioning';
-  const userId = parseUserId(user?.id);
+
+  const examMeta = challenge ? EXAM_META_BY_CHALLENGE_ID[challenge.id] : null;
+  const challengeRole = examMeta?.role ?? null;
+  const isPositioningRole = challengeRole === POSITIONING_TYPE;
+
   const { graphResult, positioningResult } = usePythonStore((state) => ({
     graphResult: state.graphResult,
     positioningResult: state.positioningResult,
   }));
-  const [historyOpen, setHistoryOpen] = useState(false);
-  const [initialCode, setInitialCode] = useState<string | undefined>(challenge?.starterCode);
-  const [currentCode, setCurrentCode] = useState<string>(challenge?.starterCode ?? '');
-  const [lastSavedCode, setLastSavedCode] = useState<string | null>(null);
-  const bootstrapKeyRef = useRef<string | null>(null);
-  const operationType = useMemo(
-    () => getOperationTypeByChallenge(Boolean(isPositioningChallenge)),
-    [isPositioningChallenge],
-  );
-  const workType = useMemo(
-    () => getWorkTypeByChallenge(Boolean(isPositioningChallenge)),
-    [isPositioningChallenge],
-  );
+
+  const operationType = examMeta?.operationType ?? PATHFINDING_OPERATION_TYPE;
+  const workType = examMeta?.workType ?? PATHFINDING_WORK_TYPE;
+
   const assignmentQuery = useAssignmentInfoQuery({ userId, operationType });
   const assignment = assignmentQuery.data ?? null;
+
   const historyQuery = useExamHistoryQuery({
     taskId: assignment?.taskId,
     memberId: assignment?.memberId,
   });
   const sceneQuery = useExamSceneQuery({
     assignment,
-    enabled: Boolean(isPositioningChallenge),
+    enabled: isPositioningRole,
   });
-  const records = useMemo(() => historyQuery.data ?? [], [historyQuery.data]);
+  const historyRecords = useMemo(() => historyQuery.data ?? [], [historyQuery.data]);
+
   const saveCodeMutation = useSaveCodeMutation();
   const submitWorkMutation = useSubmitWorkMutation({ userId, operationType });
 
+  const [historyOpen, setHistoryOpen] = useState(false);
+  const {
+    initialCode,
+    currentCode,
+    lastSavedCode,
+    setInitialCode,
+    setCurrentCode,
+    setLastSavedCode,
+  } = useExamEditorCode({
+    challenge,
+    assignment,
+    records: historyRecords,
+    historyLoading: historyQuery.isLoading,
+  });
+
   useEffect(() => {
-    if (!challenge || !user?.task) {
+    if (!challenge || !hasUserTask) {
       navigate(DASHBOARD_PATH, { replace: true });
     }
-  }, [challenge, navigate, user]);
+  }, [challenge, hasUserTask, navigate]);
 
-  useEffect(() => {
-    if (!challenge || !assignment || historyQuery.isLoading) {
-      return;
-    }
-
-    const latestCode = getLatestHistoryCode(records) ?? challenge.starterCode;
-    // 用题目 + 作业身份 + 最新代码生成引导键，避免重复覆盖用户已编辑内容。
-    const bootstrapKey = `${challenge.id}:${assignment.taskId ?? 'none'}:${assignment.memberId ?? 'none'}:${latestCode}`;
-    if (bootstrapKeyRef.current === bootstrapKey) {
-      return;
-    }
-
-    bootstrapKeyRef.current = bootstrapKey;
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setInitialCode(latestCode);
-    setCurrentCode(latestCode);
-    setLastSavedCode(latestCode);
-  }, [assignment, challenge, historyQuery.isLoading, records]);
-
-  useEffect(() => {
-    if (!assignment || assignmentQuery.isLoading || historyQuery.isLoading) {
-      return;
-    }
-
-    if (currentCode === lastSavedCode) {
-      return;
-    }
-
-    // 保存采用防抖，避免编辑器高频输入时连续触发接口。
-    const timer = window.setTimeout(() => {
-      saveCodeMutation.mutate(
-        {
-          assignment,
-          operationType,
-          sourceCode: currentCode,
-        },
-        {
-          onSuccess: (savedCode) => {
-            setLastSavedCode(savedCode);
-          },
-        },
-      );
-    }, 1200);
-
-    return () => {
-      window.clearTimeout(timer);
-    };
-  }, [assignment, assignmentQuery.isLoading, currentCode, historyQuery.isLoading, lastSavedCode, operationType, saveCodeMutation]);
+  const canAutoSave =
+    assignment != null &&
+    assignment.taskId != null &&
+    assignment.memberId != null &&
+    assignment.teamId != null &&
+    !assignmentQuery.isLoading &&
+    !historyQuery.isLoading;
+  useExamAutoSave({
+    enabled: canAutoSave,
+    assignment,
+    operationType,
+    currentCode,
+    lastSavedCode,
+    delayMs: 1200,
+    saveCodeMutation,
+    onSaved: setLastSavedCode,
+  });
 
   const roadScene = useMemo(() => buildExamRoadNetwork(assignment), [assignment]);
   const positioningScene = useMemo(() => {
@@ -136,18 +126,36 @@ export default function ExamChallengePage() {
       return sceneQuery.data;
     }
 
-    // 真实定位场景接口尚未落地时，先统一走适配层 fallback，保证考试页可用。
     return buildExamPositioningScene(assignment);
   }, [assignment, sceneQuery.data]);
 
-  const handleRestoreHistory = useCallback((record: { sourceCode?: string }) => {
+  const roadNetwork = isPositioningRole ? null : roadScene.roadNetwork;
+  const positioningData = isPositioningRole ? positioningScene.positioningData : null;
+  const sceneNotice = useMemo(() => {
+    if (assignmentQuery.isLoading) {
+      return '考试场景加载中';
+    }
+
+    if (isPositioningRole) {
+      return sceneQuery.isLoading ? '定位场景加载中' : positioningScene.sceneNotice;
+    }
+
+    return roadScene.sceneNotice;
+  }, [
+    assignmentQuery.isLoading,
+    isPositioningRole,
+    positioningScene.sceneNotice,
+    roadScene.sceneNotice,
+    sceneQuery.isLoading,
+  ]);
+
+  const handleRestoreHistory = useCallback((record: StudentOperationCodeVo) => {
     const nextCode = record.sourceCode ?? '';
     if (!nextCode) {
       return;
     }
 
     if (currentCode !== lastSavedCode && currentCode.trim().length > 0) {
-      // 历史代码恢复会直接替换编辑器内容，先拦截未保存修改。
       const confirmed = window.confirm('当前代码存在未保存修改，确认用历史代码覆盖吗？');
       if (!confirmed) {
         return;
@@ -157,7 +165,7 @@ export default function ExamChallengePage() {
     setInitialCode(nextCode);
     setCurrentCode(nextCode);
     setHistoryOpen(false);
-  }, [currentCode, lastSavedCode]);
+  }, [currentCode, lastSavedCode, setCurrentCode, setHistoryOpen, setInitialCode]);
 
   const handleSubmit = useCallback(async () => {
     if (!assignment) {
@@ -166,20 +174,23 @@ export default function ExamChallengePage() {
     }
 
     try {
-      if (currentCode !== lastSavedCode) {
-        // 提交前先补一次保存，避免最后一次编辑没有进入自动保存窗口。
+      const ensureLatestSave = async () => {
+        if (currentCode === lastSavedCode) {
+          return;
+        }
+
         const savedCode = await saveCodeMutation.mutateAsync({
           assignment,
           operationType,
           sourceCode: currentCode,
         });
         setLastSavedCode(savedCode);
-      }
+      };
 
-      if (isPositioningChallenge) {
+      const submitPositioningWork = async (): Promise<boolean> => {
         if (!positioningResult || !assignment.targetId) {
           message.error('请先运行定位分析代码并生成结果');
-          return;
+          return false;
         }
 
         await submitWorkMutation.mutateAsync({
@@ -192,14 +203,18 @@ export default function ExamChallengePage() {
             analysisDescription: '来自在线考试工作区提交',
           },
         });
-      } else {
+
+        return true;
+      };
+
+      const submitPathPlanningWork = async (): Promise<boolean> => {
         const pathPlanningData = buildPathPlanningSubmitPayload({
           result: graphResult,
           roadNetwork: roadScene.roadNetwork,
         });
         if (!pathPlanningData) {
           message.error('请先运行路径规划代码并生成有效路径');
-          return;
+          return false;
         }
 
         await submitWorkMutation.mutateAsync({
@@ -207,6 +222,17 @@ export default function ExamChallengePage() {
           workType,
           pathPlanningData,
         });
+
+        return true;
+      };
+
+      await ensureLatestSave();
+
+      const submitted = isPositioningRole
+        ? await submitPositioningWork()
+        : await submitPathPlanningWork();
+      if (!submitted) {
+        return;
       }
 
       message.success('提交成功');
@@ -217,13 +243,14 @@ export default function ExamChallengePage() {
     assignment,
     currentCode,
     graphResult,
-    isPositioningChallenge,
+    isPositioningRole,
     lastSavedCode,
     positioningResult,
     operationType,
     roadScene.roadNetwork,
     saveCodeMutation,
     submitWorkMutation,
+    setLastSavedCode,
     workType,
   ]);
 
@@ -231,48 +258,52 @@ export default function ExamChallengePage() {
     return null;
   }
 
+  const leftActions = (
+    <Space size={6}>
+      <Button size="small" onClick={() => setHistoryOpen(true)} disabled={historyQuery.isLoading}>
+        历史代码
+      </Button>
+      {assignmentQuery.error ? <Tag color="error">作业加载失败</Tag> : null}
+      {historyQuery.error ? <Tag color="warning">历史代码加载失败</Tag> : null}
+      {sceneQuery.error ? <Tag color="warning">定位场景加载失败</Tag> : null}
+    </Space>
+  );
+
+  const rightActions = (
+    <Space size={6}>
+      {saveCodeMutation.isPending ? <Tag color="processing">保存中</Tag> : null}
+      {!saveCodeMutation.isPending && saveCodeMutation.error ? (
+        <Tooltip
+          title={saveCodeMutation.error instanceof Error ? saveCodeMutation.error.message : '保存失败'}
+        >
+          <Tag color="error">保存失败</Tag>
+        </Tooltip>
+      ) : null}
+      {!saveCodeMutation.isPending && !saveCodeMutation.error && lastSavedCode !== null ? <Tag color="success">已保存</Tag> : null}
+      {submitWorkMutation.error ? <Tag color="error">提交失败</Tag> : null}
+      <Button size="small" type="primary" loading={submitWorkMutation.isPending} onClick={handleSubmit}>
+        提交作业
+      </Button>
+    </Space>
+  );
+
   return (
     <>
       <ChallengeWorkspace
         challenge={challenge}
         mode="exam"
         initialCode={initialCode}
-        roadNetwork={isPositioningChallenge ? null : roadScene.roadNetwork}
-        positioningData={isPositioningChallenge ? positioningScene.positioningData : null}
-        sceneNotice={
-          assignmentQuery.isLoading
-            ? '考试场景加载中'
-            : isPositioningChallenge
-              ? (sceneQuery.isLoading ? '定位场景加载中' : positioningScene.sceneNotice)
-              : roadScene.sceneNotice
-        }
+        roadNetwork={roadNetwork}
+        positioningData={positioningData}
+        sceneNotice={sceneNotice}
         onCodeChange={setCurrentCode}
-        leftActions={(
-          <Space size={6}>
-            <Button size="small" onClick={() => setHistoryOpen(true)} disabled={historyQuery.isLoading}>
-              历史代码
-            </Button>
-            {assignmentQuery.error ? <Tag color="error">作业加载失败</Tag> : null}
-            {historyQuery.error ? <Tag color="warning">历史代码加载失败</Tag> : null}
-            {sceneQuery.error ? <Tag color="warning">定位场景加载失败</Tag> : null}
-          </Space>
-        )}
-        rightActions={(
-          <Space size={6}>
-            {saveCodeMutation.isPending ? <Tag color="processing">保存中</Tag> : null}
-            {!saveCodeMutation.isPending && saveCodeMutation.error ? <Tag color="error">保存失败</Tag> : null}
-            {!saveCodeMutation.isPending && !saveCodeMutation.error && lastSavedCode !== null ? <Tag color="success">已保存</Tag> : null}
-            {submitWorkMutation.error ? <Tag color="error">提交失败</Tag> : null}
-            <Button size="small" type="primary" loading={submitWorkMutation.isPending} onClick={handleSubmit}>
-              提交作业
-            </Button>
-          </Space>
-        )}
+        leftActions={leftActions}
+        rightActions={rightActions}
       />
       <ExamHistoryModal
         open={historyOpen}
         loading={historyQuery.isLoading}
-        records={records}
+        records={historyRecords}
         onClose={() => setHistoryOpen(false)}
         onRestore={handleRestoreHistory}
       />
