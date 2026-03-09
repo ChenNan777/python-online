@@ -7,6 +7,11 @@ import { parseRoadNetwork, type RoadNetwork } from '@/utils/parseRoadNetwork';
 
 const FALLBACK_SCENE_NOTICE = '定位分析考试场景接口暂未提供，当前先回退本地场景数据。';
 
+export type ExamPositioningSceneResult = {
+  positioningData: PositioningData | null;
+  sceneNotice: string | null;
+};
+
 export function getOperationTypeByChallenge(isPositioningChallenge: boolean): string {
   return isPositioningChallenge ? '1' : '2';
 }
@@ -43,7 +48,7 @@ export function buildExamRoadNetwork(
 
 export function buildExamPositioningScene(
   assignment: StudentTrainingAssignmentVO | null,
-): { positioningData: PositioningData | null; sceneNotice: string | null } {
+): ExamPositioningSceneResult {
   if (!assignment) {
     return { positioningData: null, sceneNotice: '当前考试作业信息未加载。' };
   }
@@ -63,6 +68,12 @@ export function buildExamPositioningScene(
     }),
     sceneNotice: FALLBACK_SCENE_NOTICE,
   };
+}
+
+export async function fetchExamPositioningScene(
+  assignment: StudentTrainingAssignmentVO,
+): Promise<ExamPositioningSceneResult> {
+  return buildExamPositioningScene(assignment);
 }
 
 export function getLatestHistoryCode(records: StudentOperationCodeVo[]): string | null {

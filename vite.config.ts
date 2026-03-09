@@ -1,7 +1,7 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { fileURLToPath, URL } from 'node:url';
-import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import { defineConfig } from 'vite';
 
 const DEFAULT_HTTPS_KEY_PATH = fileURLToPath(new URL('./.cert/dev-key.pem', import.meta.url));
 const DEFAULT_HTTPS_CERT_PATH = fileURLToPath(new URL('./.cert/dev-cert.pem', import.meta.url));
