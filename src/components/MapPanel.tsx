@@ -182,27 +182,19 @@ const MapPanel: React.FC<MapPanelProps> = ({ roadNetwork, isPracticeMode: isPrac
   const bearingLineLength = useMemo(() => {
     if (!positioningData) return 2; // default 2km
 
-    // Calculate distance from each station to target, use the max + small buffer
+    // Calculate distance from each station to the true target, use the max + small buffer
     let maxDist = 1; // minimum 1km
 
-    const targets = [
-      positioningData.trueTarget,
-      positioningResult ? { lng: positioningResult.userLng, lat: positioningResult.userLat } : null,
-    ].filter(Boolean);
-
     positioningData.stations.forEach(station => {
-      targets.forEach(target => {
-        if (!target) return;
-        const dist = Math.sqrt(
-          Math.pow((target.lng - station.lng) * 111, 2) +
-          Math.pow((target.lat - station.lat) * 111, 2)
-        );
-        maxDist = Math.max(maxDist, dist);
-      });
+      const dist = Math.sqrt(
+        Math.pow((positioningData.trueTarget.lng - station.lng) * 111, 2) +
+        Math.pow((positioningData.trueTarget.lat - station.lat) * 111, 2)
+      );
+      maxDist = Math.max(maxDist, dist);
     });
 
     return maxDist + 0.5; // Just extend 0.5km beyond the target
-  }, [positioningData, positioningResult]);
+  }, [positioningData]);
 
   const positioningError = useMemo(() => {
     if (!positioningResult || !positioningData?.trueTarget) return null;
@@ -369,7 +361,7 @@ const MapPanel: React.FC<MapPanelProps> = ({ roadNetwork, isPracticeMode: isPrac
   const handleCopyCoordinates = async () => {
     if (!clickedCoords) return;
 
-    const coordText = `${clickedCoords.lat.toFixed(6)}, ${clickedCoords.lng.toFixed(6)}`;
+    const coordText = `${clickedCoords.lng.toFixed(6)}, ${clickedCoords.lat.toFixed(6)}`;
 
     try {
       if (navigator.clipboard && navigator.clipboard.writeText) {

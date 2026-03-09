@@ -75,6 +75,12 @@ export function buildExamPositioningScene(
   /** 先生成本地样例场景，再用考试作业中的 targetId 覆盖目标身份，保持展示链路可用。 */
   const fallback = generatePositioningData();
 
+  const hasTrueTarget =
+    assignment.targetLongitude !== undefined && assignment.targetLatitude !== undefined;
+  const trueTarget = hasTrueTarget
+    ? { lng: assignment.targetLongitude!, lat: assignment.targetLatitude! }
+    : fallback.trueTarget;
+
   const targetId = assignment?.targetId;
   return {
     positioningData: mergePositioningDataById({
@@ -83,9 +89,9 @@ export function buildExamPositioningScene(
         stationId: station.id,
         bearingDeg: station.bearingDeg,
       })),
-      trueTarget: fallback.trueTarget,
+      trueTarget,
       targetId,
-      source: 'fallback',
+      source: hasTrueTarget ? 'exam' : 'fallback',
     }),
     sceneNotice: FALLBACK_SCENE_NOTICE,
   };

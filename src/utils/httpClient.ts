@@ -1,4 +1,5 @@
-import axios, { AxiosError, AxiosRequestConfig } from 'axios';
+import axios, { AxiosError } from 'axios';
+import type { AxiosRequestConfig } from 'axios';
 import { message } from 'antd';
 import { AUTH_TOKEN_KEY, USER_INFO_KEY } from '../constants/auth';
 import { LOGIN_PATH } from '../constants/routes';

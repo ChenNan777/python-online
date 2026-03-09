@@ -193,11 +193,17 @@ export default function ExamChallengePage() {
           return false;
         }
 
+        const uavId = Number(assignment.targetId);
+        if (!Number.isFinite(uavId)) {
+          message.error('考试作业目标 ID 非法，无法提交定位结果');
+          return false;
+        }
+
         await submitWorkMutation.mutateAsync({
           assignment,
           workType,
           positioningData: {
-            uavId: Number(assignment.targetId),
+            uavId,
             longitude: positioningResult.userLng,
             latitude: positioningResult.userLat,
             analysisDescription: '来自在线考试工作区提交',

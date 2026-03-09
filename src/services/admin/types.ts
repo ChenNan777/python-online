@@ -4370,8 +4370,8 @@ export type WorkPlatformTaskVO = {
 
 /** 作业类型（4-定位分析，5-路径规划） */
 export enum WorkTypeEnum {
-  undefined = 4,
-  undefined = 5,
+  POSITIONING_ANALYSIS = 4,
+  PATH_PLANNING = 5,
 }
 
 export type IWorkTypeEnum = keyof typeof WorkTypeEnum;
