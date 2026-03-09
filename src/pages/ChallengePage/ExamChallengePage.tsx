@@ -87,6 +87,7 @@ export default function ExamChallengePage() {
     }
 
     const latestCode = getLatestHistoryCode(records) ?? challenge.starterCode;
+    // 用题目 + 作业身份 + 最新代码生成引导键，避免重复覆盖用户已编辑内容。
     const bootstrapKey = `${challenge.id}:${assignment.taskId ?? 'none'}:${assignment.memberId ?? 'none'}:${latestCode}`;
     if (bootstrapKeyRef.current === bootstrapKey) {
       return;
@@ -108,6 +109,7 @@ export default function ExamChallengePage() {
       return;
     }
 
+    // 保存采用防抖，避免编辑器高频输入时连续触发接口。
     const timer = window.setTimeout(() => {
       saveCodeMutation.mutate(
         {
@@ -134,6 +136,7 @@ export default function ExamChallengePage() {
       return sceneQuery.data;
     }
 
+    // 真实定位场景接口尚未落地时，先统一走适配层 fallback，保证考试页可用。
     return buildExamPositioningScene(assignment);
   }, [assignment, sceneQuery.data]);
 
@@ -144,6 +147,7 @@ export default function ExamChallengePage() {
     }
 
     if (currentCode !== lastSavedCode && currentCode.trim().length > 0) {
+      // 历史代码恢复会直接替换编辑器内容，先拦截未保存修改。
       const confirmed = window.confirm('当前代码存在未保存修改，确认用历史代码覆盖吗？');
       if (!confirmed) {
         return;
@@ -163,6 +167,7 @@ export default function ExamChallengePage() {
 
     try {
       if (currentCode !== lastSavedCode) {
+        // 提交前先补一次保存，避免最后一次编辑没有进入自动保存窗口。
         const savedCode = await saveCodeMutation.mutateAsync({
           assignment,
           operationType,

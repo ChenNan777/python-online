@@ -12,6 +12,7 @@ import {
 } from '@/services/admin/xueshengxunlianzuoyeguanli';
 
 export function sortExamHistoryRecords(records: StudentOperationCodeVo[]): StudentOperationCodeVo[] {
+  // 历史记录展示与恢复都依赖“最近一次优先”，统一在数据层排序。
   return [...records].sort((left, right) => {
     const leftTime = Date.parse(left.updatedAt ?? left.submitTime ?? left.createdAt ?? '');
     const rightTime = Date.parse(right.updatedAt ?? right.submitTime ?? right.createdAt ?? '');
@@ -39,6 +40,7 @@ export async function saveExamCode(args: {
   sourceCode: string;
 }) {
   const { assignment, operationType, sourceCode } = args;
+  // 这三个字段缺一不可，否则后端无法识别当前学生作业上下文。
   if (!assignment.taskId || !assignment.memberId || !assignment.teamId) {
     throw new Error('考试作业基础信息不完整，无法保存代码');
   }
@@ -64,6 +66,7 @@ export async function submitExamWork(args: {
   pathPlanningData?: StudentTrainingWorkSubmitDTO['pathPlanningData'];
 }) {
   const { assignment, workType, positioningData, pathPlanningData } = args;
+  // 提交与保存共用同一组作业身份字段，先在前端做显式校验，避免发送无效请求。
   if (!assignment.taskId || !assignment.memberId || !assignment.teamId) {
     throw new Error('考试作业基础信息不完整，无法提交');
   }

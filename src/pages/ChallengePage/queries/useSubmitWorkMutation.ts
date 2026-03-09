@@ -13,6 +13,7 @@ export function useSubmitWorkMutation(args: {
   return useMutation({
     mutationFn: submitExamWork,
     onSuccess: async (_, variables) => {
+      // 提交成功后同时刷新作业信息与历史记录，保证状态标签和历史代码列表同步。
       await Promise.all([
         queryClient.invalidateQueries({
           queryKey: examQueryKeys.history(variables.assignment.taskId, variables.assignment.memberId),

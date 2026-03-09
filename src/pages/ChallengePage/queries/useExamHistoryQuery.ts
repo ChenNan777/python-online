@@ -12,6 +12,7 @@ export function useExamHistoryQuery(args: {
   return useQuery({
     queryKey: examQueryKeys.history(taskId, memberId),
     queryFn: () => fetchExamHistory(taskId as number, memberId as number),
+    // 历史代码依赖 assignment 返回的 taskId/memberId，二者齐全后再拉取。
     enabled: taskId !== undefined && memberId !== undefined,
   });
 }
