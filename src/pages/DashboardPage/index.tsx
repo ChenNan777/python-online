@@ -34,6 +34,10 @@ export default function DashboardPage() {
       return;
     }
 
+    if (user.task.hasCompleted) {
+      return;
+    }
+
     navigate(buildChallengePath(user.role));
   };
 
@@ -69,12 +73,15 @@ export default function DashboardPage() {
     }
   };
 
-  // 复用统一判定
-  const startState = user.role && user.task
-    ? getChallengeStartState(user.role, user.task.taskStatus)
-    : { canStart: false, buttonText: '暂无任务' };
+  const isTaskCompleted = Boolean(user.task?.hasCompleted);
 
-  const taskStatusText = user.task?.stage ?? '暂无任务';
+  const startState = user.role && user.task && !isTaskCompleted
+    ? getChallengeStartState(user.role, user.task.taskStatus)
+    : (user.task
+      ? { canStart: false, buttonText: isTaskCompleted ? '已完成' : '暂无任务' }
+      : { canStart: false, buttonText: '暂无任务' });
+
+  const taskStatusText = isTaskCompleted ? '已完成' : (user.task?.stage ?? '暂无任务');
 
   const infoItems = user.task ? [
     {
@@ -98,10 +105,10 @@ export default function DashboardPage() {
 
   const actionTitle = '开始作业';
   const actionHint = user.task
-    ? (startState.canStart ? '可开始' : startState.buttonText)
+    ? (isTaskCompleted ? '已完成' : (startState.canStart ? '可开始' : startState.buttonText))
     : '暂无任务';
   const actionButtonText = user.task && user.role
-    ? startState.buttonText
+    ? (isTaskCompleted ? '已完成' : startState.buttonText)
     : '暂无任务';
 
   return (

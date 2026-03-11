@@ -11,4 +11,5 @@ export interface TaskInfo {
   memberName?: string;
   memberRole?: string;
   taskStatus?: string; // 原始的 taskStatus 值
+  hasCompleted?: boolean;
 }

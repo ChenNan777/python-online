@@ -563,16 +563,34 @@ export type CommonResultListStudentOperationCodeVo = {
   data?: StudentOperationCodeVo[];
 };
 
+export type CommonResultListTaskDroneInfoVO = {
+  code?: number;
+  message?: string;
+  data?: TaskDroneInfoVO[];
+};
+
 export type CommonResultListTaskEvent = {
   code?: number;
   message?: string;
   data?: TaskEvent[];
 };
 
+export type CommonResultListTeamPathPlanningScoreDTO = {
+  code?: number;
+  message?: string;
+  data?: TeamPathPlanningScoreDTO[];
+};
+
 export type CommonResultListTeamPositioningScoreDTO = {
   code?: number;
   message?: string;
   data?: TeamPositioningScoreDTO[];
+};
+
+export type CommonResultListTeamTargetCaptureScoreDTO = {
+  code?: number;
+  message?: string;
+  data?: TeamTargetCaptureScoreDTO[];
 };
 
 export type CommonResultListTrainTaskPageVO = {
@@ -724,6 +742,13 @@ export type CommonResultStudentTrainingAssignmentVO = {
   data?: StudentTrainingAssignmentVO;
 };
 
+export type CommonResultTargetCaptureOptimalPathVO = {
+  code?: number;
+  message?: string;
+  /** 目标捕获最优路径信息 */
+  data?: TargetCaptureOptimalPathVO;
+};
+
 export type CommonResultTaskBasicInfoContext = {
   code?: number;
   message?: string;
@@ -734,6 +759,13 @@ export type CommonResultTaskStatusDisplayVO = {
   code?: number;
   message?: string;
   data?: TaskStatusDisplayVO;
+};
+
+export type CommonResultTeamPathPlanningScoreDTO = {
+  code?: number;
+  message?: string;
+  /** 队伍路径规划评分 DTO */
+  data?: TeamPathPlanningScoreDTO;
 };
 
 export type CommonResultTeamPositioningScoreDTO = {
@@ -747,6 +779,13 @@ export type CommonResultTeamRealtimeScoreVO = {
   code?: number;
   message?: string;
   data?: TeamRealtimeScoreVO;
+};
+
+export type CommonResultTeamTargetCaptureScoreDTO = {
+  code?: number;
+  message?: string;
+  /** 队伍目标捕获评分 DTO */
+  data?: TeamTargetCaptureScoreDTO;
 };
 
 export type CommonResultTeamTaskVitalSignsVO = {
@@ -1695,6 +1734,31 @@ export type MemberMemberPathPageUsingGetResponses = {
   200: LogMemberPathVo;
 };
 
+export type MemberPathPlanningResultDTO = {
+  /** 成员 ID */
+  memberId?: number;
+  /** 成员姓名 */
+  memberName?: string;
+  /** 路径长度得分 */
+  distanceScore?: number;
+  /** 规划耗时得分 */
+  timeScore?: number;
+  /** 路径合规得分 */
+  validityScore?: number;
+  /** 综合得分 */
+  comprehensiveScore?: number;
+  /** 规划路径 */
+  plannedPath?: string;
+  /** 规划距离 */
+  plannedDistance?: number;
+  /** 提交时间 */
+  submitTime?: string;
+  /** 定位的目标 ID */
+  targetId?: number;
+  /** 定位的目标名称 */
+  targetName?: string;
+};
+
 export type MemberPositioningResultDTO = {
   /** 成员ID */
   memberId?: number;
@@ -1718,6 +1782,10 @@ export type MemberPositioningResultDTO = {
   analysisDescription?: string;
   /** 提交时间 */
   submitTime?: string;
+  /** 定位的目标 ID */
+  targetId?: number;
+  /** 定位的目标名称 */
+  targetName?: string;
 };
 
 export type MemberSearchUsingGetParams = {
@@ -1759,6 +1827,23 @@ export type MemberTaskVitalSignsVO = {
   taskId?: number;
   /** 人员体征列表 */
   vitalSignList?: MemeberVitalSignDTO[];
+};
+
+export type MemberVitalScoreDTO = {
+  /** 学员 ID */
+  memberId?: number;
+  /** 学员姓名 */
+  memberName?: string;
+  /** 手环 IMEI */
+  braceletImei?: string;
+  /** 血氧得分 */
+  bloodOxygenScore?: number;
+  /** 心率得分 */
+  heartRateScore?: number;
+  /** 体温得分 */
+  temperatureScore?: number;
+  /** 体能总得分 */
+  totalVitalScore?: number;
 };
 
 export type MemeberVitalSignDTO = {
@@ -1903,19 +1988,19 @@ export type PageableObject = {
   sort?: SortObject;
   pageSize?: number;
   pageNumber?: number;
-  unpaged?: boolean;
   paged?: boolean;
+  unpaged?: boolean;
 };
 
 export type PageStudentOperationCodeVo = {
   totalPages?: number;
   totalElements?: number;
-  first?: boolean;
-  last?: boolean;
   size?: number;
   content?: StudentOperationCodeVo[];
   number?: number;
   sort?: SortObject;
+  first?: boolean;
+  last?: boolean;
   numberOfElements?: number;
   pageable?: PageableObject;
   empty?: boolean;
@@ -2118,6 +2203,7 @@ export type PositioningAnalysisResultDTO = {
   taskId: number;
   /** 队伍ID */
   teamId: number;
+  teamName?: string;
   /** 提交结果的成员ID */
   memberId: number;
   /** 提交结果的无人机ID */
@@ -2986,6 +3072,8 @@ export type StudentTrainingAssignmentVO = {
   startLatitude?: number;
   /** 路网数据 GeoJSON（路径规划使用） */
   roadNetworkGeoJson?: string;
+  /** 截至时间（格式：yyyy-MM-dd HH:mm:ss） */
+  deadline?: string;
 };
 
 export type StudentTrainingWorkSubmitDTO = {
@@ -2993,6 +3081,7 @@ export type StudentTrainingWorkSubmitDTO = {
   taskId: number;
   /** 队伍 ID */
   teamId: number;
+  teamName?: string;
   /** 成员 ID */
   memberId: number;
   /** 成员姓名 */
@@ -3018,6 +3107,114 @@ export type TabletDeviceVO = {
   batteryLevel?: number;
   /** 平板状态 */
   tabletStatus?: boolean;
+};
+
+export type TargetCaptureHealthUsingGetResponses = {
+  /**
+   * OK
+   */
+  200: string;
+};
+
+export type TargetCaptureOptimalPathTaskTaskIdTeamTeamIdUsingGetParams = {
+  /** 任务 ID */
+  taskId: number;
+  /** 队伍 ID */
+  teamId: number;
+};
+
+export type TargetCaptureOptimalPathTaskTaskIdTeamTeamIdUsingGetResponses = {
+  /**
+   * OK
+   */
+  200: TargetCaptureOptimalPathVO;
+};
+
+export type TargetCaptureOptimalPathUsingGetParams = {
+  /** 平板序列号 */
+  deviceSn: string;
+};
+
+export type TargetCaptureOptimalPathUsingGetResponses = {
+  /**
+   * OK
+   */
+  200: TargetCaptureOptimalPathVO;
+};
+
+export type TargetCaptureOptimalPathVO = {
+  /** 任务 ID */
+  taskId?: number;
+  /** 队伍 ID */
+  teamId?: number;
+  /** 路径规划起点 - 经度 */
+  startLongitude?: number;
+  /** 路径规划起点 - 纬度 */
+  startLatitude?: number;
+  /** 目标捕获终点 - 经度 */
+  endLongitude?: number;
+  /** 目标捕获终点 - 纬度 */
+  endLatitude?: number;
+  /** 最优路径距离（米） */
+  optimalDistance?: number;
+  /** 最优路径点列表（GeoJSON 格式） */
+  optimalPathGeoJson?: string;
+  /** 路网数据 GeoJSON */
+  roadNetworkGeoJson?: string;
+  /** 建议耗时（分钟） */
+  suggestedDuration?: number;
+  /** 备注说明 */
+  remark?: string;
+};
+
+export type TargetCaptureReportRequest = {
+  /** 平板设备 IMEI */
+  imei: string;
+  /** 任务 ID */
+  taskId: number;
+  /** 队伍 ID */
+  teamId: number;
+  /** 事件编码 */
+  eventCode: string;
+  /** 事件名称 */
+  eventName?: string;
+  /** 事件描述 */
+  eventDesc?: string;
+  /** 扩展数据（JSON 字符串） */
+  eventData?: string;
+};
+
+export type TargetCaptureReportUsingPostResponses = {
+  /**
+   * OK
+   */
+  200: string;
+};
+
+export type TargetCaptureScoresTaskTaskIdTeamTeamIdUsingGetParams = {
+  /** 任务 ID */
+  taskId: number;
+  /** 队伍 ID */
+  teamId: number;
+};
+
+export type TargetCaptureScoresTaskTaskIdTeamTeamIdUsingGetResponses = {
+  /**
+   * OK
+   */
+  200: TeamTargetCaptureScoreDTO;
+};
+
+export type TargetCaptureScoresTaskTaskIdUsingGetParams = {
+  /** 任务 ID */
+  taskId: number;
+};
+
+export type TargetCaptureScoresTaskTaskIdUsingGetResponses = {
+  /**
+   * OK
+   */
+  200: TeamTargetCaptureScoreDTO[];
 };
 
 export type TargetDetectionMessageDTO = {
@@ -3176,6 +3373,23 @@ export type TaskDroneConfigVO = {
   sortOrder?: number;
 };
 
+export type TaskDroneInfoVO = {
+  /** 配置 ID */
+  configId?: number;
+  /** 无人机 ID */
+  droneId?: string;
+  /** 无人机名称 */
+  droneName?: string;
+  /** 配置类型：1-定位分析阶段 2-路径规划阶段 3-通用配置 */
+  configType?: string;
+  /** 最新经度 */
+  longitude?: number;
+  /** 最新纬度 */
+  latitude?: number;
+  /** 数据采集时间 */
+  dataTime?: string;
+};
+
 export type TaskEvent = {
   id?: number;
   taskId: number;
@@ -3246,6 +3460,32 @@ export type TaskEventPathPlanningPlanningIdUsingGetResponses = {
    * OK
    */
   200: PathPlanning;
+};
+
+export type TaskEventPathPlanningScoresTaskTaskIdTeamTeamIdUsingGetParams = {
+  /** 任务 ID */
+  taskId: number;
+  /** 队伍 ID */
+  teamId: number;
+};
+
+export type TaskEventPathPlanningScoresTaskTaskIdTeamTeamIdUsingGetResponses = {
+  /**
+   * OK
+   */
+  200: TeamPathPlanningScoreDTO;
+};
+
+export type TaskEventPathPlanningScoresTaskTaskIdUsingGetParams = {
+  /** 任务 ID */
+  taskId: number;
+};
+
+export type TaskEventPathPlanningScoresTaskTaskIdUsingGetResponses = {
+  /**
+   * OK
+   */
+  200: TeamPathPlanningScoreDTO[];
 };
 
 export type TaskEventPathPlanningSubmitUsingPostResponses = {
@@ -3425,6 +3665,17 @@ export type TaskTaskIdDetailUsingGetResponses = {
   200: TrainTaskDetailVO;
 };
 
+export type TaskTaskIdDronesUsingGetParams = {
+  taskId: number;
+};
+
+export type TaskTaskIdDronesUsingGetResponses = {
+  /**
+   * OK
+   */
+  200: TaskDroneInfoVO[];
+};
+
 export type TaskTaskIdUsingDeleteParams = {
   taskId: number;
 };
@@ -3497,6 +3748,35 @@ export type TeamMemberVO = {
   userId?: number;
 };
 
+export type TeamPathPlanningScoreDTO = {
+  /** 任务 ID */
+  taskId?: number;
+  /** 队伍 ID */
+  teamId?: number;
+  /** 队伍名称 */
+  teamName?: string;
+  /** 队长 ID */
+  leaderId?: number;
+  /** 队长姓名 */
+  leaderName?: string;
+  /** 参与路径规划人数 */
+  memberCount?: number;
+  /** 完成路径规划人数 */
+  memberFinishCount?: number;
+  /** 队伍成员路径规划结果列表 */
+  memberResults?: MemberPathPlanningResultDTO[];
+  /** 队伍平均路径长度得分 */
+  avgDistanceScore?: number;
+  /** 队伍平均规划耗时得分 */
+  avgTimeScore?: number;
+  /** 队伍平均路径合规得分 */
+  avgValidityScore?: number;
+  /** 队伍总得分 */
+  totalScore?: number;
+  /** 是否所有成员都已提交 */
+  allMembersSubmitted?: boolean;
+};
+
 export type TeamPositioningScoreDTO = {
   /** 任务ID */
   taskId?: number;
@@ -3508,6 +3788,10 @@ export type TeamPositioningScoreDTO = {
   leaderId?: number;
   /** 队长姓名 */
   leaderName?: string;
+  /** 参与定位分析人数 */
+  memberCount?: number;
+  /** 完成定位分析人数 */
+  memberFinishCount?: number;
   /** 队伍成员定位分析结果列表 */
   memberResults?: MemberPositioningResultDTO[];
   /** 队伍平均定位精度得分 */
@@ -3536,6 +3820,45 @@ export type TeamSearchUsingGetResponses = {
    * OK
    */
   200: CommonPageTrainingTeamVo;
+};
+
+export type TeamTargetCaptureScoreDTO = {
+  /** 任务 ID */
+  taskId?: number;
+  /** 队伍 ID */
+  teamId?: number;
+  /** 队伍名称 */
+  teamName?: string;
+  /** 队长 ID */
+  leaderId?: number;
+  /** 队长姓名 */
+  leaderName?: string;
+  /** 参与人数 */
+  memberCount?: number;
+  /** 完成捕获人数 */
+  memberFinishCount?: number;
+  /** 队伍成员体能得分列表 */
+  memberVitalScores?: MemberVitalScoreDTO[];
+  /** 队伍平均血氧得分 */
+  avgBloodOxygenScore?: number;
+  /** 队伍平均心率得分 */
+  avgHeartRateScore?: number;
+  /** 队伍平均体温得分 */
+  avgTemperatureScore?: number;
+  /** 队伍平均体能总得分 */
+  avgTotalVitalScore?: number;
+  /** 队伍捕获耗时得分 */
+  captureTimeScore?: number;
+  /** 队伍捕获综合得分 */
+  comprehensiveScore?: number;
+  /** 捕获开始时间 */
+  captureStartTime?: string;
+  /** 捕获完成时间 */
+  captureEndTime?: string;
+  /** 捕获耗时（分钟） */
+  captureDurationMinutes?: number;
+  /** 是否已完成捕获 */
+  isCompleted?: boolean;
 };
 
 export type TeamTaskIdAvgScoreUsingGetParams = {
@@ -3718,6 +4041,14 @@ export type TrainingTask = {
   taskDescription?: string;
   /** 演训区域定义（JSON格式存储区域坐标） */
   trainingArea?: string;
+  /** 路径规划人员开始位置 - 经度 */
+  pathPlanningStartLongitude?: number;
+  /** 路径规划人员开始位置 - 纬度 */
+  pathPlanningStartLatitude?: number;
+  /** 目标捕获最终位置 - 经度 */
+  targetCaptureEndLongitude?: number;
+  /** 目标捕获最终位置 - 纬度 */
+  targetCaptureEndLatitude?: number;
 };
 
 export type TrainingTaskAssignment = {
@@ -3743,6 +4074,37 @@ export type TrainingTaskAssignment = {
   cameraId?: string;
 };
 
+export type TrainingTaskReqParam = {
+  /** 任务名称 */
+  taskId?: string;
+  /** 任务名称 */
+  taskName?: string;
+  /** 任务类型（1-侦察任务 2-巡航任务 3-反无人机演训 4-信号干扰测试 5-综合对抗演练 6-路径规划验证） */
+  taskType?: string;
+  /** 计划开始时间 */
+  plannedStartTime?: string;
+  /** 计划开始时间 */
+  plannedEndTime?: string;
+  /** 任务优先级（1-普通 2-高 3-紧急） */
+  priority?: string;
+  /** 任务指挥官id */
+  controllerId?: number;
+  /** 任务描述 */
+  remark?: string;
+  /** 任务状态（0-未开始 1-进行中 2-已暂停 3-已完成 4-已取消） */
+  taskLastStatus?: string;
+  /** 任务状态（0-未开始 1-进行中 2-已暂停 3-已完成 4-已取消） */
+  taskCurrentStatus?: string;
+  /** 任务关联区域围栏信息 */
+  geoAreasVOList?: GeoAreasVO[];
+  /** 任务关联队伍信息 */
+  teamUAVRelationInfoVOList?: TeamUAVRelationInfoVO[];
+  /** 任务关联成员、成员关联负责内容、成员关联使用设备信息 */
+  teamMemberRoleDeviceRelationInfoVOList?: TeamMemberRoleDeviceRelationInfoVO[];
+  /** 任务配置的无人机池（用于定位分析和路径规划阶段） */
+  taskDroneConfigVOList?: TaskDroneConfigVO[];
+};
+
 export type TrainingTaskRequestParam = {
   /** Page number (starting from 1) */
   pageNum?: number;
@@ -3762,6 +4124,14 @@ export type TrainingTaskRequestParam = {
   plannedStartTime?: string;
   /** 计划结束时间 */
   plannedEndTime?: string;
+  /** 路径规划人员开始位置 - 经度 */
+  pathPlanningStartLongitude?: number;
+  /** 路径规划人员开始位置 - 纬度 */
+  pathPlanningStartLatitude?: number;
+  /** 目标捕获最终位置 - 经度 */
+  targetCaptureEndLongitude?: number;
+  /** 目标捕获最终位置 - 纬度 */
+  targetCaptureEndLatitude?: number;
 };
 
 export type TrainingTaskReqVO = {
@@ -4366,12 +4736,14 @@ export type WorkPlatformTaskVO = {
   taskRoleId?: number;
   /** 任务角色名称 */
   taskRoleName?: string;
+  /** 是否已完成测试 */
+  hasCompleted?: boolean;
 };
 
 /** 作业类型（4-定位分析，5-路径规划） */
 export enum WorkTypeEnum {
-  POSITIONING_ANALYSIS = 4,
-  PATH_PLANNING = 5,
+  POSITIONING = 4,
+  PATHFINDING = 5,
 }
 
 export type IWorkTypeEnum = keyof typeof WorkTypeEnum;

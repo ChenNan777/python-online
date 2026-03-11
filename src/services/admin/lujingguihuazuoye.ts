@@ -64,6 +64,48 @@ export function taskEventPathPlanningAssignmentInfoUsingGet({
   );
 }
 
+/** 获取任务下所有队伍的路径规划评分 获取指定任务中所有队伍的路径规划评分情况 GET /task-event/path-planning/scores/task/${param0} */
+export function taskEventPathPlanningScoresTaskTaskIdUsingGet({
+  params,
+  options,
+}: {
+  // 叠加生成的Param类型 (非body参数openapi默认没有生成对象)
+  params: API.TaskEventPathPlanningScoresTaskTaskIdUsingGetParams;
+  options?: CustomRequestOptions;
+}) {
+  const { taskId: param0, ...queryParams } = params;
+
+  return request<API.TeamPathPlanningScoreDTO[]>(
+    `/task-event/path-planning/scores/task/${param0}`,
+    {
+      method: 'GET',
+      params: { ...queryParams },
+      ...(options || {}),
+    }
+  );
+}
+
+/** 获取指定队伍的详细路径规划评分 获取指定队伍的详细路径规划评分和成员结果 GET /task-event/path-planning/scores/task/${param0}/team/${param1} */
+export function taskEventPathPlanningScoresTaskTaskIdTeamTeamIdUsingGet({
+  params,
+  options,
+}: {
+  // 叠加生成的Param类型 (非body参数openapi默认没有生成对象)
+  params: API.TaskEventPathPlanningScoresTaskTaskIdTeamTeamIdUsingGetParams;
+  options?: CustomRequestOptions;
+}) {
+  const { taskId: param0, teamId: param1, ...queryParams } = params;
+
+  return request<API.TeamPathPlanningScoreDTO>(
+    `/task-event/path-planning/scores/task/${param0}/team/${param1}`,
+    {
+      method: 'GET',
+      params: { ...queryParams },
+      ...(options || {}),
+    }
+  );
+}
+
 /** 此处后端没有提供注释 POST /task-event/path-planning/submit */
 export function taskEventPathPlanningSubmitUsingPost({
   body,

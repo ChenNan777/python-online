@@ -1,4 +1,4 @@
-export type ChallengeType = 'positioning' | 'pathfinding';
+export type ChallengeType = 'positioning' | 'pathfinding' | 'unassigned';
 export type TaskProgressStatus = 'not_started' | 'in_progress' | 'completed';
 export type ChallengePanelTab = 'map-debug' | 'positioning-debug';
 
@@ -9,6 +9,7 @@ export const POSITIONING_DEBUG_PANEL_TAB: ChallengePanelTab = 'positioning-debug
 // 挑战类型常量
 export const POSITIONING_TYPE: ChallengeType = 'positioning';
 export const PATHFINDING_TYPE: ChallengeType = 'pathfinding';
+export const UNASSIGNED_TYPE: ChallengeType = 'unassigned';
 
 // 任务状态常量定义
 export const TASK_STATUS_READY = 0;
@@ -33,7 +34,8 @@ export const PATHFINDING_WORK_TYPE = 5 as const;
 // 挑战 ID
 export const POSITIONING_CHALLENGE_ID = 'bearing-positioning';
 export const PATHFINDING_CHALLENGE_ID = 'shortest-path';
-export type ChallengeId = typeof POSITIONING_CHALLENGE_ID | typeof PATHFINDING_CHALLENGE_ID;
+export const UNASSIGNED_CHALLENGE_ID = 'unassigned';
+export type ChallengeId = typeof POSITIONING_CHALLENGE_ID | typeof PATHFINDING_CHALLENGE_ID | typeof UNASSIGNED_CHALLENGE_ID;
 
 export type ExamChallengeMeta = {
   role: ChallengeType;
@@ -52,21 +54,30 @@ export const EXAM_META_BY_CHALLENGE_ID: Record<ChallengeId, ExamChallengeMeta> =
     operationType: PATHFINDING_OPERATION_TYPE,
     workType: PATHFINDING_WORK_TYPE,
   },
+  unassigned: {
+    role: UNASSIGNED_TYPE,
+    operationType: "2",
+    workType: 4
+  }
 };
 
 const CHALLENGE_TYPE_TO_ID: Record<ChallengeType, ChallengeId> = {
   [POSITIONING_TYPE]: POSITIONING_CHALLENGE_ID,
   [PATHFINDING_TYPE]: PATHFINDING_CHALLENGE_ID,
+  [UNASSIGNED_TYPE]: UNASSIGNED_CHALLENGE_ID,
 };
 
-const ROLE_LABEL_MAP: Record<ChallengeType, string> = {
+// 在ROLE_LABEL_MAP中添加UNASSIGNED_TYPE的标签定义
+export const ROLE_LABEL_MAP: Record<ChallengeType, string> = {
   [POSITIONING_TYPE]: '定位分析',
   [PATHFINDING_TYPE]: '路径规划',
+  [UNASSIGNED_TYPE]: '未分配',
 };
 
 const ROLE_EXPECTED_STATUS_MAP: Record<ChallengeType, number> = {
   [POSITIONING_TYPE]: TASK_STATUS_POSITIONING_ANALYSIS,
   [PATHFINDING_TYPE]: TASK_STATUS_PATH_PLANNING,
+  [UNASSIGNED_TYPE]: TASK_STATUS_READY,
 };
 
 const TASK_STAGE_TEXT_MAP: Record<number, string> = {
@@ -116,7 +127,7 @@ export function getRoleByTaskRoleId(taskRoleId: string): ChallengeType {
     return PATHFINDING_TYPE;
   }
 
-  return PATHFINDING_TYPE;
+  return UNASSIGNED_TYPE;
 }
 
 export function getRoleLabel(role: ChallengeType): string {

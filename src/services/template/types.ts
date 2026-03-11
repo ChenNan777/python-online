@@ -2883,19 +2883,19 @@ export type PageableObject = {
   sort?: SortObject;
   pageSize?: number;
   pageNumber?: number;
-  unpaged?: boolean;
   paged?: boolean;
+  unpaged?: boolean;
 };
 
 export type PageAlertHistoryVo = {
   totalPages?: number;
   totalElements?: number;
-  first?: boolean;
-  last?: boolean;
   size?: number;
   content?: AlertHistoryVo[];
   number?: number;
   sort?: SortObject;
+  first?: boolean;
+  last?: boolean;
   numberOfElements?: number;
   pageable?: PageableObject;
   empty?: boolean;
@@ -2904,12 +2904,12 @@ export type PageAlertHistoryVo = {
 export type PageAlertRulesVo = {
   totalPages?: number;
   totalElements?: number;
-  first?: boolean;
-  last?: boolean;
   size?: number;
   content?: AlertRulesVo[];
   number?: number;
   sort?: SortObject;
+  first?: boolean;
+  last?: boolean;
   numberOfElements?: number;
   pageable?: PageableObject;
   empty?: boolean;
@@ -2918,12 +2918,12 @@ export type PageAlertRulesVo = {
 export type PageDroneControlLogVo = {
   totalPages?: number;
   totalElements?: number;
-  first?: boolean;
-  last?: boolean;
   size?: number;
   content?: DroneControlLogVo[];
   number?: number;
   sort?: SortObject;
+  first?: boolean;
+  last?: boolean;
   numberOfElements?: number;
   pageable?: PageableObject;
   empty?: boolean;
@@ -2932,12 +2932,12 @@ export type PageDroneControlLogVo = {
 export type PageDroneRealtimeStatusVo = {
   totalPages?: number;
   totalElements?: number;
-  first?: boolean;
-  last?: boolean;
   size?: number;
   content?: DroneRealtimeStatusVo[];
   number?: number;
   sort?: SortObject;
+  first?: boolean;
+  last?: boolean;
   numberOfElements?: number;
   pageable?: PageableObject;
   empty?: boolean;
@@ -2946,12 +2946,12 @@ export type PageDroneRealtimeStatusVo = {
 export type PageDroneWarningVo = {
   totalPages?: number;
   totalElements?: number;
-  first?: boolean;
-  last?: boolean;
   size?: number;
   content?: DroneWarningVo[];
   number?: number;
   sort?: SortObject;
+  first?: boolean;
+  last?: boolean;
   numberOfElements?: number;
   pageable?: PageableObject;
   empty?: boolean;
@@ -2960,12 +2960,12 @@ export type PageDroneWarningVo = {
 export type PageLogBraceletVo = {
   totalPages?: number;
   totalElements?: number;
-  first?: boolean;
-  last?: boolean;
   size?: number;
   content?: LogBraceletVo[];
   number?: number;
   sort?: SortObject;
+  first?: boolean;
+  last?: boolean;
   numberOfElements?: number;
   pageable?: PageableObject;
   empty?: boolean;
@@ -2974,12 +2974,12 @@ export type PageLogBraceletVo = {
 export type PageLogMemberPathVo = {
   totalPages?: number;
   totalElements?: number;
-  first?: boolean;
-  last?: boolean;
   size?: number;
   content?: LogMemberPathVo[];
   number?: number;
   sort?: SortObject;
+  first?: boolean;
+  last?: boolean;
   numberOfElements?: number;
   pageable?: PageableObject;
   empty?: boolean;
@@ -2988,12 +2988,12 @@ export type PageLogMemberPathVo = {
 export type PageLogPayloadVo = {
   totalPages?: number;
   totalElements?: number;
-  first?: boolean;
-  last?: boolean;
   size?: number;
   content?: LogPayloadVo[];
   number?: number;
   sort?: SortObject;
+  first?: boolean;
+  last?: boolean;
   numberOfElements?: number;
   pageable?: PageableObject;
   empty?: boolean;
@@ -3002,12 +3002,12 @@ export type PageLogPayloadVo = {
 export type PageMemberDeviceRelationVo = {
   totalPages?: number;
   totalElements?: number;
-  first?: boolean;
-  last?: boolean;
   size?: number;
   content?: MemberDeviceRelationVo[];
   number?: number;
   sort?: SortObject;
+  first?: boolean;
+  last?: boolean;
   numberOfElements?: number;
   pageable?: PageableObject;
   empty?: boolean;
@@ -3016,12 +3016,12 @@ export type PageMemberDeviceRelationVo = {
 export type PageScoresVo = {
   totalPages?: number;
   totalElements?: number;
-  first?: boolean;
-  last?: boolean;
   size?: number;
   content?: ScoresVo[];
   number?: number;
   sort?: SortObject;
+  first?: boolean;
+  last?: boolean;
   numberOfElements?: number;
   pageable?: PageableObject;
   empty?: boolean;
@@ -3030,12 +3030,12 @@ export type PageScoresVo = {
 export type PageScoringStandardsVo = {
   totalPages?: number;
   totalElements?: number;
-  first?: boolean;
-  last?: boolean;
   size?: number;
   content?: ScoringStandardsVo[];
   number?: number;
   sort?: SortObject;
+  first?: boolean;
+  last?: boolean;
   numberOfElements?: number;
   pageable?: PageableObject;
   empty?: boolean;
@@ -3044,12 +3044,12 @@ export type PageScoringStandardsVo = {
 export type PageStudentTargetAssignmentVo = {
   totalPages?: number;
   totalElements?: number;
-  first?: boolean;
-  last?: boolean;
   size?: number;
   content?: StudentTargetAssignmentVo[];
   number?: number;
   sort?: SortObject;
+  first?: boolean;
+  last?: boolean;
   numberOfElements?: number;
   pageable?: PageableObject;
   empty?: boolean;
@@ -3058,12 +3058,12 @@ export type PageStudentTargetAssignmentVo = {
 export type PageTaskDroneConfigVo = {
   totalPages?: number;
   totalElements?: number;
-  first?: boolean;
-  last?: boolean;
   size?: number;
   content?: TaskDroneConfigVo[];
   number?: number;
   sort?: SortObject;
+  first?: boolean;
+  last?: boolean;
   numberOfElements?: number;
   pageable?: PageableObject;
   empty?: boolean;
@@ -3072,12 +3072,12 @@ export type PageTaskDroneConfigVo = {
 export type PageThresholdsVo = {
   totalPages?: number;
   totalElements?: number;
-  first?: boolean;
-  last?: boolean;
   size?: number;
   content?: ThresholdsVo[];
   number?: number;
   sort?: SortObject;
+  first?: boolean;
+  last?: boolean;
   numberOfElements?: number;
   pageable?: PageableObject;
   empty?: boolean;
@@ -3086,12 +3086,12 @@ export type PageThresholdsVo = {
 export type PageTrainingTaskAssignmentVo = {
   totalPages?: number;
   totalElements?: number;
-  first?: boolean;
-  last?: boolean;
   size?: number;
   content?: TrainingTaskAssignmentVo[];
   number?: number;
   sort?: SortObject;
+  first?: boolean;
+  last?: boolean;
   numberOfElements?: number;
   pageable?: PageableObject;
   empty?: boolean;
@@ -3100,12 +3100,12 @@ export type PageTrainingTaskAssignmentVo = {
 export type PageTrainingTaskVO = {
   totalPages?: number;
   totalElements?: number;
-  first?: boolean;
-  last?: boolean;
   size?: number;
   content?: TrainingTaskVO[];
   number?: number;
   sort?: SortObject;
+  first?: boolean;
+  last?: boolean;
   numberOfElements?: number;
   pageable?: PageableObject;
   empty?: boolean;
@@ -4786,6 +4786,14 @@ export type TrainingTask = {
   taskDescription?: string;
   /** 演训区域定义（JSON格式存储区域坐标） */
   trainingArea?: string;
+  /** 路径规划人员开始位置 - 经度 */
+  pathPlanningStartLongitude?: number;
+  /** 路径规划人员开始位置 - 纬度 */
+  pathPlanningStartLatitude?: number;
+  /** 目标捕获最终位置 - 经度 */
+  targetCaptureEndLongitude?: number;
+  /** 目标捕获最终位置 - 纬度 */
+  targetCaptureEndLatitude?: number;
 };
 
 export type TrainingTaskAssignment = {
@@ -5015,6 +5023,14 @@ export type TrainingTaskRequestParam = {
   plannedStartTime?: string;
   /** 计划结束时间 */
   plannedEndTime?: string;
+  /** 路径规划人员开始位置 - 经度 */
+  pathPlanningStartLongitude?: number;
+  /** 路径规划人员开始位置 - 纬度 */
+  pathPlanningStartLatitude?: number;
+  /** 目标捕获最终位置 - 经度 */
+  targetCaptureEndLongitude?: number;
+  /** 目标捕获最终位置 - 纬度 */
+  targetCaptureEndLatitude?: number;
 };
 
 export type TrainingTaskSearchUsingGetParams = {

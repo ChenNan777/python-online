@@ -61,6 +61,24 @@ export function taskTaskIdDetailInfoUsingGet({
   });
 }
 
+/** 获取任务关联的无人机列表 获取任务关联的无人机列表，包含无人机名称、最新经度、纬度信息 GET /task/${param0}/drones */
+export function taskTaskIdDronesUsingGet({
+  params,
+  options,
+}: {
+  // 叠加生成的Param类型 (非body参数openapi默认没有生成对象)
+  params: API.TaskTaskIdDronesUsingGetParams;
+  options?: CustomRequestOptions;
+}) {
+  const { taskId: param0, ...queryParams } = params;
+
+  return request<API.TaskDroneInfoVO[]>(`/task/${param0}/drones`, {
+    method: 'GET',
+    params: { ...queryParams },
+    ...(options || {}),
+  });
+}
+
 /** 训练区域分页列表 条件查询训练区域分页列表 GET /task/areas/search */
 export function taskAreasSearchUsingGet({
   params,

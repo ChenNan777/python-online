@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Button, Space, message } from 'antd';
-import { CheckCircleFilled, CloseCircleFilled } from '@ant-design/icons';
+import { Button, Modal, Space, message } from 'antd';
+import { CheckCircleFilled, CloseCircleFilled, ExclamationCircleFilled } from '@ant-design/icons';
 import { useNavigate, useParams } from 'react-router-dom';
 
-import { DASHBOARD_PATH } from '@/constants/routes';
+import { DASHBOARD_PATH, EXAM_FINISHED_PATH } from '@/constants/routes';
 import {
   EXAM_META_BY_CHALLENGE_ID,
   PATHFINDING_OPERATION_TYPE,
@@ -81,7 +81,7 @@ export default function ExamChallengePage() {
   const historyRecords = useMemo(() => historyQuery.data ?? [], [historyQuery.data]);
 
   const saveCodeMutation = useSaveCodeMutation();
-  const submitWorkMutation = useSubmitWorkMutation({ userId, operationType });
+  const submitWorkMutation = useSubmitWorkMutation();
 
   const [historyOpen, setHistoryOpen] = useState(false);
   const {
@@ -151,7 +151,53 @@ export default function ExamChallengePage() {
     setHistoryOpen(false);
   }, [currentCode, lastSavedCode, setCurrentCode, setHistoryOpen, setInitialCode]);
 
-  const deadlineCountdownState = useExamDeadlineCountdown(assignment?.deadline);
+  const devDeadlineRaw = useMemo(() => {
+    if (!import.meta.env.DEV) {
+      return null;
+    }
+
+    const query = window.location.search;
+    const match = query.match(/[?&]devDeadline=([^&]*)/);
+    const raw = match?.[1];
+    if (!raw) {
+      return null;
+    }
+
+    const decoded = decodeURIComponent(raw.replace(/\+/g, '%2B')).trim();
+    return decoded.length > 0 ? decoded : null;
+  }, []);
+
+  const [devDeadlineOverride, setDevDeadlineOverride] = useState<unknown>(null);
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      if (!import.meta.env.DEV || devDeadlineRaw === null) {
+        setDevDeadlineOverride(null);
+        return;
+      }
+
+      if (/^[+-]\d+(\.\d+)?$/.test(devDeadlineRaw)) {
+        const offsetSeconds = Number(devDeadlineRaw);
+        if (!Number.isFinite(offsetSeconds)) {
+          setDevDeadlineOverride(null);
+          return;
+        }
+        setDevDeadlineOverride(Date.now() + offsetSeconds * 1000);
+        return;
+      }
+
+      const numeric = Number(devDeadlineRaw);
+      if (Number.isFinite(numeric)) {
+        setDevDeadlineOverride(numeric);
+        return;
+      }
+
+      setDevDeadlineOverride(devDeadlineRaw);
+    }, 0);
+
+    return () => window.clearTimeout(timer);
+  }, [devDeadlineRaw]);
+
+  const deadlineCountdownState = useExamDeadlineCountdown(devDeadlineOverride ?? assignment?.deadline);
   const deadlineCountdown = deadlineCountdownState.countdown;
   const isDeadlineExpired = deadlineCountdownState.isExpired;
 
@@ -185,78 +231,88 @@ export default function ExamChallengePage() {
       return;
     }
 
-    try {
-      const ensureLatestSave = async () => {
-        if (currentCode === lastSavedCode) {
-          return;
+    Modal.confirm({
+      title: '确认提交作业？',
+      icon: <ExclamationCircleFilled />,
+      content: '提交后将无法撤回，也无法再次修改代码。确认要提交吗？',
+      okText: '确认提交',
+      cancelText: '取消',
+      onOk: async () => {
+        try {
+          const ensureLatestSave = async () => {
+            if (currentCode === lastSavedCode) {
+              return;
+            }
+
+            const savedCode = await saveCodeMutation.mutateAsync({
+              assignment,
+              operationType,
+              sourceCode: currentCode,
+            });
+            setLastSavedCode(savedCode);
+          };
+
+          const submitPositioningWork = async (): Promise<boolean> => {
+            if (!positioningResult || !assignment.targetId) {
+              message.error('请先运行定位分析代码并生成结果');
+              return false;
+            }
+
+            const uavId = Number(assignment.targetId);
+            if (!Number.isFinite(uavId)) {
+              message.error('考试作业目标 ID 非法，无法提交定位结果');
+              return false;
+            }
+
+            await submitWorkMutation.mutateAsync({
+              assignment,
+              workType,
+              positioningData: {
+                uavId,
+                longitude: positioningResult.userLng,
+                latitude: positioningResult.userLat,
+                analysisDescription: '来自在线考试工作区提交',
+              },
+            });
+
+            return true;
+          };
+
+          const submitPathPlanningWork = async (): Promise<boolean> => {
+            const pathPlanningData = buildPathPlanningSubmitPayload({
+              result: graphResult,
+              roadNetwork: roadScene.roadNetwork,
+            });
+            if (!pathPlanningData) {
+              message.error('请先运行路径规划代码并生成有效路径');
+              return false;
+            }
+
+            await submitWorkMutation.mutateAsync({
+              assignment,
+              workType,
+              pathPlanningData,
+            });
+
+            return true;
+          };
+
+          await ensureLatestSave();
+
+          const submitted = isPositioningRole
+            ? await submitPositioningWork()
+            : await submitPathPlanningWork();
+          if (!submitted) {
+            return;
+          }
+
+          message.success('提交成功');
+          navigate(EXAM_FINISHED_PATH, { replace: true });
+        } catch (submitActionError) {
+          console.error(submitActionError);
         }
-
-        const savedCode = await saveCodeMutation.mutateAsync({
-          assignment,
-          operationType,
-          sourceCode: currentCode,
-        });
-        setLastSavedCode(savedCode);
-      };
-
-      const submitPositioningWork = async (): Promise<boolean> => {
-        if (!positioningResult || !assignment.targetId) {
-          message.error('请先运行定位分析代码并生成结果');
-          return false;
-        }
-
-        const uavId = Number(assignment.targetId);
-        if (!Number.isFinite(uavId)) {
-          message.error('考试作业目标 ID 非法，无法提交定位结果');
-          return false;
-        }
-
-        await submitWorkMutation.mutateAsync({
-          assignment,
-          workType,
-          positioningData: {
-            uavId,
-            longitude: positioningResult.userLng,
-            latitude: positioningResult.userLat,
-            analysisDescription: '来自在线考试工作区提交',
-          },
-        });
-
-        return true;
-      };
-
-      const submitPathPlanningWork = async (): Promise<boolean> => {
-        const pathPlanningData = buildPathPlanningSubmitPayload({
-          result: graphResult,
-          roadNetwork: roadScene.roadNetwork,
-        });
-        if (!pathPlanningData) {
-          message.error('请先运行路径规划代码并生成有效路径');
-          return false;
-        }
-
-        await submitWorkMutation.mutateAsync({
-          assignment,
-          workType,
-          pathPlanningData,
-        });
-
-        return true;
-      };
-
-      await ensureLatestSave();
-
-      const submitted = isPositioningRole
-        ? await submitPositioningWork()
-        : await submitPathPlanningWork();
-      if (!submitted) {
-        return;
-      }
-
-      message.success('提交成功');
-    } catch (submitActionError) {
-      message.error(submitActionError instanceof Error ? submitActionError.message : '提交失败');
-    }
+      },
+    });
   }, [
     assignment,
     currentCode,
@@ -271,6 +327,7 @@ export default function ExamChallengePage() {
     setLastSavedCode,
     workType,
     isDeadlineExpired,
+    navigate,
   ]);
 
   const headerNotices = useMemo(
@@ -373,7 +430,7 @@ export default function ExamChallengePage() {
   );
 
   if (!challenge) {
-    return null;
+    return <div>暂未加载到作业信息</div>;
   }
 
   return (

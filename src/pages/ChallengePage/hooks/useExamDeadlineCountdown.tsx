@@ -10,7 +10,7 @@ function parseDeadlineMs(deadline: unknown): number | null {
     if (!Number.isFinite(deadline)) {
       return null;
     }
-    const asMs = deadline > 2_000_000_000_000 ? deadline : deadline * 1000;
+    const asMs = deadline > 10_000_000_000 ? deadline : deadline * 1000;
     return asMs > 0 ? asMs : null;
   }
 

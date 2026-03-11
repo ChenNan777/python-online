@@ -149,6 +149,7 @@ httpClient.interceptors.response.use(
     const requestSucceeded = isBusinessRequestSuccessful(response.data);
 
     if (requestSucceeded === false) {
+      message.error(getBusinessErrorMessage(response.data));
       return Promise.reject(
         new AxiosError(
           getBusinessErrorMessage(response.data),

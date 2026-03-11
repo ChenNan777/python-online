@@ -12,12 +12,12 @@ const common: Partial<GenerateServiceProps> = {
 export default [
   {
     ...common,
-    schemaPath: 'http://192.168.0.216:28888/v3/api-docs/admin',
+    schemaPath: 'http://192.168.0.113:28888/v3/api-docs/admin',
     serversPath: './src/services/admin',
   },
   {
     ...common,
-    schemaPath: 'http://192.168.0.216:28888/v3/api-docs/template',
+    schemaPath: 'http://192.168.0.113:28888/v3/api-docs/template',
     serversPath: './src/services/template',
   },
 ] as GenerateServiceProps[];

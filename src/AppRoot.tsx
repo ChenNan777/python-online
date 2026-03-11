@@ -7,6 +7,7 @@ import { Suspense, lazy } from 'react';
 const ChallengePage = lazy(() => import('./pages/ChallengePage'));
 const DashboardPage = lazy(() => import('./pages/DashboardPage'));
 const DebuggerPage = lazy(() => import('./pages/DebuggerPage'));
+const ExamFinishedPage = lazy(() => import('./pages/ExamFinishedPage'));
 const LoginPage = lazy(() => import('./pages/LoginPage'));
 const PracticePage = lazy(() => import('./pages/PracticePage'));
 const ProtectedRoute = lazy(() => import('./components/ProtectedRoute'));
@@ -14,6 +15,7 @@ import {
   CHALLENGE_PATH,
   DASHBOARD_PATH,
   DEBUGGER_PATH,
+  EXAM_FINISHED_PATH,
   LOGIN_PATH,
   PRACTICE_CHALLENGE_PATH,
   PRACTICE_PATH,
@@ -40,6 +42,7 @@ export default function AppRoot() {
                 <Route element={<ProtectedRoute />}>
                   <Route path={DASHBOARD_PATH} element={<DashboardPage />} />
                   <Route path={CHALLENGE_PATH} element={<ChallengePage />} />
+                  <Route path={EXAM_FINISHED_PATH} element={<ExamFinishedPage />} />
                 </Route>
                 <Route path={ROOT_PATH} element={<Navigate to={DASHBOARD_PATH} replace />} />
                 <Route path="*" element={<Navigate to={DASHBOARD_PATH} replace />} />
