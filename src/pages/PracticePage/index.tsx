@@ -1,12 +1,13 @@
 import { useNavigate } from 'react-router-dom';
 import { Card, Button, Space } from 'antd';
-import { CodeOutlined, CompassOutlined, AimOutlined } from '@ant-design/icons';
+import { CodeOutlined, CompassOutlined, AimOutlined, SettingOutlined } from '@ant-design/icons';
 import ThemeSwitcher from '../../components/ThemeSwitcher';
 import { PATHFINDING_TYPE, POSITIONING_TYPE } from '../../constants/challenge';
 import {
   buildPracticeChallengePath,
   DEBUGGER_PATH,
   LOGIN_PATH,
+  ROAD_NETWORK_CONFIG_PATH,
 } from '../../constants/routes';
 import './PracticePage.css';
 
@@ -46,6 +47,15 @@ export default function PracticePage() {
               onClick={() => navigate(buildPracticeChallengePath(PATHFINDING_TYPE))}
             >
               路径规划练习
+            </Button>
+
+            <Button
+              size="large"
+              block
+              icon={<SettingOutlined />}
+              onClick={() => navigate(ROAD_NETWORK_CONFIG_PATH)}
+            >
+              路网配置
             </Button>
 
             <Button

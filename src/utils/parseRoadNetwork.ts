@@ -63,6 +63,8 @@ export function parseRoadNetwork(
 
     const coords = (feature.geometry as LineString).coordinates;
     const isOneway = feature.properties?.oneway === 'yes';
+    // 读取权重因子，默认为 1.0。数值越大，代表通行成本越高（如拥堵、限速等）。
+    const weightFactor = typeof feature.properties?.weight === 'number' ? feature.properties.weight : 1.0;
 
     // 为每条道路的每个坐标点创建节点
     for (let i = 0; i < coords.length; i++) {
@@ -79,7 +81,8 @@ export function parseRoadNetwork(
       if (i > 0) {
         const [prevLng, prevLat] = coords[i - 1];
         const prevNodeId = `${prevLng.toFixed(6)},${prevLat.toFixed(6)}`;
-        const weight = haversineDistance(prevLng, prevLat, lng, lat);
+        const distance = haversineDistance(prevLng, prevLat, lng, lat);
+        const weight = distance * weightFactor;
 
         // 添加边
         graph[prevNodeId][nodeId] = weight;

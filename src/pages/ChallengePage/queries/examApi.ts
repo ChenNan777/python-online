@@ -7,6 +7,8 @@ import type {
 import {
   studentOperationCodeAssignmentInfoUsingGet,
   studentOperationCodeListStudentTaskIdMemberIdUsingGet,
+  studentOperationCodeRoadDataUsingGet,
+  studentOperationCodeRoadDataUsingPost,
   studentOperationCodeSaveCodeUsingPost,
   studentOperationCodeSubmitUsingPost,
 } from '@/services/admin/xueshengxunlianzuoyeguanli';
@@ -40,6 +42,29 @@ export async function fetchExamHistory(taskId: number, memberId: number): Promis
   return sortExamHistoryRecords(response.data);
 }
 
+export async function fetchExamRoadData(): Promise<string | null> {
+  const response: unknown = await studentOperationCodeRoadDataUsingGet({});
+  if (typeof response === 'string') {
+    return response.trim().length > 0 ? response : null;
+  }
+  if (response && typeof response === 'object') {
+    return JSON.stringify(response);
+  }
+  return null;
+}
+
+export async function saveExamRoadData(geojson: object | string): Promise<string> {
+  const jsonStr = typeof geojson === 'string' ? geojson : JSON.stringify(geojson);
+  const blob = new Blob([jsonStr], { type: 'application/json' });
+  const formData = new FormData();
+  formData.append('file', blob, 'road_network.json');
+
+  const response = await studentOperationCodeRoadDataUsingPost({
+    body: formData,
+  });
+  return response.data;
+}
+
 export async function saveExamCode(args: {
   assignment: StudentTrainingAssignmentVO;
   operationType: string;
@@ -51,10 +76,9 @@ export async function saveExamCode(args: {
     throw new Error('考试作业基础信息不完整，无法保存代码');
   }
 
-  const needsTargetId = operationType === '1';
   const parsedTargetId = assignment.targetId != null ? Number(assignment.targetId) : null;
   const targetId = Number.isFinite(parsedTargetId) ? parsedTargetId : null;
-  if (needsTargetId && targetId === null) {
+  if (targetId === null) {
     throw new Error('定位作业目标 ID 缺失，无法保存代码');
   }
 

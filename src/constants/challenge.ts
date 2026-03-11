@@ -118,7 +118,6 @@ export function getChallengeIdByType(type: string | undefined): ChallengeId | nu
 }
 
 export function getRoleByTaskRoleId(taskRoleId: string): ChallengeType {
-  // 2=定位，3=路径规划
   if (taskRoleId === POSITIONING_TASK_ROLE_ID) {
     return POSITIONING_TYPE;
   }
@@ -165,6 +164,13 @@ export function getChallengeStartState(role: ChallengeType, taskStatus: string |
   canStart: boolean;
   buttonText: string;
 } {
+  if (role === UNASSIGNED_TYPE) {
+    return {
+      canStart: false,
+      buttonText: '暂无作业',
+    };
+  }
+
   // Dashboard 按钮状态
   const taskStatusNum = parseTaskStatusNumber(taskStatus);
   const expectedStatus = getExpectedTaskStatusByRole(role);

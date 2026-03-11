@@ -34,7 +34,7 @@ export default function DashboardPage() {
       return;
     }
 
-    if (user.task.hasCompleted) {
+    if (user.task.isComplete) {
       return;
     }
 
@@ -73,7 +73,7 @@ export default function DashboardPage() {
     }
   };
 
-  const isTaskCompleted = Boolean(user.task?.hasCompleted);
+  const isTaskCompleted = user.task?.isComplete === true;
 
   const startState = user.role && user.task && !isTaskCompleted
     ? getChallengeStartState(user.role, user.task.taskStatus)

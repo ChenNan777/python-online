@@ -8,6 +8,7 @@ const ChallengePage = lazy(() => import('./pages/ChallengePage'));
 const DashboardPage = lazy(() => import('./pages/DashboardPage'));
 const DebuggerPage = lazy(() => import('./pages/DebuggerPage'));
 const ExamFinishedPage = lazy(() => import('./pages/ExamFinishedPage'));
+const RoadNetworkConfigPage = lazy(() => import('./pages/RoadNetworkConfigPage'));
 const LoginPage = lazy(() => import('./pages/LoginPage'));
 const PracticePage = lazy(() => import('./pages/PracticePage'));
 const ProtectedRoute = lazy(() => import('./components/ProtectedRoute'));
@@ -19,6 +20,7 @@ import {
   LOGIN_PATH,
   PRACTICE_CHALLENGE_PATH,
   PRACTICE_PATH,
+  ROAD_NETWORK_CONFIG_PATH,
   ROOT_PATH,
 } from './constants/routes';
 import { appQueryClient } from './query/client';
@@ -37,6 +39,7 @@ export default function AppRoot() {
               <Routes>
                 <Route path={LOGIN_PATH} element={<LoginPage />} />
                 <Route path={PRACTICE_PATH} element={<PracticePage />} />
+                <Route path={ROAD_NETWORK_CONFIG_PATH} element={<RoadNetworkConfigPage />} />
                 <Route path={DEBUGGER_PATH} element={<DebuggerPage />} />
                 <Route path={PRACTICE_CHALLENGE_PATH} element={<ChallengePage />} />
                 <Route element={<ProtectedRoute />}>

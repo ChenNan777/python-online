@@ -122,7 +122,7 @@ function handleHttpStatusError(status: number): void {
 // 创建 axios 实例
 export const httpClient = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:28888',
-  timeout: 10000,
+  timeout: 30000,
   headers: {
     'Content-Type': 'application/json',
   },

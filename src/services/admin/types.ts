@@ -2965,6 +2965,25 @@ export type StudentOperationCodeRequestParam = {
   sourceCode?: string;
 };
 
+export type StudentOperationCodeRoadDataUsingGetResponses = {
+  /**
+   * OK
+   */
+  200: string;
+};
+
+export type StudentOperationCodeRoadDataUsingPostBody = {
+  /** 路网 GeoJSON 文件 */
+  file: string;
+};
+
+export type StudentOperationCodeRoadDataUsingPostResponses = {
+  /**
+   * OK
+   */
+  200: string;
+};
+
 export type StudentOperationCodeSaveCodeUsingPostResponses = {
   /**
    * OK
@@ -4049,6 +4068,10 @@ export type TrainingTask = {
   targetCaptureEndLongitude?: number;
   /** 目标捕获最终位置 - 纬度 */
   targetCaptureEndLatitude?: number;
+  /** 定位分析作业考试时间 (分钟) */
+  posAnalysisDuration?: number;
+  /** 路径规划作业考试时间 (分钟) */
+  pathPlanDuration?: number;
 };
 
 export type TrainingTaskAssignment = {
@@ -4132,6 +4155,10 @@ export type TrainingTaskRequestParam = {
   targetCaptureEndLongitude?: number;
   /** 目标捕获最终位置 - 纬度 */
   targetCaptureEndLatitude?: number;
+  /** 定位分析作业考试时间 (分钟) */
+  posAnalysisDuration?: number;
+  /** 路径规划作业考试时间 (分钟) */
+  pathPlanDuration?: number;
 };
 
 export type TrainingTaskReqVO = {
@@ -4163,6 +4190,10 @@ export type TrainingTaskReqVO = {
   teamMemberRoleDeviceRelationInfoVOList?: TeamMemberRoleDeviceRelationInfoVO[];
   /** 任务配置的无人机池（用于定位分析和路径规划阶段） */
   taskDroneConfigVOList?: TaskDroneConfigVO[];
+  /** 定位分析作业考试时间 (分钟) */
+  posAnalysisDuration?: number;
+  /** 路径规划作业考试时间 (分钟) */
+  pathPlanDuration?: number;
 };
 
 export type TrainingTeamMember = {
@@ -4736,8 +4767,8 @@ export type WorkPlatformTaskVO = {
   taskRoleId?: number;
   /** 任务角色名称 */
   taskRoleName?: string;
-  /** 是否已完成测试 */
-  hasCompleted?: boolean;
+  /** 是否已完成作业提交 */
+  isComplete?: boolean;
 };
 
 /** 作业类型（4-定位分析，5-路径规划） */

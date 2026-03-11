@@ -25,6 +25,7 @@ import ChallengeWorkspace from './components/ChallengeWorkspace';
 import ExamHistoryModal from './components/ExamHistoryModal';
 import { useAssignmentInfoQuery } from './queries/useAssignmentInfoQuery';
 import { useExamHistoryQuery } from './queries/useExamHistoryQuery';
+import { useExamRoadDataQuery } from './queries/useExamRoadDataQuery';
 import { useExamSceneQuery } from './queries/useExamSceneQuery';
 import { useSaveCodeMutation } from './queries/useSaveCodeMutation';
 import { useSubmitWorkMutation } from './queries/useSubmitWorkMutation';
@@ -78,6 +79,9 @@ export default function ExamChallengePage() {
     assignment,
     enabled: isPositioningRole,
   });
+  const roadDataQuery = useExamRoadDataQuery({
+    enabled: !isPositioningRole && assignment !== null,
+  });
   const historyRecords = useMemo(() => historyQuery.data ?? [], [historyQuery.data]);
 
   const saveCodeMutation = useSaveCodeMutation();
@@ -104,7 +108,10 @@ export default function ExamChallengePage() {
     }
   }, [challenge, hasUserTask, navigate]);
 
-  const roadScene = useMemo(() => buildExamRoadNetwork(assignment), [assignment]);
+  const roadScene = useMemo(
+    () => buildExamRoadNetwork({ assignment, roadNetworkGeoJson: roadDataQuery.data ?? null }),
+    [assignment, roadDataQuery.data],
+  );
   const positioningScene = useMemo(() => {
     if (sceneQuery.data) {
       return sceneQuery.data;
@@ -124,11 +131,21 @@ export default function ExamChallengePage() {
       return sceneQuery.isLoading ? '定位场景加载中' : positioningScene.sceneNotice;
     }
 
+    if (roadDataQuery.isLoading) {
+      return '路径规划场景加载中';
+    }
+
+    if (roadDataQuery.error) {
+      return '考试路网数据加载失败。';
+    }
+
     return roadScene.sceneNotice;
   }, [
     assignmentQuery.isLoading,
     isPositioningRole,
     positioningScene.sceneNotice,
+    roadDataQuery.error,
+    roadDataQuery.isLoading,
     roadScene.sceneNotice,
     sceneQuery.isLoading,
   ]);

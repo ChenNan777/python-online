@@ -36,23 +36,30 @@ export function getWorkTypeByChallenge(isPositioningChallenge: boolean) {
 
 /** 把后端下发的路网 GeoJSON 解析为前端可用 RoadNetwork，并附带“场景提示”用于 UI 展示。 */
 export function buildExamRoadNetwork(
-  assignment: StudentTrainingAssignmentVO | null,
+  args: {
+    assignment: StudentTrainingAssignmentVO | null;
+    roadNetworkGeoJson: string | null;
+  },
 ): { roadNetwork: RoadNetwork | null; sceneNotice: string | null } {
-  if (!assignment?.roadNetworkGeoJson) {
+  const { assignment, roadNetworkGeoJson } = args;
+  const startCoord =
+    assignment?.startLongitude !== undefined && assignment.startLatitude !== undefined
+      ? { lng: assignment.startLongitude, lat: assignment.startLatitude }
+      : undefined;
+  const endCoord =
+    assignment?.targetLongitude !== undefined && assignment.targetLatitude !== undefined
+      ? { lng: assignment.targetLongitude, lat: assignment.targetLatitude }
+      : undefined;
+
+  if (!roadNetworkGeoJson) {
     return { roadNetwork: null, sceneNotice: '当前考试未下发路网数据。' };
   }
 
   try {
-    const geojson = JSON.parse(assignment.roadNetworkGeoJson) as FeatureCollection;
+    const geojson = JSON.parse(roadNetworkGeoJson) as FeatureCollection;
     const roadNetwork = parseRoadNetwork(geojson, {
-      startCoord:
-        assignment.startLongitude !== undefined && assignment.startLatitude !== undefined
-          ? { lng: assignment.startLongitude, lat: assignment.startLatitude }
-          : undefined,
-      endCoord:
-        assignment.targetLongitude !== undefined && assignment.targetLatitude !== undefined
-          ? { lng: assignment.targetLongitude, lat: assignment.targetLatitude }
-          : undefined,
+      startCoord,
+      endCoord,
     });
 
     return { roadNetwork, sceneNotice: null };

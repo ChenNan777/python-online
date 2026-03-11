@@ -151,6 +151,60 @@ export default function ChallengeWorkspace(props: ChallengeWorkspaceProps) {
     ),
   }], [allPassed, challenge.testCases, consoleOutput, passedCount, results, totalCount]);
 
+  const descriptionNode = useMemo(() => {
+    if (!isPathfindingChallenge) {
+      return challenge.description;
+    }
+
+    const keyword = '路网邻接表';
+    const chunks = challenge.description.split(keyword);
+    if (chunks.length === 1) {
+      return challenge.description;
+    }
+
+    const tooltipTitle = (
+      <div className="text-xs leading-5 max-w-[340px]">
+        <div className="font-semibold mb-1">路网邻接表是什么？</div>
+        <div>
+          这是把“真实路网”转换成可计算的图结构：每个节点是一个路口/折线点，边表示两点之间可通行的道路。
+        </div>
+        <div className="mt-2">
+          <span style={{ opacity: 0.7, marginRight: 6 }}>•</span>
+          graph[u][v] = 从 u 到 v 的道路距离（单位：米）
+        </div>
+        <div>
+          <span style={{ opacity: 0.7, marginRight: 6 }}>•</span>
+          u / v 是节点 ID（字符串），由路网中的经纬度点生成
+        </div>
+      </div>
+    );
+
+    return chunks.flatMap((chunk, index) => {
+      if (index === chunks.length - 1) {
+        return [chunk];
+      }
+
+      return [
+        chunk,
+        (
+          <Tooltip key={`road-graph-tip-${index}`} title={tooltipTitle} placement="top" mouseEnterDelay={0.1}>
+            <span
+              tabIndex={0}
+              style={{
+                textDecoration: 'underline dotted',
+                textUnderlineOffset: 3,
+                cursor: 'help',
+                color: 'var(--text-primary)',
+              }}
+            >
+              {keyword}
+            </span>
+          </Tooltip>
+        ),
+      ];
+    });
+  }, [challenge.description, isPathfindingChallenge]);
+
   return (
     <Layout className="flex flex-col h-full theme-page theme-app">
       {messageContextHolder}
@@ -254,7 +308,7 @@ export default function ChallengeWorkspace(props: ChallengeWorkspaceProps) {
                   <div className="px-4 py-3 overflow-y-auto flex-1 theme-subtle theme-border" style={{ borderBottomWidth: 1, borderBottomStyle: 'solid' }}>
                     <div className="text-[13px] font-semibold mb-1">{challenge.title}</div>
                     <pre className="text-xs whitespace-pre-wrap font-sans leading-5 m-0" style={{ color: 'var(--text-secondary)' }}>
-                      {challenge.description}
+                      {descriptionNode}
                     </pre>
                   </div>
                   {isPracticeRoute ? (

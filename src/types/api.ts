@@ -53,5 +53,5 @@ export interface TaskInfoApiResponse {
   memberName: string;
   taskRoleId: string;
   taskRoleName: string | null;
-  hasCompleted?: boolean;
+  isComplete?: boolean;
 }

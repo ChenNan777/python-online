@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 import type { StudentTrainingAssignmentVO } from "../../../services/admin/types";
 import { useSaveCodeMutation } from "../queries/useSaveCodeMutation";
@@ -24,6 +24,11 @@ export function useExamAutoSave(args: {
     onSaved,
   } = args;
 
+  const saveCodeMutationRef = useRef(saveCodeMutation);
+  useEffect(() => {
+    saveCodeMutationRef.current = saveCodeMutation;
+  }, [saveCodeMutation]);
+
   useEffect(() => {
     if (!enabled || !assignment) {
       return;
@@ -34,7 +39,7 @@ export function useExamAutoSave(args: {
     }
 
     const timer = window.setTimeout(() => {
-      saveCodeMutation.mutate(
+      saveCodeMutationRef.current.mutate(
         {
           assignment,
           operationType,
@@ -51,6 +56,5 @@ export function useExamAutoSave(args: {
     return () => {
       window.clearTimeout(timer);
     };
-  }, [assignment, currentCode, delayMs, enabled, lastSavedCode, onSaved, operationType, saveCodeMutation]);
+  }, [assignment, currentCode, delayMs, enabled, lastSavedCode, onSaved, operationType]);
 }
-

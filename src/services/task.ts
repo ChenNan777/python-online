@@ -51,7 +51,7 @@ function adaptTaskInfoToUser(apiData: TaskInfoApiResponse, username: string, use
       memberName: apiData.memberName,
       memberRole,
       taskStatus: apiData.taskStatus, // 保留原始 taskStatus
-      hasCompleted: Boolean(apiData.hasCompleted),
+      isComplete: typeof apiData.isComplete === 'boolean' ? apiData.isComplete : undefined,
     },
   };
 }

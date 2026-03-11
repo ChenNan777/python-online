@@ -91,6 +91,36 @@ export function studentOperationCodeListTypeUsingGet({
   );
 }
 
+/** 路网数据 获取路网数据） GET /StudentOperationCode/road-data */
+export function studentOperationCodeRoadDataUsingGet({
+  options,
+}: {
+  options?: CustomRequestOptions;
+}) {
+  return request<string>('/StudentOperationCode/road-data', {
+    method: 'GET',
+    ...(options || {}),
+  });
+}
+
+/** 更新路网数据 更新路网 GeoJSON 数据（全量更新） POST /StudentOperationCode/road-data */
+export function studentOperationCodeRoadDataUsingPost({
+  body,
+  options,
+}: {
+  body: API.StudentOperationCodeRoadDataUsingPostBody | FormData;
+  options?: CustomRequestOptions;
+}) {
+  return request<string>('/StudentOperationCode/road-data', {
+    method: 'POST',
+    headers: body instanceof FormData
+      ? { 'Content-Type': undefined }
+      : { 'Content-Type': 'application/json' },
+    data: body,
+    ...(options || {}),
+  });
+}
+
 /** 保存学生作业代码 保存学生提交的编程代码（支持定位分析和路径规划） POST /StudentOperationCode/saveCode */
 export function studentOperationCodeSaveCodeUsingPost({
   body,

@@ -8,6 +8,7 @@ export const DEBUGGER_PATH = '/debugger';
 export const PRACTICE_CHALLENGE_PATH = '/practice/:type';
 export const CHALLENGE_PATH = '/challenge/:type';
 export const EXAM_FINISHED_PATH = '/exam/finished';
+export const ROAD_NETWORK_CONFIG_PATH = '/road-network-config';
 export const PRACTICE_CHALLENGE_PREFIX = '/practice/';
 
 export type ChallengeTypePath = ChallengeType;
