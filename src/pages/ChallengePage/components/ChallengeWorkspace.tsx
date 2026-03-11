@@ -1,5 +1,6 @@
 import { useMemo, useState, type ReactNode } from 'react';
 import Editor from '@monaco-editor/react';
+import { ExclamationCircleFilled } from '@ant-design/icons';
 import {
   Button,
   Layout,
@@ -12,7 +13,7 @@ import {
 } from 'antd';
 import { Pane, SplitPane } from 'react-split-pane';
 
-import CodeEditorShell from '@/components/CodeEditorShell';
+import CodeEditorShell, { type CodeEditorBadge } from '@/components/CodeEditorShell';
 import ContextCodeModal from '@/components/ContextCodeModal';
 import ExtraDepsModal from '@/components/ExtraDepsModal';
 import PageToolbar from '@/components/PageToolbar';
@@ -31,13 +32,17 @@ import RightPanelStack from '../../EditorPage/RightPanelStack';
 type ChallengeWorkspaceProps = {
   challenge: Challenge;
   mode: 'practice' | 'exam';
+  locked?: boolean;
   initialCode?: string;
   roadNetwork: RoadNetwork | null;
   positioningData: PositioningData | null;
   sceneNotice?: string | null;
+  headerNotices?: { level: 'info' | 'warning' | 'error'; message: string }[];
+  editorBadges?: CodeEditorBadge[];
   onCodeChange?: (code: string) => void;
   onBack?: () => void;
   leftActions?: ReactNode;
+  centerContent?: ReactNode;
   rightActions?: ReactNode;
 };
 
@@ -45,15 +50,43 @@ export default function ChallengeWorkspace(props: ChallengeWorkspaceProps) {
   const {
     challenge,
     mode,
+    locked = false,
     initialCode,
     roadNetwork,
     positioningData,
     sceneNotice,
+    headerNotices,
+    editorBadges,
     onCodeChange,
     onBack,
     leftActions,
+    centerContent,
     rightActions,
   } = props;
+
+  const noticeItems = useMemo(() => {
+    const items: { level: 'info' | 'warning' | 'error'; message: string }[] = [];
+    if (sceneNotice) {
+      items.push({ level: 'warning', message: sceneNotice });
+    }
+    if (headerNotices && headerNotices.length > 0) {
+      items.push(...headerNotices);
+    }
+    return items;
+  }, [headerNotices, sceneNotice]);
+
+  const noticeTone = useMemo(() => {
+    if (noticeItems.some((item) => item.level === 'error')) {
+      return { color: 'var(--danger-strong)', title: '提示' };
+    }
+    if (noticeItems.some((item) => item.level === 'warning')) {
+      return { color: 'var(--warning-strong)', title: '提示' };
+    }
+    if (noticeItems.length > 0) {
+      return { color: 'var(--accent-primary)', title: '提示' };
+    }
+    return null;
+  }, [noticeItems]);
 
   const [depsModalOpen, setDepsModalOpen] = useState(false);
   const [contextModalOpen, setContextModalOpen] = useState(false);
@@ -101,6 +134,8 @@ export default function ChallengeWorkspace(props: ChallengeWorkspaceProps) {
     messageApi,
   });
 
+  const editorLocked = mode === 'exam' && locked;
+
   const extraPanels = useMemo(() => [{
     key: 'test-cases',
     title: results !== null
@@ -135,7 +170,25 @@ export default function ChallengeWorkspace(props: ChallengeWorkspaceProps) {
                 </Button>
               ) : null}
               {hasContext ? <Tag color="blue" className="text-xs">上下文</Tag> : null}
-              {sceneNotice ? <Tag color="gold">{sceneNotice}</Tag> : null}
+              {noticeTone ? (
+                <Tooltip
+                  title={(
+                    <div className="text-xs leading-5">
+                      {noticeItems.map((item, index) => (
+                        <div key={`${item.level}-${index}`}>
+                          <span style={{ opacity: 0.7, marginRight: 6 }}>•</span>
+                          {item.message}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  placement="bottom"
+                >
+                  <span className="theme-toolbar-notice-icon" style={{ color: noticeTone.color }}>
+                    <ExclamationCircleFilled />
+                  </span>
+                </Tooltip>
+              ) : null}
               {isPracticeRoute ? (
                 <Tooltip title="加载额外依赖" placement="bottom">
                   <span>
@@ -161,6 +214,7 @@ export default function ChallengeWorkspace(props: ChallengeWorkspaceProps) {
               {leftActions}
             </>
           )}
+          centerContent={centerContent}
           rightContent={(
             <Space size={6} className="theme-toolbar-group">
               <ThemeSwitcher />
@@ -170,14 +224,6 @@ export default function ChallengeWorkspace(props: ChallengeWorkspaceProps) {
                 </span>
               ) : null}
               {rightActions}
-              <RunControls
-                onRun={runCode}
-                onContinue={continueExec}
-                onStepOver={handleStepOver}
-                onStepInto={handleStepInto}
-                onStepOut={handleStepOut}
-                onStop={stopExec}
-              />
             </Space>
           )}
         />
@@ -234,7 +280,23 @@ export default function ChallengeWorkspace(props: ChallengeWorkspaceProps) {
                 </div>
               </Pane>
               <Pane minSize={200} className="min-h-0">
-                <CodeEditorShell title="solve.py" badges={["Python", "Challenge"]}>
+                <CodeEditorShell
+                  title="solve.py"
+                  badges={["Python"]}
+                  extraBadges={editorBadges}
+                  actions={(
+                    <RunControls
+                      onRun={runCode}
+                      onContinue={continueExec}
+                      onStepOver={handleStepOver}
+                      onStepInto={handleStepInto}
+                      onStepOut={handleStepOut}
+                      onStop={stopExec}
+                      disabled={editorLocked}
+                      disabledReason="考试已截止"
+                    />
+                  )}
+                >
                   <Editor
                     height="100%"
                     defaultLanguage="python"
@@ -254,6 +316,8 @@ export default function ChallengeWorkspace(props: ChallengeWorkspaceProps) {
                       bracketPairColorization: { enabled: true },
                       guides: { bracketPairs: true, indentation: true },
                       padding: { top: 14 },
+                      readOnly: editorLocked,
+                      domReadOnly: editorLocked,
                     }}
                   />
                 </CodeEditorShell>

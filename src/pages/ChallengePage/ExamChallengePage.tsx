@@ -1,5 +1,6 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { Button, Space, Tag, Tooltip, message } from 'antd';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Button, Space, message } from 'antd';
+import { CheckCircleFilled, CloseCircleFilled } from '@ant-design/icons';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import { DASHBOARD_PATH } from '@/constants/routes';
@@ -29,6 +30,7 @@ import { useSaveCodeMutation } from './queries/useSaveCodeMutation';
 import { useSubmitWorkMutation } from './queries/useSubmitWorkMutation';
 import { useExamAutoSave } from './hooks/useExamAutoSave';
 import { useExamEditorCode } from './hooks/useExamEditorCode';
+import { useExamDeadlineCountdown } from './hooks/useExamDeadlineCountdown';
 
 function parseUserId(rawUserId: string | undefined): number | null {
   if (!rawUserId) {
@@ -102,25 +104,6 @@ export default function ExamChallengePage() {
     }
   }, [challenge, hasUserTask, navigate]);
 
-  const canAutoSave =
-    assignment != null &&
-    assignment.taskId != null &&
-    assignment.memberId != null &&
-    assignment.teamId != null &&
-    !assignmentQuery.isLoading &&
-    !historyQuery.isLoading;
-    // console.log('canAutoSave', canAutoSave, assignment);
-  useExamAutoSave({
-    enabled: canAutoSave,
-    assignment,
-    operationType,
-    currentCode,
-    lastSavedCode,
-    delayMs: 1200,
-    saveCodeMutation,
-    onSaved: setLastSavedCode,
-  });
-
   const roadScene = useMemo(() => buildExamRoadNetwork(assignment), [assignment]);
   const positioningScene = useMemo(() => {
     if (sceneQuery.data) {
@@ -168,9 +151,37 @@ export default function ExamChallengePage() {
     setHistoryOpen(false);
   }, [currentCode, lastSavedCode, setCurrentCode, setHistoryOpen, setInitialCode]);
 
+  const deadlineCountdownState = useExamDeadlineCountdown(assignment?.deadline);
+  const deadlineCountdown = deadlineCountdownState.countdown;
+  const isDeadlineExpired = deadlineCountdownState.isExpired;
+
+  const canAutoSave =
+    assignment != null &&
+    assignment.taskId != null &&
+    assignment.memberId != null &&
+    assignment.teamId != null &&
+    !assignmentQuery.isLoading &&
+    !historyQuery.isLoading &&
+    !isDeadlineExpired;
+  useExamAutoSave({
+    enabled: canAutoSave,
+    assignment,
+    operationType,
+    currentCode,
+    lastSavedCode,
+    delayMs: 1200,
+    saveCodeMutation,
+    onSaved: setLastSavedCode,
+  });
+
   const handleSubmit = useCallback(async () => {
     if (!assignment) {
       message.error('考试作业信息尚未加载完成');
+      return;
+    }
+
+    if (isDeadlineExpired) {
+      message.error('考试已经截止，无法提交');
       return;
     }
 
@@ -259,60 +270,137 @@ export default function ExamChallengePage() {
     submitWorkMutation,
     setLastSavedCode,
     workType,
+    isDeadlineExpired,
   ]);
 
-  if (!challenge) {
-    return null;
-  }
-
-  const leftActions = (
-    <Space size={6}>
-      <Button size="small" onClick={() => setHistoryOpen(true)} disabled={historyQuery.isLoading}>
-        历史代码
-      </Button>
-      {assignmentQuery.error ? <Tag color="error">作业加载失败</Tag> : null}
-      {historyQuery.error ? <Tag color="warning">历史代码加载失败</Tag> : null}
-      {sceneQuery.error ? <Tag color="warning">定位场景加载失败</Tag> : null}
-    </Space>
+  const headerNotices = useMemo(
+    () => (assignmentQuery.error ? [{ level: 'error' as const, message: '作业加载失败' }] : []),
+    [assignmentQuery.error],
   );
+
+  const [showSavePending, setShowSavePending] = useState(false);
+  const pendingShowTimerRef = useRef<number | null>(null);
+  const pendingHideTimerRef = useRef<number | null>(null);
+  const pendingShownAtRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (pendingShowTimerRef.current !== null) {
+      window.clearTimeout(pendingShowTimerRef.current);
+      pendingShowTimerRef.current = null;
+    }
+    if (pendingHideTimerRef.current !== null) {
+      window.clearTimeout(pendingHideTimerRef.current);
+      pendingHideTimerRef.current = null;
+    }
+
+    if (saveCodeMutation.isPending) {
+      if (showSavePending) {
+        return;
+      }
+      pendingShowTimerRef.current = window.setTimeout(() => {
+        pendingShownAtRef.current = Date.now();
+        setShowSavePending(true);
+      }, 420);
+      return () => {
+        if (pendingShowTimerRef.current !== null) {
+          window.clearTimeout(pendingShowTimerRef.current);
+          pendingShowTimerRef.current = null;
+        }
+      };
+    }
+
+    if (!showSavePending) {
+      return;
+    }
+
+    const shownAt = pendingShownAtRef.current;
+    const elapsedMs = typeof shownAt === 'number' ? Date.now() - shownAt : 0;
+    const minVisibleMs = 320;
+    const remainingMs = Math.max(0, minVisibleMs - elapsedMs);
+
+    pendingHideTimerRef.current = window.setTimeout(() => {
+      pendingShownAtRef.current = null;
+      setShowSavePending(false);
+    }, remainingMs);
+
+    return () => {
+      if (pendingHideTimerRef.current !== null) {
+        window.clearTimeout(pendingHideTimerRef.current);
+        pendingHideTimerRef.current = null;
+      }
+    };
+  }, [saveCodeMutation.isPending, showSavePending]);
+
+  const editorBadges = showSavePending
+    ? [{
+      key: 'save-pending',
+      className: 'theme-editor-chip--save',
+      label: (
+        <span className="theme-editor-inline-dots" style={{ color: 'var(--accent-primary)' }}>
+          <span /><span /><span />
+        </span>
+      ),
+      tooltip: '保存中',
+    }]
+    : saveCodeMutation.error
+      ? [{
+        key: 'save-error',
+        className: 'theme-editor-chip--save',
+        label: <CloseCircleFilled style={{ color: 'var(--danger-strong)' }} />,
+        tooltip: saveCodeMutation.error instanceof Error ? saveCodeMutation.error.message : '保存失败',
+      }]
+      : lastSavedCode !== null
+        ? [{
+          key: 'save-ok',
+          className: 'theme-editor-chip--save',
+          label: <CheckCircleFilled style={{ color: 'var(--success-strong)' }} />,
+          tooltip: '已保存',
+        }]
+        : [];
 
   const rightActions = (
     <Space size={6}>
-      {saveCodeMutation.isPending ? <Tag color="processing">保存中</Tag> : null}
-      {!saveCodeMutation.isPending && saveCodeMutation.error ? (
-        <Tooltip
-          title={saveCodeMutation.error instanceof Error ? saveCodeMutation.error.message : '保存失败'}
-        >
-          <Tag color="error">保存失败</Tag>
-        </Tooltip>
-      ) : null}
-      {!saveCodeMutation.isPending && !saveCodeMutation.error && lastSavedCode !== null ? <Tag color="success">已保存</Tag> : null}
-      {submitWorkMutation.error ? <Tag color="error">提交失败</Tag> : null}
-      <Button size="small" type="primary" loading={submitWorkMutation.isPending} onClick={handleSubmit}>
+      <Button
+        className="theme-toolbar-submit-btn"
+        size="small"
+        loading={submitWorkMutation.isPending}
+        disabled={isDeadlineExpired}
+        onClick={handleSubmit}
+      >
         提交作业
       </Button>
     </Space>
   );
+
+  if (!challenge) {
+    return null;
+  }
 
   return (
     <>
       <ChallengeWorkspace
         challenge={challenge}
         mode="exam"
+        locked={isDeadlineExpired}
         initialCode={initialCode}
         roadNetwork={roadNetwork}
         positioningData={positioningData}
         sceneNotice={sceneNotice}
+        headerNotices={headerNotices}
+        editorBadges={editorBadges}
         onCodeChange={setCurrentCode}
-        leftActions={leftActions}
+        centerContent={deadlineCountdown}
         rightActions={rightActions}
       />
       <ExamHistoryModal
         open={historyOpen}
         loading={historyQuery.isLoading}
+        refreshing={historyQuery.isFetching}
+        hasError={Boolean(historyQuery.error)}
         records={historyRecords}
         onClose={() => setHistoryOpen(false)}
         onRestore={handleRestoreHistory}
+        onRefresh={() => void historyQuery.refetch()}
       />
     </>
   );

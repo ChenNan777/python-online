@@ -18,6 +18,8 @@ type RunControlsProps = {
   onStepOut: () => void;
   onStop: () => void;
   runLabel?: string;
+  disabled?: boolean;
+  disabledReason?: string;
 };
 
 export default function RunControls({
@@ -28,6 +30,8 @@ export default function RunControls({
   onStepOut,
   onStop,
   runLabel = '运行',
+  disabled = false,
+  disabledReason = '已截止',
 }: RunControlsProps) {
   const { isRunning, isPaused, isReady, hasBreakpoints, runStatus } = usePythonStore((state) => ({
     isRunning: state.isRunning,
@@ -38,8 +42,9 @@ export default function RunControls({
   }));
 
   if (!isRunning) {
+    const canRun = isReady && !disabled;
     return (
-      <Tooltip title={isReady ? runLabel : '加载中...'} placement="bottom">
+      <Tooltip title={disabled ? disabledReason : isReady ? runLabel : '加载中...'} placement="bottom">
         <span>
           <Button
             className="theme-run-btn theme-run-btn--primary"
@@ -47,8 +52,8 @@ export default function RunControls({
             type="primary"
             shape="circle"
             onClick={onRun}
-            disabled={!isReady}
-            aria-label={isReady ? runLabel : '加载中'}
+            disabled={!canRun}
+            aria-label={canRun ? runLabel : disabled ? disabledReason : '加载中'}
             icon={isReady ? <PlayCircle size={14} /> : <LoaderCircle size={14} className="animate-spin" />}
           />
         </span>
@@ -93,22 +98,22 @@ export default function RunControls({
     <Space size={4} className="theme-run-controls">
       <Tooltip title="继续运行" placement="bottom">
         <span>
-          <Button className="theme-run-btn" size="small" shape="circle" onClick={onContinue} disabled={!isPaused} aria-label="继续运行" icon={<Play size={14} />} />
+          <Button className="theme-run-btn" size="small" shape="circle" onClick={onContinue} disabled={disabled || !isPaused} aria-label="继续运行" icon={<Play size={14} />} />
         </span>
       </Tooltip>
       <Tooltip title="单步（跳过函数）" placement="bottom">
         <span>
-          <Button className="theme-run-btn" size="small" shape="circle" onClick={onStepOver} disabled={!isPaused} aria-label="单步（跳过函数）" icon={<StepForward size={14} />} />
+          <Button className="theme-run-btn" size="small" shape="circle" onClick={onStepOver} disabled={disabled || !isPaused} aria-label="单步（跳过函数）" icon={<StepForward size={14} />} />
         </span>
       </Tooltip>
       <Tooltip title="运行进函数" placement="bottom">
         <span>
-          <Button className="theme-run-btn" size="small" shape="circle" onClick={onStepInto} disabled={!isPaused} aria-label="运行进函数" icon={<CornerDownRight size={14} />} />
+          <Button className="theme-run-btn" size="small" shape="circle" onClick={onStepInto} disabled={disabled || !isPaused} aria-label="运行进函数" icon={<CornerDownRight size={14} />} />
         </span>
       </Tooltip>
       <Tooltip title="运行出函数" placement="bottom">
         <span>
-          <Button className="theme-run-btn" size="small" shape="circle" onClick={onStepOut} disabled={!isPaused} aria-label="运行出函数" icon={<CornerUpLeft size={14} />} />
+          <Button className="theme-run-btn" size="small" shape="circle" onClick={onStepOut} disabled={disabled || !isPaused} aria-label="运行出函数" icon={<CornerUpLeft size={14} />} />
         </span>
       </Tooltip>
       <Tooltip title="结束运行" placement="bottom">

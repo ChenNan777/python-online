@@ -15,13 +15,15 @@ export default function OutputPanel({ output }: OutputPanelProps) {
   return (
     <div className="p-2 flex flex-col h-full min-h-0">
       {visible.length === 0 ? (
-        <Typography.Text type="secondary">等待输出...</Typography.Text>
+        <Typography.Text type="secondary" className="text-xs">
+          暂无输出
+        </Typography.Text>
       ) : (
         <div className="flex-1 min-h-0 overflow-auto pr-1 theme-console rounded px-2 py-1.5">
           {visible.map((line, idx) => (
             <Typography.Paragraph
               key={idx}
-              className="mb-1.5 whitespace-pre-wrap break-words"
+              className="mb-1.5 whitespace-pre-wrap break-words text-xs"
               style={{ color: 'var(--text-secondary)' }}
             >
               {line}

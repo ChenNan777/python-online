@@ -11,6 +11,12 @@ import {
   studentOperationCodeSubmitUsingPost,
 } from '@/services/admin/xueshengxunlianzuoyeguanli';
 
+export type ExamAssignmentDeadline = string | number | number[] | null;
+
+export type ExamAssignmentInfo = StudentTrainingAssignmentVO & {
+  deadline?: ExamAssignmentDeadline;
+};
+
 export function sortExamHistoryRecords(records: StudentOperationCodeVo[]): StudentOperationCodeVo[] {
   // 历史记录展示与恢复都依赖“最近一次优先”，统一在数据层排序。
   return [...records].sort((left, right) => {
@@ -20,7 +26,7 @@ export function sortExamHistoryRecords(records: StudentOperationCodeVo[]): Stude
   });
 }
 
-export async function fetchAssignmentInfo(userId: number): Promise<StudentTrainingAssignmentVO> {
+export async function fetchAssignmentInfo(userId: number): Promise<ExamAssignmentInfo> {
   const response = await studentOperationCodeAssignmentInfoUsingGet({
     params: { userId },
   });
@@ -45,12 +51,20 @@ export async function saveExamCode(args: {
     throw new Error('考试作业基础信息不完整，无法保存代码');
   }
 
+  const needsTargetId = operationType === '1';
+  const parsedTargetId = assignment.targetId != null ? Number(assignment.targetId) : null;
+  const targetId = Number.isFinite(parsedTargetId) ? parsedTargetId : null;
+  if (needsTargetId && targetId === null) {
+    throw new Error('定位作业目标 ID 缺失，无法保存代码');
+  }
+
   await studentOperationCodeSaveCodeUsingPost({
     body: {
       taskId: assignment.taskId,
       memberId: assignment.memberId,
       teamId: assignment.teamId,
       operationType,
+      targetId: targetId ?? undefined,
       programmingLanguage: 'Python',
       sourceCode,
     },

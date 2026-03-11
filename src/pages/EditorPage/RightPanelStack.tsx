@@ -89,11 +89,12 @@ export default function RightPanelStack({ activeTab, extraPanels, roadNetwork, i
   }, [activeTab, variableScopes, breakpoints, code, setBreakpointEnabled, removeBreakpoint, runStatus, outputDurationMs, output]);
 
   const allPanels = useMemo(
-    () => [...basePanels, ...(extraPanels ?? [])],
+    () => [...(extraPanels ?? []), ...basePanels],
     [basePanels, extraPanels],
   );
 
-  const debugStack = <DebugPanelStack key={activeTab} panels={allPanels} />;
+  const debugStackKey = `${activeTab}:${allPanels.map((p) => p.key).join(",")}`;
+  const debugStack = <DebugPanelStack key={debugStackKey} panels={allPanels} />;
 
   if (activeTab === "graph-debug") {
     return (

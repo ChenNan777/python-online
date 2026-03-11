@@ -1,22 +1,21 @@
 # AGENTS.md
 
-本文件用于指导在本仓库中工作的 agent。
-
-适用范围：仓库根目录及全部子目录。
+本文件用于指导在本仓库中工作的 agent，适用范围为仓库根目录及全部子目录。
 
 ## 项目概览
 
-- 技术栈：React 18 + TypeScript + Vite 7 + ESLint 9。
+- 技术栈：React 18、TypeScript、Vite 7、ESLint 9。
 - 主要依赖：Ant Design、Zustand、React Router、TanStack Query、Monaco Editor、Pyodide。
 - 包管理器：`npm`，锁文件为 `package-lock.json`。
-- TypeScript 采用 `strict` 模式，前端路径别名为 `@/* -> src/*`。
+- TypeScript 采用 `strict` 模式。
+- 路径别名：`@/* -> src/*`。
 - 构建产物目录：`dist/`。
-- 当前仓库是前端应用；后端接口代码通过 `src/services/` 中的生成文件接入。
+- 当前仓库是前端应用，后端接口主要通过 `src/services/` 接入。
 
-## 目录结构
+## 目录速览
 
 - 页面：`src/pages/<PageName>/index.tsx`
-- 页面私有模块：`src/pages/<PageName>/components/`、`hooks/`、`queries/`、`adapters/`
+- 页面私有模块：`src/pages/<PageName>/{components,hooks,queries,adapters}/`
 - 通用组件：`src/components/`
 - 特性模块：`src/features/`
 - 状态管理：`src/store/`
@@ -33,7 +32,7 @@
 - 本地预览构建产物：`npm run preview`
 - 更新 OpenAPI 生成代码：`npm run openapi`
 
-## 构建、Lint、类型检查
+## 构建、Lint、类型检查命令
 
 - 生产构建：`npm run build`
 - 全量 lint：`npm run lint`
@@ -47,8 +46,8 @@
 - 当前 `package.json` 没有 `test` 脚本。
 - 当前仓库未发现 `*.test.*` 或 `*.spec.*` 文件。
 - 目前没有可直接执行的自动化测试套件。
-- 因此，当前最小验证门禁为：类型检查 + `npm run lint` + `npm run build`。
-- 若用户要求“跑测试”或“单测通过”，先明确说明仓库当前没有测试框架，不要虚构测试结果。
+- 因此，当前最小验证门禁是：类型检查 + lint + build。
+- 若用户要求“跑测试”或“单测通过”，先明确说明当前仓库没有测试框架，不要虚构测试结果。
 
 ### 若后续接入 Vitest，推荐命令约定
 
@@ -64,17 +63,18 @@
 1. `npx tsc -p tsconfig.app.json --noEmit`
 2. `npx tsc -p tsconfig.node.json --noEmit`（仅当修改了 `vite.config.ts` 等 Node 侧文件）
 3. `npm run lint`
-4. `npm run build`（涉及路由、worker、构建链路、样式、运行时或页面行为时执行）
+4. `npm run build`（涉及路由、worker、样式、运行时、编辑器或页面行为时执行）
 
 ## Agent 工作原则
 
 - 先读上下文，再做最小可行修改。
 - 优先遵循邻近代码风格，不做无关重构。
-- 不顺手修复与当前任务无关的问题。
+- 不顺手修复当前任务无关的问题。
 - 不擅自修改公共接口、路由语义、环境变量约定或生成代码结构。
 - 变更鉴权、路由、Monaco、Worker、Pyodide、TanStack Query 时优先保证构建通过。
 - 修改 OpenAPI 生成文件前，先确认是否应改源接口定义或只改适配层。
 - 若需求只影响考试模式，不要误伤练习模式；反之亦然。
+- 需求较大或跨模块改动时，先在 `docs/plans/` 写计划再实施。
 
 ## Import 规范
 
@@ -92,8 +92,7 @@
 - 当前仓库未见独立 Prettier 配置，不要额外引入格式化工具。
 - 引号风格并不完全统一，优先保持“单文件内一致 + 邻近一致”。
 - 不做纯格式化大改，避免制造无意义 diff。
-- 以后新增或生成代码时，应补充简短注释，帮助快速理解非显然逻辑。
-- 注释应简洁、直接，优先解释“为什么”或关键约束，不要逐行翻译代码。
+- 注释只写非显然逻辑、约束或原因，不逐行翻译代码。
 - 注释默认使用中文；若文件整体为英文语境，则保持文件内一致。
 
 ## TypeScript 规范
@@ -132,7 +131,7 @@
 
 ## 服务层、适配层与错误处理
 
-- API 调用放在 `src/services/`；优先复用已有 OpenAPI 生成函数。
+- API 调用放在 `src/services/`；优先复用已有服务函数或生成文件。
 - HTTP 请求统一复用 `src/utils/httpClient.ts`，不要重复创建 axios 实例。
 - 服务层负责把接口响应适配成前端业务模型；页面和组件尽量不要直接耦合后端原始字段。
 - 页面复杂映射逻辑优先放到 `adapters/`、`services/` 或 `utils/`，不要塞进 JSX。
@@ -151,25 +150,18 @@
 - `pyodide` 被排除在 `optimizeDeps` 外，相关改动需留意构建与运行时兼容性。
 - 修改编辑器、调试器、worker 通信协议时，至少跑一次 `npm run build`。
 
-## 文档与计划文件
+## 文档维护
 
-- 需求较大或跨模块改动时，先在 `docs/plans/` 写计划，再实施。
 - 计划文件命名建议：`YYYY-MM-DD-<topic>.md`。
+- 设计文档建议命名：`YYYY-MM-DD-<topic>-design.md`。
 - 实现完成后，如果行为或约束发生变化，应同步更新相关计划文档或说明。
 
 ## Cursor / Copilot 规则
 
-已检查以下位置：
-
-- `.cursor/rules/`
-- `.cursorrules`
-- `.github/copilot-instructions.md`
-
-当前仓库未发现上述规则文件。
-
-若未来新增这些规则，建议优先级为：
-
-1. 用户直接指令
-2. 更深层目录的 `AGENTS.md`
-3. 仓库根目录 `AGENTS.md`
-4. Cursor / Copilot 规则文件
+- 已检查 `.cursor/rules/`、`.cursorrules`、`.github/copilot-instructions.md`。
+- 当前仓库未发现上述规则文件。
+- 若未来新增这些规则，建议优先级为：
+  1. 用户直接指令
+  2. 更深层目录的 `AGENTS.md`
+  3. 仓库根目录 `AGENTS.md`
+  4. Cursor / Copilot 规则文件

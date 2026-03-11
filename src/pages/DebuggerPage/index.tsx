@@ -474,14 +474,6 @@ function DebuggerPage() {
           rightContent={(
             <div className="theme-toolbar-group shrink-0 min-w-[120px]">
               <ThemeSwitcher />
-              <RunControls
-                onRun={runCode}
-                onContinue={continueExec}
-                onStepOver={handleStepOver}
-                onStepInto={handleStepInto}
-                onStepOut={handleStepOut}
-                onStop={stopExec}
-              />
             </div>
           )}
         />
@@ -514,8 +506,21 @@ function DebuggerPage() {
           className="h-full"
         >
           <Pane minSize={520} defaultSize="68%" className="min-h-0">
-            <CodeEditorShell title="sandbox.py" badges={["Python", "Debugger"]}>
-                <Editor
+            <CodeEditorShell
+              title="sandbox.py"
+              badges={["Python", "Debugger"]}
+              actions={(
+                <RunControls
+                  onRun={runCode}
+                  onContinue={continueExec}
+                  onStepOver={handleStepOver}
+                  onStepInto={handleStepInto}
+                  onStepOut={handleStepOut}
+                  onStop={stopExec}
+                />
+              )}
+            >
+              <Editor
                   height="100%"
                   defaultLanguage="python"
                   theme={getMonacoTheme(themeId)}
@@ -534,7 +539,7 @@ function DebuggerPage() {
                     guides: { bracketPairs: true, indentation: true },
                     padding: { top: 14 },
                   }}
-                />
+              />
             </CodeEditorShell>
           </Pane>
           <Pane minSize={280} className="min-h-0">

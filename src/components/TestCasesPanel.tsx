@@ -11,7 +11,7 @@ type Props = {
 
 export default function TestCasesPanel({ testCases, results, consoleOutput, allPassed }: Props) {
   return (
-    <div className="px-3 py-2 space-y-2 theme-panel-strong h-full">
+    <div className="px-3 py-2 space-y-2 theme-panel-strong min-h-full">
       {testCases.map((tc, i) => {
         const result = results?.[i];
         const status = result === undefined ? "pending" : result.passed ? "pass" : "fail";

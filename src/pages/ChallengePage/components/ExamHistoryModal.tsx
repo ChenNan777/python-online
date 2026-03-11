@@ -5,9 +5,12 @@ import type { StudentOperationCodeVo } from '@/services/admin/types';
 type ExamHistoryModalProps = {
   open: boolean;
   loading: boolean;
+  refreshing?: boolean;
+  hasError?: boolean;
   records: StudentOperationCodeVo[];
   onClose: () => void;
   onRestore: (record: StudentOperationCodeVo) => void;
+  onRefresh?: () => void;
 };
 
 function buildRecordTime(record: StudentOperationCodeVo): string {
@@ -15,11 +18,21 @@ function buildRecordTime(record: StudentOperationCodeVo): string {
 }
 
 export default function ExamHistoryModal(props: ExamHistoryModalProps) {
-  const { open, loading, records, onClose, onRestore } = props;
+  const { open, loading, refreshing = false, hasError = false, records, onClose, onRestore, onRefresh } = props;
 
   return (
     <Modal
-      title="历史代码"
+      title={(
+        <Space size={8} wrap>
+          <span>历史代码</span>
+          {onRefresh ? (
+            <Button size="small" loading={refreshing} disabled={loading} onClick={onRefresh}>
+              刷新
+            </Button>
+          ) : null}
+          {hasError ? <Typography.Text type="danger">加载失败</Typography.Text> : null}
+        </Space>
+      )}
       open={open}
       width={920}
       footer={null}
@@ -27,7 +40,7 @@ export default function ExamHistoryModal(props: ExamHistoryModalProps) {
       destroyOnHidden
     >
       {records.length === 0 ? (
-        <Empty description={loading ? '历史代码加载中' : '暂无历史代码'} />
+        <Empty description={loading ? '历史代码加载中' : hasError ? '历史代码加载失败' : '暂无历史代码'} />
       ) : (
         <List
           loading={loading}
