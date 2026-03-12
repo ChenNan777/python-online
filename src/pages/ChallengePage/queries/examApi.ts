@@ -57,7 +57,7 @@ export async function saveExamRoadData(geojson: object | string): Promise<string
   const jsonStr = typeof geojson === 'string' ? geojson : JSON.stringify(geojson);
   const blob = new Blob([jsonStr], { type: 'application/json' });
   const formData = new FormData();
-  formData.append('file', blob, 'road_network.json');
+  formData.append('file', blob, 'road_network.geojson');
 
   const response = await studentOperationCodeRoadDataUsingPost({
     body: formData,

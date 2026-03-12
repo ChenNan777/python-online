@@ -1,5 +1,5 @@
 import axios, { AxiosError } from 'axios';
-import type { AxiosRequestConfig } from 'axios';
+import type { AxiosInstance, AxiosRequestConfig } from 'axios';
 import { message, Modal } from 'antd';
 import { AUTH_TOKEN_KEY, USER_INFO_KEY } from '../constants/auth';
 import { LOGIN_PATH } from '../constants/routes';
@@ -9,6 +9,7 @@ export type CustomRequestOptions = AxiosRequestConfig;
 type BusinessResponseBody = {
   code?: number;
   message?: string;
+  msg?: string;
   success?: boolean;
 };
 
@@ -51,6 +52,10 @@ function getBusinessErrorMessage(payload: unknown): string {
 
   if (body?.message) {
     return body.message;
+  }
+
+  if (body?.msg) {
+    return body.msg;
   }
 
   return '请求失败，请稍后重试';
@@ -119,60 +124,58 @@ function handleHttpStatusError(status: number): void {
   }
 }
 
-// 创建 axios 实例
-export const httpClient = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:28888',
-  timeout: 30000,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
+function createHttpClient(baseURL: string): AxiosInstance {
+  const client = axios.create({
+    baseURL,
+    timeout: 3000000,
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
 
-// 请求拦截器：注入 token
-httpClient.interceptors.request.use(
-  (config) => {
-    const token = getStoredAuthToken();
-    if (token) {
-      // token 已经包含 "Bearer " 前缀，直接使用
-      config.headers.Authorization = token;
-    }
-    return config;
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
+  client.interceptors.request.use(
+    (config) => {
+      const token = getStoredAuthToken();
+      if (token) {
+        config.headers.Authorization = token;
+      }
+      return config;
+    },
+    (error) => Promise.reject(error),
+  );
 
-// 响应拦截器：统一错误处理
-httpClient.interceptors.response.use(
-  (response) => {
-    const requestSucceeded = isBusinessRequestSuccessful(response.data);
+  client.interceptors.response.use(
+    (response) => {
+      const requestSucceeded = isBusinessRequestSuccessful(response.data);
 
-    if (requestSucceeded === false) {
-      message.error(getBusinessErrorMessage(response.data));
-      return Promise.reject(
-        new AxiosError(
-          getBusinessErrorMessage(response.data),
-          undefined,
-          response.config,
-          response.request,
-          response
-        )
-      );
-    }
+      if (requestSucceeded === false) {
+        message.error(getBusinessErrorMessage(response.data));
+        return Promise.reject(
+          new AxiosError(
+            getBusinessErrorMessage(response.data),
+            undefined,
+            response.config,
+            response.request,
+            response,
+          ),
+        );
+      }
 
-    return response.data;
-  },
-  (error: AxiosError) => {
-    // 网络错误
-    if (!error.response) {
-      message.error('网络连接失败，请检查网络设置');
+      return response.data;
+    },
+    (error: AxiosError) => {
+      if (!error.response) {
+        message.error('网络连接失败，请检查网络设置');
+        return Promise.reject(error);
+      }
+
+      handleHttpStatusError(error.response.status);
       return Promise.reject(error);
-    }
+    },
+  );
 
-    // HTTP 错误状态码处理
-    handleHttpStatusError(error.response.status);
+  return client;
+}
 
-    return Promise.reject(error);
-  }
-);
+export const httpClient = createHttpClient('/api');
+export const uavHttpClient = createHttpClient('/uav-api');

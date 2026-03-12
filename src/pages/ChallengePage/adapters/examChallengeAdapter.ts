@@ -1,6 +1,8 @@
 import type { FeatureCollection } from 'geojson';
 
 import type { StudentOperationCodeVo, StudentTrainingAssignmentVO } from '@/services/admin/types';
+import { getUavSignalDeviceListInfo, getUavSignalSmodeByUavId } from '@/services/uav';
+import type { UavSignalDeviceInfo, UavSignalSmodeRecord } from '@/types/uav';
 import type { PositioningData, ShortestPathResult } from '@/types';
 import {
   PATHFINDING_OPERATION_TYPE,
@@ -23,6 +25,101 @@ export type ExamPositioningSceneResult = {
   positioningData: PositioningData | null;
   sceneNotice: string | null;
 };
+
+function getRecordTimestamp(record: UavSignalSmodeRecord): number {
+  const createTimeValue = Date.parse(record.createTime);
+  if (Number.isFinite(createTimeValue)) {
+    return createTimeValue;
+  }
+  const toaDatetimeValue = Date.parse(record.toaDatetime);
+  if (Number.isFinite(toaDatetimeValue)) {
+    return toaDatetimeValue;
+  }
+  return Number(record.toa) || Number.NEGATIVE_INFINITY;
+}
+
+function isFiniteNumber(value: unknown): value is number {
+  return typeof value === 'number' && Number.isFinite(value);
+}
+
+function buildExamPositioningDataFromUav(args: {
+  assignment: StudentTrainingAssignmentVO;
+  devices: UavSignalDeviceInfo[];
+  smodeRecords: UavSignalSmodeRecord[];
+}): PositioningData {
+  const { assignment, devices, smodeRecords } = args;
+  const targetLngRaw = assignment.targetLongitude;
+  const targetLatRaw = assignment.targetLatitude;
+  if (!isFiniteNumber(targetLngRaw) || !isFiniteNumber(targetLatRaw)) {
+    throw new Error('考试目标坐标缺失，无法构建定位场景。');
+  }
+  const targetLng = targetLngRaw;
+  const targetLat = targetLatRaw;
+
+  const deviceByPort = new Map<number, UavSignalDeviceInfo>();
+  for (const device of devices) {
+    deviceByPort.set(device.devicePort, device);
+  }
+
+  const latestRecordByPort = new Map<number, UavSignalSmodeRecord>();
+  for (const record of smodeRecords) {
+    const current = latestRecordByPort.get(record.port);
+    if (!current || getRecordTimestamp(record) > getRecordTimestamp(current)) {
+      latestRecordByPort.set(record.port, record);
+    }
+  }
+
+  const stationMap = new Map<string, { id: string; lng: number; lat: number; frequency?: string }>();
+  const measurementMap = new Map<string, { stationId: string; bearingDeg: number }>();
+
+  for (const [port, record] of latestRecordByPort.entries()) {
+    const device = deviceByPort.get(port);
+    if (!device) {
+      continue;
+    }
+    const stationId = device.deviceName.trim();
+    if (!stationId || !Number.isFinite(record.aoa)) {
+      continue;
+    }
+
+    const stationLngRaw = isFiniteNumber(record.localLongitude) && isFiniteNumber(record.localLatitude)
+      ? record.localLongitude
+      : isFiniteNumber(device.localLongitude) && isFiniteNumber(device.localLatitude)
+        ? device.localLongitude
+        : null;
+    const stationLatRaw = isFiniteNumber(record.localLongitude) && isFiniteNumber(record.localLatitude)
+      ? record.localLatitude
+      : isFiniteNumber(device.localLongitude) && isFiniteNumber(device.localLatitude)
+        ? device.localLatitude
+        : null;
+
+    if (!isFiniteNumber(stationLngRaw) || !isFiniteNumber(stationLatRaw)) {
+      continue;
+    }
+    const stationLng = stationLngRaw;
+    const stationLat = stationLatRaw;
+
+    stationMap.set(stationId, { id: stationId, lng: stationLng, lat: stationLat });
+    measurementMap.set(stationId, {
+      stationId,
+      bearingDeg: Math.round(record.aoa * 100) / 100,
+    });
+  }
+
+  const stations = [...stationMap.values()];
+  const measurements = [...measurementMap.values()];
+  if (stations.length === 0 || measurements.length === 0) {
+    throw new Error('无人机天线侦察数据为空，无法构建定位场景。');
+  }
+
+  return mergePositioningDataById({
+    stations,
+    measurements,
+    trueTarget: { lng: targetLng, lat: targetLat },
+    targetId: assignment.targetId,
+    source: 'exam',
+  });
+}
 
 /** 考试接口类型值：用于保存/提交时的 operationType（定位/路径规划）。 */
 export function getOperationTypeByChallenge(isPositioningChallenge: boolean): string {
@@ -108,7 +205,24 @@ export function buildExamPositioningScene(
 export async function fetchExamPositioningScene(
   assignment: StudentTrainingAssignmentVO,
 ): Promise<ExamPositioningSceneResult> {
-  return buildExamPositioningScene(assignment);
+  const uavId = Number(assignment.targetId);
+  if (!Number.isFinite(uavId) || uavId <= 0) {
+    throw new Error('无人机 ID 无效，无法加载定位场景。');
+  }
+
+  const [devices, smodeRecords] = await Promise.all([
+    getUavSignalDeviceListInfo(),
+    getUavSignalSmodeByUavId(uavId),
+  ]);
+
+  return {
+    positioningData: buildExamPositioningDataFromUav({
+      assignment,
+      devices,
+      smodeRecords,
+    }),
+    sceneNotice: null,
+  };
 }
 
 /** 从历史记录里取“最新一条”的 sourceCode，用于编辑器初始化/恢复。 */

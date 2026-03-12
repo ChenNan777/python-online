@@ -14,8 +14,17 @@ setupMonaco();
 useAuthStore.getState().loadFromStorage();
 useThemeStore.getState().loadFromStorage();
 
-createRoot(document.getElementById("root")!).render(
-  <React.StrictMode>
-    <AppRoot />
-  </React.StrictMode>,
-);
+async function bootstrap() {
+  if (import.meta.env.DEV && import.meta.env.VITE_USE_MOCK === 'true') {
+    const { worker } = await import('./mocks/browser');
+    await worker.start({ onUnhandledRequest: 'bypass' });
+  }
+
+  createRoot(document.getElementById("root")!).render(
+    <React.StrictMode>
+      <AppRoot />
+    </React.StrictMode>,
+  );
+}
+
+void bootstrap();

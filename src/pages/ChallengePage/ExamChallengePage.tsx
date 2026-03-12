@@ -17,7 +17,6 @@ import type { StudentOperationCodeVo } from '@/services/admin/types';
 
 import { CHALLENGES } from './challenges';
 import {
-  buildExamPositioningScene,
   buildExamRoadNetwork,
   buildPathPlanningSubmitPayload,
 } from './adapters/examChallengeAdapter';
@@ -117,17 +116,31 @@ export default function ExamChallengePage() {
       return sceneQuery.data;
     }
 
-    return buildExamPositioningScene(assignment);
-  }, [assignment, sceneQuery.data]);
+    if (sceneQuery.error instanceof Error) {
+      return {
+        positioningData: null,
+        sceneNotice: sceneQuery.error.message || '定位场景加载失败。',
+      };
+    }
+
+    return {
+      positioningData: null,
+      sceneNotice: null,
+    };
+  }, [sceneQuery.data, sceneQuery.error]);
 
   const roadNetwork = isPositioningRole ? null : roadScene.roadNetwork;
   const positioningData = isPositioningRole ? positioningScene.positioningData : null;
+  const assignmentTargetId = assignment?.targetId;
   const sceneNotice = useMemo(() => {
     if (assignmentQuery.isLoading) {
       return '考试场景加载中';
     }
 
     if (isPositioningRole) {
+      if (!assignmentTargetId) {
+        return '考试作业未下发目标ID（targetId），无法进行定位分析与提交。';
+      }
       return sceneQuery.isLoading ? '定位场景加载中' : positioningScene.sceneNotice;
     }
 
@@ -142,6 +155,7 @@ export default function ExamChallengePage() {
     return roadScene.sceneNotice;
   }, [
     assignmentQuery.isLoading,
+    assignmentTargetId,
     isPositioningRole,
     positioningScene.sceneNotice,
     roadDataQuery.error,
@@ -248,6 +262,11 @@ export default function ExamChallengePage() {
       return;
     }
 
+    if (!assignment.targetId) {
+      message.error('考试作业未下发目标ID（targetId），无法提交定位结果');
+      return;
+    }
+
     Modal.confirm({
       title: '确认提交作业？',
       icon: <ExclamationCircleFilled />,
@@ -270,7 +289,12 @@ export default function ExamChallengePage() {
           };
 
           const submitPositioningWork = async (): Promise<boolean> => {
-            if (!positioningResult || !assignment.targetId) {
+            if (!assignment.targetId) {
+              message.error('考试作业未下发目标ID（targetId），无法提交定位结果');
+              return false;
+            }
+
+            if (!positioningResult) {
               message.error('请先运行定位分析代码并生成结果');
               return false;
             }
@@ -438,7 +462,7 @@ export default function ExamChallengePage() {
         className="theme-toolbar-submit-btn"
         size="small"
         loading={submitWorkMutation.isPending}
-        disabled={isDeadlineExpired}
+        disabled={isDeadlineExpired || (isPositioningRole && !assignment?.targetId)}
         onClick={handleSubmit}
       >
         提交作业
